@@ -1,58 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Control de Comedor y Empleados
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este es un sistema basado en Laravel diseñado para gestionar el registro diario de consumo de alimentos de los empleados, permitiendo un flujo de escaneo rápido y estadísticas avanzadas para administración.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Características Principales
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Registro de Comedor (Acceso Público Kiosco)
+* **URL Pública:** `/comedor` (Accesible para cualquiera en red local, no requiere inicio de sesión).
+* **Flujo de Escaneo Rápido:** Permite registrar accesos digitando el número de empleado o mediante lectores de códigos de barras.
+* **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
+* **Alertas Dinámicas:** Integración de SweetAlert2 para mostrar mensajes interactivos de éxito o error al instante (por ejemplo, empleado inactivo, comida ya registrada o no encontrado).
+* **Historial Oculto:** El listado de accesos del día está protegido; solo los administradores logueados pueden verlo.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Panel de Estadísticas (Dashboard Administrativo)
+* **URL Protegida:** `/dashboard` (Solo para administradores autenticados).
+* **Métricas KPI:**
+  * Total de empleados en el sistema.
+  * Cantidad de empleados activos vs. inactivos.
+  * Total de comidas servidas hoy.
+  * Consumo mensual acumulado y promedio diario estimado.
+* **Gráficos Interactivos (Chart.js):**
+  * **Tendencia Diaria (Últimos 15 días):** Línea interactiva con curvas suaves que muestra las fluctuaciones de consumo.
+  * **Distribución de Horas Pico:** Gráfico de barras que agrupa las comidas por hora (06:00 a 20:00) para identificar las horas más concurridas.
+  * **Consumo Mensual:** Gráfico acumulativo por mes para el año en curso.
+  * **Uso por Departamento:** Gráfico de dona (Doughnut) que muestra qué áreas o departamentos de la empresa consumen más alimentos.
 
-## Learning Laravel
+### 3. Gestión de Empleados
+* **Rutas Protegidas:** `/empleados` (CRUD completo de personal).
+* **Importación Masiva:** Subida y procesamiento de listas de empleados mediante archivos CSV con descarga de plantilla oficial integrada.
+* **Estado de Empleado:** Switch interactivo para activar o desactivar empleados de forma rápida (un empleado desactivado no podrá registrar comidas).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Stack Tecnológico
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+* **Framework:** Laravel (PHP 8.x)
+* **Frontend:** TailwindCSS, Blade Templates, Alpine.js (para la reactividad de escaneo y alertas).
+* **Base de Datos:** MySQL / MariaDB (con control estricto de zona horaria).
+* **Librerías Visuales:** Chart.js (gráficos interactivos) y SweetAlert2 (alertas flotantes de estado).
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## ⚙️ Configuración Importante de Zona Horaria
 
-```bash
-composer require laravel/boost --dev
+Para garantizar que los registros y las estadísticas de consumo diario coincidan con la hora local de México y evitar un desfase de 6 horas respecto a UTC:
 
-php artisan boost:install
-```
+1. **Configuración de Laravel (`config/app.php`):**
+   ```php
+   'timezone' => env('APP_TIMEZONE', 'America/Mexico_City'),
+   ```
+2. **Conexión de Base de Datos (`config/database.php`):**
+   Se sincronizó la sesión de conexión MySQL para utilizar el offset fijo de la Ciudad de México:
+   ```php
+   'mysql' => [
+       'driver' => 'mysql',
+       // ...
+       'timezone' => env('DB_TIMEZONE', '-06:00'),
+   ]
+   ```
+3. **Archivo de Entorno (`.env`):**
+   ```env
+   APP_TIMEZONE=America/Mexico_City
+   DB_TIMEZONE=-06:00
+   ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 📂 Estructura del Código Clave
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* **Controladores:**
+  * `DashboardController.php`: Lógica de consultas de agregación y preparación de datos para los gráficos.
+  * `RegistroComedorController.php`: Lógica del registro de consumo e indexación pública del lector.
+  * `EmpleadoController.php`: Lógica del CRUD e importación masiva de personal.
+* **Vistas:**
+  * `resources/views/dashboard.blade.php`: Contenedores y scripts de Chart.js para los 4 gráficos.
+  * `resources/views/comedor/index.blade.php`: Pantalla del kiosco de escaneo.
+  * `resources/views/layouts/navigation.blade.php`: Menú de navegación dinámico adaptativo para visitantes y administradores.

@@ -1,9 +1,5 @@
 <?php
 
-// Temporarily clear config and route cache files
-@unlink(__DIR__.'/../bootstrap/cache/routes-v7.php');
-@unlink(__DIR__.'/../bootstrap/cache/config.php');
-
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
