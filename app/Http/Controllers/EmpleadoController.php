@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empleado;
+use App\Models\EmpleadoLog;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -49,7 +50,12 @@ class EmpleadoController extends Controller
             ->sort()
             ->values();
 
-        return view('empleados.index', compact('empleados', 'departamentos'));
+        $logs = EmpleadoLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(15)
+            ->get();
+
+        return view('empleados.index', compact('empleados', 'departamentos', 'logs'));
     }
 
     /**
@@ -75,7 +81,21 @@ class EmpleadoController extends Controller
             'nombre.required' => 'El nombre es obligatorio.',
         ]);
 
-        Empleado::create($validated);
+        $empleado = Empleado::create($validated);
+
+        EmpleadoLog::create([
+            'user_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'empleado_numero' => $empleado->numero_empleado,
+            'empleado_nombre' => $empleado->nombre,
+            'action' => 'crear',
+            'details' => json_encode([
+                'nombre' => $empleado->nombre,
+                'numero_empleado' => $empleado->numero_empleado,
+                'departamento' => $empleado->departamento,
+                'puesto' => $empleado->puesto,
+            ], JSON_UNESCAPED_UNICODE)
+        ]);
 
         return redirect()->route('empleados.index')->with('success', 'Empleado creado exitosamente.');
     }
@@ -103,7 +123,21 @@ class EmpleadoController extends Controller
             'nombre.required' => 'El nombre es obligatorio.',
         ]);
 
+        $original = $empleado->getOriginal();
         $empleado->update($validated);
+        $changes = $empleado->getChanges();
+
+        EmpleadoLog::create([
+            'user_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'empleado_numero' => $empleado->numero_empleado,
+            'empleado_nombre' => $empleado->nombre,
+            'action' => 'actualizar',
+            'details' => json_encode([
+                'changes' => $changes,
+                'original' => array_intersect_key($original, $changes)
+            ], JSON_UNESCAPED_UNICODE)
+        ]);
 
         return redirect()->route('empleados.index')->with('success', 'Empleado actualizado exitosamente.');
     }
@@ -113,8 +147,21 @@ class EmpleadoController extends Controller
      */
     public function toggleStatus(Empleado $empleado)
     {
+        $oldStatus = $empleado->activo;
         $empleado->update([
             'activo' => !$empleado->activo,
+        ]);
+
+        EmpleadoLog::create([
+            'user_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'empleado_numero' => $empleado->numero_empleado,
+            'empleado_nombre' => $empleado->nombre,
+            'action' => 'cambiar_estado',
+            'details' => json_encode([
+                'activo' => $empleado->activo ? 'Activo' : 'Inactivo',
+                'anterior' => $oldStatus ? 'Activo' : 'Inactivo'
+            ], JSON_UNESCAPED_UNICODE)
         ]);
 
         $statusMessage = $empleado->activo ? 'activado' : 'desactivado';
@@ -215,12 +262,26 @@ class EmpleadoController extends Controller
                     continue;
                 }
 
-                Empleado::create([
+                $empleado = Empleado::create([
                     'numero_empleado' => $numeroEmpleado,
                     'nombre' => $nombre,
                     'departamento' => $departamento ?: null,
                     'puesto' => $puesto ?: null,
                     'activo' => true,
+                ]);
+
+                EmpleadoLog::create([
+                    'user_id' => auth()->id(),
+                    'empleado_id' => $empleado->id,
+                    'empleado_numero' => $empleado->numero_empleado,
+                    'empleado_nombre' => $empleado->nombre,
+                    'action' => 'importar',
+                    'details' => json_encode([
+                        'nombre' => $empleado->nombre,
+                        'numero_empleado' => $empleado->numero_empleado,
+                        'departamento' => $empleado->departamento,
+                        'puesto' => $empleado->puesto,
+                    ], JSON_UNESCAPED_UNICODE)
                 ]);
 
                 $successCount++;

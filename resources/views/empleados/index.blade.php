@@ -286,6 +286,125 @@
                 @endif
             </div>
 
+            <!-- Activity Log Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-950">Historial de Actividad reciente</h3>
+                            <p class="text-xs text-gray-500">Últimos cambios realizados por usuarios del sistema</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                        {{ $logs->count() }} Registros
+                    </span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    @forelse ($logs as $log)
+                        @php
+                            $detailsData = json_decode($log->details, true);
+                        @endphp
+                        <div class="p-4 sm:px-6 hover:bg-gray-50/50 transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="space-y-1 text-left">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <!-- Action Badge -->
+                                    @if ($log->action === 'crear')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                            Creación
+                                        </span>
+                                    @elseif ($log->action === 'actualizar')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-100">
+                                            Modificación
+                                        </span>
+                                    @elseif ($log->action === 'cambiar_estado')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                                            Estado
+                                        </span>
+                                    @elseif ($log->action === 'importar')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                                            Importación
+                                        </span>
+                                    @endif
+
+                                    <!-- Employee Ref -->
+                                    <span class="text-sm font-semibold text-gray-900">
+                                        [{{ $log->empleado_numero ?? 'N/A' }}] {{ $log->empleado_nombre ?? 'N/A' }}
+                                    </span>
+                                </div>
+
+                                <!-- Change Details -->
+                                @if($log->action === 'actualizar')
+                                    @if(isset($detailsData['changes']) && count($detailsData['changes']) > 0)
+                                        <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-2">
+                                            @foreach($detailsData['changes'] as $key => $val)
+                                                @if($key !== 'updated_at')
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-50 text-slate-700 border border-slate-100 font-mono">
+                                                        {{ ucfirst(str_replace('_', ' ', $key)) }}: 
+                                                        <span class="text-rose-600 line-through mx-1">{{ $detailsData['original'][$key] ?? 'N/A' }}</span>
+                                                        <svg class="w-3 h-3 text-gray-400 mx-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                        <span class="text-emerald-600 font-semibold">{{ $val }}</span>
+                                                    </span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @elseif($log->action === 'cambiar_estado')
+                                    @if(isset($detailsData['activo']))
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-50 text-slate-700 border border-slate-100 font-mono">
+                                                Estado: 
+                                                <span class="text-rose-600 line-through mx-1">{{ $detailsData['anterior'] ?? 'N/A' }}</span>
+                                                <svg class="w-3 h-3 text-gray-400 mx-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                <span class="text-emerald-600 font-semibold">{{ $detailsData['activo'] }}</span>
+                                            </span>
+                                        </div>
+                                    @endif
+                                @elseif($log->action === 'crear' || $log->action === 'importar')
+                                    @if((isset($detailsData['departamento']) && $detailsData['departamento']) || (isset($detailsData['puesto']) && $detailsData['puesto']))
+                                        <div class="text-xs text-gray-500 mt-1 flex gap-3">
+                                            @if(isset($detailsData['departamento']) && $detailsData['departamento'])
+                                                <span><strong>Departamento:</strong> {{ $detailsData['departamento'] }}</span>
+                                            @endif
+                                            @if(isset($detailsData['puesto']) && $detailsData['puesto'])
+                                                <span><strong>Puesto:</strong> {{ $detailsData['puesto'] }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+
+                            <!-- Metadata (User & Time) -->
+                            <div class="flex flex-col items-start sm:items-end text-xs text-gray-500 gap-0.5">
+                                <span class="flex items-center gap-1.5 font-medium text-gray-700">
+                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    {{ $log->user ? $log->user->name : 'Sistema/Desconocido' }}
+                                </span>
+                                <span class="text-gray-400 flex items-center gap-1" title="{{ $log->created_at->format('d/m/Y H:i:s') }}">
+                                    <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    {{ $log->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-6 text-center text-sm text-gray-500">
+                            <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Aún no hay registro de cambios.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
         </div>
 
     <!-- CREATE MODAL -->
