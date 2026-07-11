@@ -28,7 +28,7 @@
                             Lector de Código / Entrada
                         </h3>
                         <p class="text-xs text-gray-500 mb-6">
-                            Escanee el código de barras del gafete del empleado o escriba sus 10 dígitos y presione <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded font-mono text-gray-600">Enter</kbd>.
+                            Escanee el código de barras del gafete del empleado o escriba su número y presione <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded font-mono text-gray-600">Enter</kbd>.
                         </p>
                     </div>
 
@@ -41,7 +41,7 @@
                                 type="text"
                                 name="numero_empleado"
                                 id="numero_empleado"
-                                placeholder="0000000000"
+                                placeholder="Número de empleado"
                                 maxlength="10"
                                 autocomplete="off"
                                 required
@@ -143,7 +143,7 @@
                                     @if (session('error'))
                                         {{ session('error') }}
                                     @else
-                                        Por favor, revise que el número ingresado tenga exactamente 10 dígitos y sea numérico.
+                                        Por favor, revise que el número ingresado sea numérico y no exceda de 10 dígitos.
                                     @endif
                                 </p>
                             </div>

@@ -67,7 +67,7 @@ class EmpleadoController extends Controller
             'numero_empleado' => [
                 'required',
                 'numeric',
-                'digits:10',
+                'max_digits:10',
                 'unique:empleados,numero_empleado',
             ],
             'nombre' => 'required|string|max:255',
@@ -76,7 +76,7 @@ class EmpleadoController extends Controller
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
-            'numero_empleado.digits' => 'El número de empleado debe tener exactamente 10 dígitos.',
+            'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
             'numero_empleado.unique' => 'Este número de empleado ya está registrado.',
             'nombre.required' => 'El nombre es obligatorio.',
         ]);
@@ -109,7 +109,7 @@ class EmpleadoController extends Controller
             'numero_empleado' => [
                 'required',
                 'numeric',
-                'digits:10',
+                'max_digits:10',
                 Rule::unique('empleados', 'numero_empleado')->ignore($empleado->id),
             ],
             'nombre' => 'required|string|max:255',
@@ -118,7 +118,7 @@ class EmpleadoController extends Controller
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
-            'numero_empleado.digits' => 'El número de empleado debe tener exactamente 10 dígitos.',
+            'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
             'numero_empleado.unique' => 'Este número de empleado ya está registrado.',
             'nombre.required' => 'El nombre es obligatorio.',
         ]);
@@ -251,8 +251,8 @@ class EmpleadoController extends Controller
                     continue;
                 }
 
-                if (!is_numeric($numeroEmpleado) || strlen($numeroEmpleado) !== 10) {
-                    $errors[] = "Fila {$rowNumber}: El número de empleado '{$numeroEmpleado}' debe ser numérico de exactamente 10 dígitos.";
+                if (!is_numeric($numeroEmpleado) || strlen($numeroEmpleado) > 10) {
+                    $errors[] = "Fila {$rowNumber}: El número de empleado '{$numeroEmpleado}' debe ser numérico y no exceder los 10 dígitos.";
                     continue;
                 }
 

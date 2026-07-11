@@ -31,11 +31,11 @@ class RegistroComedorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'numero_empleado' => 'required|numeric|digits:10',
+            'numero_empleado' => 'required|numeric|max_digits:10',
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'Debe ingresar únicamente números.',
-            'numero_empleado.digits' => 'El número de empleado debe tener exactamente 10 dígitos.',
+            'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
         ]);
 
         $numeroEmpleado = $request->input('numero_empleado');
