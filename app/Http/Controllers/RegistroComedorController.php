@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empleado;
 use App\Models\RegistroComedor;
+use App\Models\Reservacion;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -57,6 +58,42 @@ class RegistroComedorController extends Controller
         }
 
         $today = Carbon::today()->toDateString();
+
+        // 2.b. Check if the employee has a reservation for today
+        $reservacion = Reservacion::where('empleado_id', $empleado->id)
+            ->where('fecha', $today)
+            ->first();
+
+        if (!$reservacion) {
+            return redirect()->route('comedor.index')
+                ->withInput()
+                ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
+        }
+
+        // 2.c. Check if the employee is within the reserved schedule window
+        $horaActual = Carbon::now()->format('H:i');
+        $horaReservada = $reservacion->hora; // '12:30', '13:45', '14:45'
+        $valido = false;
+
+        if ($horaReservada === '12:30') {
+            $valido = ($horaActual >= '12:00' && $horaActual <= '13:30');
+        } elseif ($horaReservada === '13:45') {
+            $valido = ($horaActual >= '13:30' && $horaActual <= '14:30');
+        } elseif ($horaReservada === '14:45') {
+            $valido = ($horaActual >= '14:30' && $horaActual <= '15:45');
+        }
+
+        if (!$valido) {
+            $formatoHora = [
+                '12:30' => '12:30 p.m. (Ventana: 12:00 a 13:30)',
+                '13:45' => '13:45 p.m. (Ventana: 13:30 a 14:30)',
+                '14:45' => '14:45 p.m. (Ventana: 14:30 a 15:45)',
+            ];
+            $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
+            return redirect()->route('comedor.index')
+                ->withInput()
+                ->with('error', "Horario incorrecto. El empleado {$empleado->nombre} reservó a las {$ventana}, pero está ingresando a las {$horaActual}.");
+        }
 
         // 3. Check if already registered today
         $alreadyEaten = RegistroComedor::where('empleado_id', $empleado->id)

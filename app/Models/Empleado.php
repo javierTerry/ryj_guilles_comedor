@@ -30,4 +30,12 @@ class Empleado extends Model
     {
         return $this->hasMany(RegistroComedor::class);
     }
+
+    /**
+     * Get the reservations associated with the employee.
+     */
+    public function reservaciones()
+    {
+        return $this->hasMany(Reservacion::class);
+    }
 }

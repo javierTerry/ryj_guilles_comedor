@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\RegistroComedorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReservacionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,5 +28,9 @@ Route::middleware('auth')->group(function () {
 // Rutas Públicas para Control de Comedor
 Route::get('comedor', [RegistroComedorController::class, 'index'])->name('comedor.index');
 Route::post('comedor/registrar', [RegistroComedorController::class, 'store'])->name('comedor.registrar');
+
+// Rutas Públicas para Reservaciones
+Route::get('reservar', [ReservacionController::class, 'create'])->name('reservaciones.create');
+Route::post('reservar', [ReservacionController::class, 'store'])->name('reservaciones.store');
 
 require __DIR__ . '/auth.php';
