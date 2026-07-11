@@ -20,6 +20,9 @@
                     <x-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
                         {{ __('Registro Comedor') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
+                        {{ __('Reservar') }}
+                    </x-nav-link>
                     @auth
                         <x-nav-link :href="route('empleados.index')" :active="request()->routeIs('empleados.index')">
                             {{ __('Empleados') }}
@@ -90,6 +93,9 @@
             @endauth
             <x-responsive-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
                 {{ __('Registro Comedor') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
+                {{ __('Reservar') }}
             </x-responsive-nav-link>
             @auth
                 <x-responsive-nav-link :href="route('empleados.index')" :active="request()->routeIs('empleados.index')">

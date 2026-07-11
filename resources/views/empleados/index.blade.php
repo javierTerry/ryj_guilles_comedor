@@ -62,44 +62,7 @@
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- Success Alerts -->
-            @if (session('success'))
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-md shadow-sm transition-all duration-300">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-emerald-800">
-                                {{ session('success') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endif
 
-            <!-- Validation Errors -->
-            @if ($errors->any())
-                <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-md shadow-sm">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-rose-800">Hubo algunos problemas al procesar la solicitud:</h3>
-                            <ul class="mt-2 list-disc list-inside text-sm text-rose-700">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            @endif
 
             <!-- Search and Filter Bar -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -255,7 +218,7 @@
                                             <button
                                                 type="submit"
                                                 class="inline-flex items-center {{ $empleado->activo ? 'text-rose-600 hover:text-rose-900' : 'text-emerald-600 hover:text-emerald-900' }} transition"
-                                                onclick="return confirm('¿Está seguro de cambiar el estado de este empleado?')"
+                                                onclick="confirmAction(event, '¿Está seguro de cambiar el estado de este empleado?')"
                                             >
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
@@ -418,19 +381,19 @@
 
             <div class="space-y-4">
                 <div>
-                    <x-input-label for="new_numero_empleado" :value="__('Número de Empleado (10 dígitos)')" />
+                    <x-input-label for="new_numero_empleado" :value="__('Número de Empleado (Máx 10 dígitos)')" />
                     <x-text-input
                         id="new_numero_empleado"
                         name="numero_empleado"
                         type="text"
                         class="mt-1 block w-full"
-                        placeholder="Escriba exactamente 10 números"
+                        placeholder="Escriba el número de empleado"
                         maxlength="10"
-                        pattern="[0-9]{10}"
-                        title="Debe contener exactamente 10 dígitos numéricos"
+                        pattern="[0-9]{1,10}"
+                        title="Debe contener hasta 10 dígitos numéricos"
                         required
                     />
-                    <p class="text-xs text-gray-400 mt-1">Solo se permiten números (0-9).</p>
+                    <p class="text-xs text-gray-400 mt-1">Solo se permiten números (0-9), máximo 10 dígitos.</p>
                 </div>
 
                 <div>
@@ -492,7 +455,7 @@
 
             <div class="space-y-4">
                 <div>
-                    <x-input-label for="edit_numero_empleado" :value="__('Número de Empleado (10 dígitos)')" />
+                    <x-input-label for="edit_numero_empleado" :value="__('Número de Empleado (Máx 10 dígitos)')" />
                     <x-text-input
                         id="edit_numero_empleado"
                         name="numero_empleado"
@@ -500,8 +463,8 @@
                         class="mt-1 block w-full"
                         x-model="activeEmpleado.numero_empleado"
                         maxlength="10"
-                        pattern="[0-9]{10}"
-                        title="Debe contener exactamente 10 dígitos numéricos"
+                        pattern="[0-9]{1,10}"
+                        title="Debe contener hasta 10 dígitos numéricos"
                         required
                     />
                 </div>
@@ -568,7 +531,7 @@
                     <ol class="list-decimal list-inside space-y-1">
                         <li>Descarga la plantilla CSV con las columnas correspondientes.</li>
                         <li>Completa los datos en las columnas: <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">nombre</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">departamento</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">puesto</code>.</li>
-                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code> debe tener exactamente 10 dígitos y ser único.</li>
+                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code> debe ser numérico con un máximo de 10 dígitos y ser único.</li>
                         <li>Sube tu archivo y presiona importar. Se reportarán las filas exitosas y los errores si ocurren.</li>
                     </ol>
                 </div>

@@ -13,6 +13,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -32,5 +35,65 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Helper global para confirmaciones
+                window.confirmAction = function(event, message) {
+                    event.preventDefault();
+                    const element = event.currentTarget || event.target;
+                    const form = element.closest('form');
+                    Swal.fire({
+                        title: '¿Confirmar acción?',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#4f46e5',
+                        cancelButtonColor: '#ef4444',
+                        confirmButtonText: 'Sí, continuar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                };
+
+                // Alertas Flash automáticas (excepto en la pantalla de comedor para no interrumpir el flujo del lector)
+                @if (!request()->routeIs('comedor.*'))
+                    @if (session('success'))
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: "{{ session('success') }}",
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    @endif
+
+                    @if (session('error'))
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: "{{ session('error') }}",
+                            confirmButtonColor: '#4f46e5'
+                        });
+                    @endif
+
+                    @if ($errors->any())
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Errores de Validación',
+                            html: `<ul style="text-align: left; list-style-type: disc; padding-left: 20px; margin: 0;">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>`,
+                            confirmButtonColor: '#4f46e5'
+                        });
+                    @endif
+                @endif
+            });
+        </script>
     </body>
 </html>
