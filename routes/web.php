@@ -32,5 +32,6 @@ Route::post('comedor/registrar', [RegistroComedorController::class, 'store'])->n
 // Rutas Públicas para Reservaciones
 Route::get('reservar', [ReservacionController::class, 'create'])->name('reservaciones.create');
 Route::post('reservar', [ReservacionController::class, 'store'])->name('reservaciones.store');
+Route::get('reservar/empleado/{numero_empleado}', [ReservacionController::class, 'getEmpleadoInfo'])->name('reservaciones.empleado_info');
 
 require __DIR__ . '/auth.php';

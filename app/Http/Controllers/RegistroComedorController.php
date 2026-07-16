@@ -7,6 +7,7 @@ use App\Models\RegistroComedor;
 use App\Models\Reservacion;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class RegistroComedorController extends Controller
 {
@@ -20,17 +21,18 @@ class RegistroComedorController extends Controller
         // Get registrations of today order by recent first
         $registros = RegistroComedor::with('empleado')
             ->where('fecha', $today)
-            ->orderBy('fecha_hora', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('comedor.index', compact('registros'));
     }
 
     /**
-     * Store a new dining room visit.
+     * Store a new dining access record.
      */
     public function store(Request $request)
     {
+        // Validate input format
         $request->validate([
             'numero_empleado' => 'required|numeric|max_digits:10',
         ], [
@@ -41,10 +43,13 @@ class RegistroComedorController extends Controller
 
         $numeroEmpleado = $request->input('numero_empleado');
 
+        Log::info("Kiosco Comedor: Intento de ingreso de colaborador: {$numeroEmpleado}");
+
         // 1. Find employee
         $empleado = Empleado::where('numero_empleado', $numeroEmpleado)->first();
 
         if (!$empleado) {
+            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} no registrado.");
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "El número de empleado {$numeroEmpleado} no está registrado en el sistema.");
@@ -52,6 +57,7 @@ class RegistroComedorController extends Controller
 
         // 2. Check if active
         if (!$empleado->activo) {
+            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) está inactivo.");
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) está marcado como INACTIVO.");
@@ -65,6 +71,7 @@ class RegistroComedorController extends Controller
             ->first();
 
         if (!$reservacion) {
+            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.");
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
@@ -72,7 +79,7 @@ class RegistroComedorController extends Controller
 
         // 2.c. Check if the employee is within the reserved schedule window
         $horaActual = Carbon::now()->format('H:i');
-        $horaReservada = $reservacion->hora; // '12:30', '13:45', '14:45'
+        $horaReservada = $reservacion->hora; // '12:30', '13:45', '14:45', '15:45'
         $valido = false;
 
         if ($horaReservada === '12:30') {
@@ -81,6 +88,8 @@ class RegistroComedorController extends Controller
             $valido = ($horaActual >= '13:30' && $horaActual <= '14:30');
         } elseif ($horaReservada === '14:45') {
             $valido = ($horaActual >= '14:30' && $horaActual <= '15:45');
+        } elseif ($horaReservada === '15:45') {
+            $valido = ($horaActual >= '15:45' && $horaActual <= '17:00');
         }
 
         if (!$valido) {
@@ -88,8 +97,10 @@ class RegistroComedorController extends Controller
                 '12:30' => '12:30 p.m. (Ventana: 12:00 a 13:30)',
                 '13:45' => '13:45 p.m. (Ventana: 13:30 a 14:30)',
                 '14:45' => '14:45 p.m. (Ventana: 14:30 a 15:45)',
+                '15:45' => '15:45 p.m. (Ventana: 15:45 a 17:00)',
             ];
             $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
+            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.");
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "Horario incorrecto. El empleado {$empleado->nombre} reservó a las {$ventana}, pero está ingresando a las {$horaActual}.");
@@ -102,6 +113,7 @@ class RegistroComedorController extends Controller
 
         if ($alreadyEaten) {
             $horaRegistro = Carbon::parse($alreadyEaten->fecha_hora)->format('H:i:s');
+            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) ya registró comida hoy a las {$horaRegistro}.");
             return redirect()->route('comedor.index')
                 ->with('error_duplicated', "El empleado {$empleado->nombre} ({$numeroEmpleado}) ya registró su comida hoy a las {$horaRegistro}. Límite de 1 acceso diario.")
                 ->with('duplicated_employee', $empleado);
@@ -116,6 +128,8 @@ class RegistroComedorController extends Controller
 
         // Get updated total visits
         $totalVisitas = $empleado->registrosComedor()->count();
+
+        Log::info("Kiosco Comedor: Acceso registrado exitosamente para colaborador {$numeroEmpleado} ({$empleado->nombre}) en el horario reservado {$horaReservada}. Total visitas histórico: {$totalVisitas}");
 
         return redirect()->route('comedor.index')
             ->with('success', "¡Registro exitoso! Comida registrada para {$empleado->nombre}.")
