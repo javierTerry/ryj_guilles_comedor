@@ -7,7 +7,7 @@
 
     <!-- Estilos de fuentes e identidad visual -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&family=Outfit:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
         
         .font-brand-logo-cursive {
             font-family: 'Dancing Script', cursive;
@@ -15,32 +15,29 @@
         .font-brand-logo-serif {
             font-family: 'Playfair Display', serif;
         }
-        .font-app-outfit {
-            font-family: 'Outfit', sans-serif;
-        }
     </style>
 
-    <div class="py-12 bg-slate-50 min-h-screen font-app-outfit">
+    <div class="py-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 
-            <!-- TARJETA DEL FORMULARIO DE RESERVACIONES -->
-                <div class="lg:col-span-7 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                <!-- TARJETA DEL FORMULARIO DE RESERVACIONES -->
+                <div class="lg:col-span-7 bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
                         Haz tu reservación
                     </h2>
 
-                    <form action="{{ route('reservaciones.store') }}" method="POST" class="space-y-6" x-data="{ 
+                    <form id="reservacion-form" action="{{ route('reservaciones.store') }}" method="POST" class="space-y-6" x-data="{ 
                         selectedHora: '{{ old('hora', '') }}'
-                    }" @submit="if(!selectedHora) { Swal.fire({ icon: 'warning', title: 'Horario requerido', text: 'Por favor, elija uno de los tres horarios disponibles haciendo clic sobre él.', confirmButtonColor: '#4f46e5' }); $event.preventDefault(); }">
+                    }" @submit.prevent="confirmarReservacion($event)">
                         @csrf
 
                         <!-- NÚMERO DE COLABORADOR -->
                         <div class="space-y-2">
-                            <label for="numero_empleado" class="block text-sm font-semibold text-slate-700">
+                            <label for="numero_empleado" class="block text-sm font-semibold text-gray-700">
                                 Número de colaborador
                             </label>
-                            <div class="flex rounded-xl border-2 border-indigo-100 bg-slate-50 overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-150 transition duration-200">
+                            <div class="flex rounded-xl border-2 border-indigo-100 bg-gray-50 overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition duration-200">
                                 <span class="inline-flex items-center pl-4 pr-2 text-indigo-400">
                                     <!-- User Icon -->
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,32 +54,24 @@
                                     pattern="[0-9]{1,10}"
                                     title="Debe contener hasta 10 dígitos numéricos"
                                     required
-                                    class="border-0 bg-transparent flex-1 block w-full text-slate-700 placeholder-slate-400 font-medium py-3 px-2 focus:ring-0 focus:outline-none"
+                                    class="border-0 bg-transparent flex-1 block w-full text-gray-700 placeholder-gray-400 font-medium py-3 px-2 focus:ring-0 focus:outline-none"
                                 />
                             </div>
                         </div>
 
                         <!-- FECHA -->
                         <div class="space-y-2">
-                            <label for="fecha" class="block text-sm font-semibold text-slate-700">
-                                Selecciona una fecha
-                            </label>
-                            <div class="flex rounded-xl border-2 border-indigo-100 bg-slate-50 overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-150 transition duration-200">
-                                <span class="inline-flex items-center pl-4 pr-2 text-indigo-400">
+                            <span class="block text-sm font-semibold text-gray-700">
+                                Fecha de reservación
+                            </span>
+                            <div class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-indigo-100 bg-indigo-50/30 text-indigo-900 font-semibold transition duration-200">
+                                <span class="text-indigo-500">
                                     <!-- Calendar Icon -->
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </span>
-                                <input
-                                    type="date"
-                                    name="fecha"
-                                    id="fecha"
-                                    min="{{ date('Y-m-d') }}"
-                                    value="{{ old('fecha', date('Y-m-d')) }}"
-                                    required
-                                    class="border-0 bg-transparent flex-1 block w-full text-slate-700 font-medium py-3 px-2 focus:ring-0 focus:outline-none"
-                                />
+                                <span>Hoy: {{ \Carbon\Carbon::today()->translatedFormat('j \d\e F \d\e Y') }}</span>
                             </div>
                         </div>
 
@@ -91,38 +80,64 @@
 
                         <!-- HORA BUTTONS SECTION -->
                         <div class="space-y-3">
-                            <label class="block text-sm font-semibold text-slate-700">
+                            <label class="block text-sm font-semibold text-gray-700">
                                 Selección rápida de hora
                             </label>
-                            <div class="grid grid-cols-3 gap-3">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <!-- 12:30 Button -->
                                 <button
                                     type="button"
                                     @click="selectedHora = '12:30'"
-                                    :class="selectedHora === '12:30' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
-                                    class="py-3.5 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none"
+                                    @if(($horarios['12:30'] ?? 0) <= 0) disabled @endif
+                                    :class="selectedHora === '12:30' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['12:30'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
-                                    12:30 p.m.
+                                    <span>12:30 p.m.</span>
+                                    <span class="text-[10px] {{ old('hora') === '12:30' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '12:30' ? 'text-indigo-200' : ''">
+                                        {{ $horarios['12:30'] ?? 0 }} libres
+                                    </span>
                                 </button>
 
                                 <!-- 13:45 Button -->
                                 <button
                                     type="button"
                                     @click="selectedHora = '13:45'"
-                                    :class="selectedHora === '13:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
-                                    class="py-3.5 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none"
+                                    @if(($horarios['13:45'] ?? 0) <= 0) disabled @endif
+                                    :class="selectedHora === '13:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['13:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
-                                    13:45 p.m.
+                                    <span>13:45 p.m.</span>
+                                    <span class="text-[10px] {{ old('hora') === '13:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '13:45' ? 'text-indigo-200' : ''">
+                                        {{ $horarios['13:45'] ?? 0 }} libres
+                                    </span>
                                 </button>
 
                                 <!-- 14:45 Button -->
                                 <button
                                     type="button"
                                     @click="selectedHora = '14:45'"
-                                    :class="selectedHora === '14:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
-                                    class="py-3.5 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none"
+                                    @if(($horarios['14:45'] ?? 0) <= 0) disabled @endif
+                                    :class="selectedHora === '14:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['14:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
-                                    14:45 p.m.
+                                    <span>14:45 p.m.</span>
+                                    <span class="text-[10px] {{ old('hora') === '14:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '14:45' ? 'text-indigo-200' : ''">
+                                        {{ $horarios['14:45'] ?? 0 }} libres
+                                    </span>
+                                </button>
+
+                                <!-- 15:45 Button -->
+                                <button
+                                    type="button"
+                                    @click="selectedHora = '15:45'"
+                                    @if(($horarios['15:45'] ?? 0) <= 0) disabled @endif
+                                    :class="selectedHora === '15:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['15:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
+                                >
+                                    <span>15:45 p.m.</span>
+                                    <span class="text-[10px] {{ old('hora') === '15:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '15:45' ? 'text-indigo-200' : ''">
+                                        {{ $horarios['15:45'] ?? 0 }} libres
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -143,25 +158,48 @@
 
                     </form>
                 </div>
+
                 <!-- PANEL INFORMATIVO Y LOGOTIPO -->
-                <div class="lg:col-span-5 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div class="lg:col-span-5 bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-4">
+                        <!-- Logotipo Comedor GILOU -->
+                        <div class="flex flex-col mb-8 relative select-none">
+                            <div class="relative inline-block">
+                                <!-- "Comedor" en manuscrito rojo -->
+                                <span class="font-brand-logo-cursive text-3xl text-indigo-600 absolute -top-5 left-16 transform rotate-[-6deg] z-10">
+                                    Comedor
+                                </span>
+                                <!-- "GILOU" Serif elegante -->
+                                <span class="font-brand-logo-serif text-6xl font-bold tracking-wider text-gray-900 block">
+                                    GILOU
+                                </span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
                             Reserva tu lugar en el comedor
                         </h3>
-                        <p class="text-slate-600 text-sm leading-relaxed mb-8">
-                            Para asegurar una mejor atención y coordinar el servicio de alimentos diariamente, por favor registre su reservación ingresando su número de colaborador, la fecha y el horario de su preferencia.
+                        <p class="text-gray-600 text-sm leading-relaxed mb-8">
+                            Para asegurar una mejor atención y coordinar el servicio de alimentos diariamente, por favor registre su reservación ingresando su número de colaborador y seleccionando el horario de su preferencia. Las reservaciones se realizan exclusivamente para el día de hoy.
                         </p>
 
                         <!-- Puntos de guía -->
-                        <div class="space-y-4 text-xs text-slate-500">
+                        <div class="space-y-4 text-xs text-gray-500">
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <span>3 Horarios Disponibles: 12:30 p.m., 13:45 p.m. y 14:45 p.m.</span>
+                                <span>4 Horarios Disponibles: 12:30 p.m., 13:45 p.m., 14:45 p.m. y 15:45 p.m.</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <span>Límite de 180 lugares por cada horario diariamente.</span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
@@ -183,14 +221,130 @@
                     </div>
 
                     <!-- Nota al pie -->
-                    <div class="mt-8 pt-4 border-t border-slate-100 text-xs text-slate-400">
+                    <div class="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400">
                         © {{ date('Y') }} Comedor GILOU. Todos los derechos reservados.
                     </div>
                 </div>
 
-                
-
             </div>
         </div>
     </div>
+
+    @if (session('success_reservation'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Reservación Exitosa!',
+                    html: `
+                        <div class="text-left mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm space-y-2">
+                            <div><span class="font-bold text-gray-500">Colaborador:</span> <span class="text-gray-900 font-semibold">{{ session('success_reservation')['empleado'] }}</span></div>
+                            <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-gray-900 font-semibold">{{ \Carbon\Carbon::parse(session('success_reservation')['fecha'])->format('d/m/Y') }}</span></div>
+                            <div><span class="font-bold text-gray-500">Horario:</span> <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">{{ session('success_reservation')['hora'] }} p.m.</span></div>
+                        </div>
+                    `,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#4f46e5',
+                    customClass: {
+                        popup: 'rounded-2xl border border-gray-100'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        function confirmarReservacion(event) {
+            const form = event.target;
+            const hora = form.querySelector('input[name="hora"]').value;
+            const numEmp = document.getElementById('numero_empleado').value.trim();
+
+            if (!hora) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Horario requerido',
+                    text: 'Por favor, elija uno de los cuatro horarios disponibles.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            if (!numEmp) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Número requerido',
+                    text: 'Por favor, ingrese su número de colaborador.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Cargando...',
+                text: 'Buscando datos del colaborador',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const url = "{{ route('reservaciones.empleado_info', ['numero_empleado' => ':num']) }}".replace(':num', numEmp);
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error de conexión con el servidor.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) {
+                        if (data.already_reserved) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Ya tienes una reservación hoy',
+                                text: data.message,
+                                confirmButtonColor: '#4f46e5',
+                                customClass: {
+                                    popup: 'rounded-2xl border border-gray-100'
+                                }
+                            });
+                            return;
+                        }
+                        throw new Error(data.message || 'Error al buscar el colaborador.');
+                    }
+                    Swal.close();
+                    Swal.fire({
+                        title: '¿Confirmar Reservación?',
+                        html: `
+                            <div class="text-left mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm space-y-2">
+                                <div><span class="font-bold text-gray-500">Colaborador:</span> <span class="text-gray-900 font-semibold">${data.nombre}</span></div>
+                                <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-gray-900 font-semibold">${new Date().toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit', year: 'numeric'})}</span></div>
+                                <div><span class="font-bold text-gray-500">Horario:</span> <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">${hora} p.m.</span></div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, Reservar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#4f46e5',
+                        cancelButtonColor: '#ef4444',
+                        customClass: {
+                            popup: 'rounded-2xl border border-gray-100'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message,
+                        confirmButtonColor: '#4f46e5'
+                    });
+                });
+        }
+    </script>
 </x-app-layout>
