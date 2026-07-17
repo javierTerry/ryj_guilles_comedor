@@ -46,6 +46,7 @@
             id: null,
             numero_empleado: '',
             nombre: '',
+            correo: '',
             departamento: '',
             puesto: ''
         },
@@ -54,6 +55,7 @@
                 id: emp.id,
                 numero_empleado: emp.numero_empleado,
                 nombre: emp.nombre,
+                correo: emp.correo || '',
                 departamento: emp.departamento || '',
                 puesto: emp.puesto || ''
             };
@@ -151,6 +153,9 @@
                                     Nombre
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Correo
+                                </th>
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Departamento
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -175,6 +180,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-950">{{ $empleado->nombre }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ $empleado->correo }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         {{ $empleado->departamento ?? '-' }}
@@ -230,7 +238,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-10 whitespace-nowrap text-center text-sm text-gray-500">
+                                    <td colspan="8" class="px-6 py-10 whitespace-nowrap text-center text-sm text-gray-500">
                                         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                         </svg>
@@ -409,6 +417,18 @@
                 </div>
 
                 <div>
+                    <x-input-label for="new_correo" :value="__('Correo Electrónico')" />
+                    <x-text-input
+                        id="new_correo"
+                        name="correo"
+                        type="email"
+                        class="mt-1 block w-full"
+                        placeholder="Ej. juan.perez@empresa.com"
+                        required
+                    />
+                </div>
+
+                <div>
                     <x-input-label for="new_departamento" :value="__('Departamento')" />
                     <x-text-input
                         id="new_departamento"
@@ -482,6 +502,18 @@
                 </div>
 
                 <div>
+                    <x-input-label for="edit_correo" :value="__('Correo Electrónico')" />
+                    <x-text-input
+                        id="edit_correo"
+                        name="correo"
+                        type="email"
+                        class="mt-1 block w-full"
+                        x-model="activeEmpleado.correo"
+                        required
+                    />
+                </div>
+
+                <div>
                     <x-input-label for="edit_departamento" :value="__('Departamento')" />
                     <x-text-input
                         id="edit_departamento"
@@ -530,8 +562,9 @@
                     <p class="font-bold uppercase tracking-wider">Instrucciones de Importación:</p>
                     <ol class="list-decimal list-inside space-y-1">
                         <li>Descarga la plantilla CSV con las columnas correspondientes.</li>
-                        <li>Completa los datos en las columnas: <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">nombre</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">departamento</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">puesto</code>.</li>
+                        <li>Completa los datos en las columnas: <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">nombre</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">departamento</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">puesto</code>.</li>
                         <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code> debe ser numérico con un máximo de 10 dígitos y ser único.</li>
+                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code> debe tener formato válido y ser único.</li>
                         <li>Sube tu archivo y presiona importar. Se reportarán las filas exitosas y los errores si ocurren.</li>
                     </ol>
                 </div>

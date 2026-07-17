@@ -71,6 +71,7 @@ class EmpleadoController extends Controller
                 'unique:empleados,numero_empleado',
             ],
             'nombre' => 'required|string|max:255',
+            'correo' => 'required|email|max:255|unique:empleados,correo',
             'departamento' => 'nullable|string|max:255',
             'puesto' => 'nullable|string|max:255',
         ], [
@@ -79,6 +80,9 @@ class EmpleadoController extends Controller
             'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
             'numero_empleado.unique' => 'Este número de empleado ya está registrado.',
             'nombre.required' => 'El nombre es obligatorio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico debe ser una dirección válida.',
+            'correo.unique' => 'Este correo electrónico ya está registrado.',
         ]);
 
         $empleado = Empleado::create($validated);
@@ -92,6 +96,7 @@ class EmpleadoController extends Controller
             'details' => json_encode([
                 'nombre' => $empleado->nombre,
                 'numero_empleado' => $empleado->numero_empleado,
+                'correo' => $empleado->correo,
                 'departamento' => $empleado->departamento,
                 'puesto' => $empleado->puesto,
             ], JSON_UNESCAPED_UNICODE)
@@ -113,6 +118,12 @@ class EmpleadoController extends Controller
                 Rule::unique('empleados', 'numero_empleado')->ignore($empleado->id),
             ],
             'nombre' => 'required|string|max:255',
+            'correo' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('empleados', 'correo')->ignore($empleado->id),
+            ],
             'departamento' => 'nullable|string|max:255',
             'puesto' => 'nullable|string|max:255',
         ], [
@@ -121,6 +132,9 @@ class EmpleadoController extends Controller
             'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
             'numero_empleado.unique' => 'Este número de empleado ya está registrado.',
             'nombre.required' => 'El nombre es obligatorio.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico debe ser una dirección válida.',
+            'correo.unique' => 'Este correo electrónico ya está registrado.',
         ]);
 
         $original = $empleado->getOriginal();
@@ -181,13 +195,13 @@ class EmpleadoController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['numero_empleado', 'nombre', 'departamento', 'puesto'];
+        $columns = ['numero_empleado', 'nombre', 'correo', 'departamento', 'puesto'];
 
         $callback = function() use ($columns) {
             $file = fopen('php://output', 'w');
             fputs($file, "\xEF\xBB\xBF"); // BOM for Excel UTF-8
             fputcsv($file, $columns);
-            fputcsv($file, ['1234567890', 'Juan Perez Lopez', 'Produccion', 'Operador A']);
+            fputcsv($file, ['1234567890', 'Juan Perez Lopez', 'juan.perez@empresa.com', 'Produccion', 'Operador A']);
             fclose($file);
         };
 
@@ -243,16 +257,22 @@ class EmpleadoController extends Controller
                 
                 $numeroEmpleado = trim($row['numero_empleado'] ?? '');
                 $nombre = trim($row['nombre'] ?? '');
+                $correo = trim($row['correo'] ?? '');
                 $departamento = trim($row['departamento'] ?? '');
                 $puesto = trim($row['puesto'] ?? '');
 
-                if (empty($numeroEmpleado) || empty($nombre)) {
-                    $errors[] = "Fila {$rowNumber}: El número de empleado y el nombre son obligatorios.";
+                if (empty($numeroEmpleado) || empty($nombre) || empty($correo)) {
+                    $errors[] = "Fila {$rowNumber}: El número de empleado, el nombre y el correo son obligatorios.";
                     continue;
                 }
 
                 if (!is_numeric($numeroEmpleado) || strlen($numeroEmpleado) > 10) {
                     $errors[] = "Fila {$rowNumber}: El número de empleado '{$numeroEmpleado}' debe ser numérico y no exceder los 10 dígitos.";
+                    continue;
+                }
+
+                if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                    $errors[] = "Fila {$rowNumber}: El correo '{$correo}' no es una dirección válida.";
                     continue;
                 }
 
@@ -262,9 +282,16 @@ class EmpleadoController extends Controller
                     continue;
                 }
 
+                $emailExists = Empleado::where('correo', $correo)->exists();
+                if ($emailExists) {
+                    $errors[] = "Fila {$rowNumber}: El correo '{$correo}' ya está registrado.";
+                    continue;
+                }
+
                 $empleado = Empleado::create([
                     'numero_empleado' => $numeroEmpleado,
                     'nombre' => $nombre,
+                    'correo' => $correo,
                     'departamento' => $departamento ?: null,
                     'puesto' => $puesto ?: null,
                     'activo' => true,
@@ -279,6 +306,7 @@ class EmpleadoController extends Controller
                     'details' => json_encode([
                         'nombre' => $empleado->nombre,
                         'numero_empleado' => $empleado->numero_empleado,
+                        'correo' => $empleado->correo,
                         'departamento' => $empleado->departamento,
                         'puesto' => $empleado->puesto,
                     ], JSON_UNESCAPED_UNICODE)
