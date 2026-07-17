@@ -27,6 +27,20 @@
                         Haz tu reservación
                     </h2>
 
+                    @if(!$reservasAbiertas)
+                        <div class="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-start gap-3">
+                            <span class="text-amber-500 mt-0.5">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </span>
+                            <div>
+                                <h4 class="font-bold text-sm">Reservaciones no iniciadas</h4>
+                                <p class="text-xs mt-0.5">El registro de reservaciones diarias está programado para iniciar a las 8:30 a.m.</p>
+                            </div>
+                        </div>
+                    @endif
+
                     <form id="reservacion-form" action="{{ route('reservaciones.store') }}" method="POST" class="space-y-6" x-data="{ 
                         selectedHora: '{{ old('hora', '') }}'
                     }" @submit.prevent="confirmarReservacion($event)">
@@ -112,13 +126,17 @@
                                 <button
                                     type="button"
                                     @click="selectedHora = '12:30'"
-                                    @if(($horarios['12:30'] ?? 0) <= 0) disabled @endif
-                                    :class="selectedHora === '12:30' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['12:30'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    @if(!$horariosStatus['12:30']['habilitado']) disabled @endif
+                                    :class="selectedHora === '12:30' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(!$horariosStatus['12:30']['habilitado']) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
                                     class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
                                     <span>12:30 p.m.</span>
                                     <span class="text-[10px] {{ old('hora') === '12:30' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '12:30' ? 'text-indigo-200' : ''">
-                                        {{ $horarios['12:30'] ?? 0 }} libres
+                                        @if(!$horariosStatus['12:30']['habilitado'])
+                                            {{ $horariosStatus['12:30']['mensaje'] }}
+                                        @else
+                                            {{ $horariosStatus['12:30']['libres'] }} libres
+                                        @endif
                                     </span>
                                 </button>
 
@@ -126,13 +144,17 @@
                                 <button
                                     type="button"
                                     @click="selectedHora = '13:45'"
-                                    @if(($horarios['13:45'] ?? 0) <= 0) disabled @endif
-                                    :class="selectedHora === '13:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['13:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    @if(!$horariosStatus['13:45']['habilitado']) disabled @endif
+                                    :class="selectedHora === '13:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(!$horariosStatus['13:45']['habilitado']) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
                                     class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
                                     <span>13:45 p.m.</span>
                                     <span class="text-[10px] {{ old('hora') === '13:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '13:45' ? 'text-indigo-200' : ''">
-                                        {{ $horarios['13:45'] ?? 0 }} libres
+                                        @if(!$horariosStatus['13:45']['habilitado'])
+                                            {{ $horariosStatus['13:45']['mensaje'] }}
+                                        @else
+                                            {{ $horariosStatus['13:45']['libres'] }} libres
+                                        @endif
                                     </span>
                                 </button>
 
@@ -140,13 +162,17 @@
                                 <button
                                     type="button"
                                     @click="selectedHora = '14:45'"
-                                    @if(($horarios['14:45'] ?? 0) <= 0) disabled @endif
-                                    :class="selectedHora === '14:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['14:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    @if(!$horariosStatus['14:45']['habilitado']) disabled @endif
+                                    :class="selectedHora === '14:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(!$horariosStatus['14:45']['habilitado']) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
                                     class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
                                     <span>14:45 p.m.</span>
                                     <span class="text-[10px] {{ old('hora') === '14:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '14:45' ? 'text-indigo-200' : ''">
-                                        {{ $horarios['14:45'] ?? 0 }} libres
+                                        @if(!$horariosStatus['14:45']['habilitado'])
+                                            {{ $horariosStatus['14:45']['mensaje'] }}
+                                        @else
+                                            {{ $horariosStatus['14:45']['libres'] }} libres
+                                        @endif
                                     </span>
                                 </button>
 
@@ -154,13 +180,17 @@
                                 <button
                                     type="button"
                                     @click="selectedHora = '15:45'"
-                                    @if(($horarios['15:45'] ?? 0) <= 0) disabled @endif
-                                    :class="selectedHora === '15:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(($horarios['15:45'] ?? 0) <= 0) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
+                                    @if(!$horariosStatus['15:45']['habilitado']) disabled @endif
+                                    :class="selectedHora === '15:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : (@json(!$horariosStatus['15:45']['habilitado']) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100')"
                                     class="py-3 px-1 border rounded-xl font-semibold text-sm text-center transition duration-200 focus:outline-none flex flex-col items-center justify-center gap-0.5"
                                 >
                                     <span>15:45 p.m.</span>
                                     <span class="text-[10px] {{ old('hora') === '15:45' ? 'text-indigo-200' : 'text-gray-500' }}" :class="selectedHora === '15:45' ? 'text-indigo-200' : ''">
-                                        {{ $horarios['15:45'] ?? 0 }} libres
+                                        @if(!$horariosStatus['15:45']['habilitado'])
+                                            {{ $horariosStatus['15:45']['mensaje'] }}
+                                        @else
+                                            {{ $horariosStatus['15:45']['libres'] }} libres
+                                        @endif
                                     </span>
                                 </button>
                             </div>
@@ -284,11 +314,46 @@
             const numEmp = document.getElementById('numero_empleado').value.trim();
             const correo = document.getElementById('correo').value.trim();
 
+            // Validación de horario de apertura (8:30 a.m.)
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeMinutes = currentHour * 60 + currentMinute;
+
+            // 8:30 AM is 8 * 60 + 30 = 510 minutes
+            if (currentTimeMinutes < 110) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Reservaciones no iniciadas',
+                    text: 'El horario para empezar la reserva solo puede ser después de las 8:30 a.m.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
             if (!hora) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Horario requerido',
                     text: 'Por favor, elija uno de los cuatro horarios disponibles.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            // Validación de límites de 15 minutos de anticipación por horario
+            const limits = {
+                '12:30': 12 * 60 + 15, // 12:15
+                '13:45': 13 * 60 + 30, // 13:30
+                '14:45': 14 * 60 + 30, // 14:30
+                '15:45': 15 * 60 + 30  // 15:30
+            };
+
+            if (limits[hora] && currentTimeMinutes >= limits[hora]) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Horario expirado',
+                    text: 'El tiempo límite para reservar el horario de las ' + hora + ' p.m. ha expirado.',
                     confirmButtonColor: '#4f46e5'
                 });
                 return;
