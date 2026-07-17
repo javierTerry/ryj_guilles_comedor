@@ -59,6 +59,30 @@
                             </div>
                         </div>
 
+                        <!-- CORREO ELECTRÓNICO -->
+                        <div class="space-y-2">
+                            <label for="correo" class="block text-sm font-semibold text-gray-700">
+                                Correo electrónico registrado
+                            </label>
+                            <div class="flex rounded-xl border-2 border-indigo-100 bg-gray-50 overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition duration-200">
+                                <span class="inline-flex items-center pl-4 pr-2 text-indigo-400">
+                                    <!-- Mail Icon -->
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </span>
+                                <input
+                                    type="email"
+                                    name="correo"
+                                    id="correo"
+                                    value="{{ old('correo') }}"
+                                    placeholder="ejemplo@correo.com"
+                                    required
+                                    class="border-0 bg-transparent flex-1 block w-full text-gray-700 placeholder-gray-400 font-medium py-3 px-2 focus:ring-0 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
                         <!-- FECHA -->
                         <div class="space-y-2">
                             <span class="block text-sm font-semibold text-gray-700">
@@ -258,6 +282,7 @@
             const form = event.target;
             const hora = form.querySelector('input[name="hora"]').value;
             const numEmp = document.getElementById('numero_empleado').value.trim();
+            const correo = document.getElementById('correo').value.trim();
 
             if (!hora) {
                 Swal.fire({
@@ -279,6 +304,16 @@
                 return;
             }
 
+            if (!correo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Correo requerido',
+                    text: 'Por favor, ingrese su correo electrónico registrado.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Cargando...',
                 text: 'Buscando datos del colaborador',
@@ -288,7 +323,7 @@
                 }
             });
 
-            const url = "{{ route('reservaciones.empleado_info', ['numero_empleado' => ':num']) }}".replace(':num', numEmp);
+            const url = "{{ route('reservaciones.empleado_info', ['numero_empleado' => ':num']) }}".replace(':num', numEmp) + '?correo=' + encodeURIComponent(correo);
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -310,7 +345,18 @@
                             });
                             return;
                         }
-                        throw new Error(data.message || 'Error al buscar el colaborador.');
+                        
+                        // Error de discrepancia o de no registrado
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de validación',
+                            text: data.message || 'El número de colaborador o correo no pertenecen al registro.',
+                            confirmButtonColor: '#4f46e5',
+                            customClass: {
+                                popup: 'rounded-2xl border border-gray-100'
+                            }
+                        });
+                        return;
                     }
                     Swal.close();
                     Swal.fire({

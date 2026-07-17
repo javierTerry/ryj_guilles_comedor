@@ -34,18 +34,22 @@ class ReservacionController extends Controller
     {
         $fecha = \Carbon\Carbon::today()->toDateString();
         $numeroEmpleado = $request->input('numero_empleado');
+        $correo = trim($request->input('correo'));
         $hora = $request->input('hora');
 
-        Log::info("Reservaciones: Intento de reservación iniciado para colaborador: {$numeroEmpleado} en horario: {$hora}");
+        Log::info("Reservaciones: Intento de reservación iniciado para colaborador: {$numeroEmpleado} con correo: {$correo} en horario: {$hora}");
 
-        // 1. Validar el formato inicial del número de empleado y la hora
+        // 1. Validar el formato inicial del número de empleado, correo y la hora
         $request->validate([
             'numero_empleado' => 'required|numeric|max_digits:10',
+            'correo' => 'required|email|max:255',
             'hora' => ['required', Rule::in(['12:30', '13:45', '14:45', '15:45'])],
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
             'numero_empleado.max_digits' => 'El número de empleado no debe exceder los 10 dígitos.',
+            'correo.required' => 'El correo electrónico es obligatorio.',
+            'correo.email' => 'El correo electrónico debe ser una dirección válida.',
             'hora.required' => 'Debe seleccionar un horario.',
             'hora.in' => 'El horario seleccionado no es válido.',
         ]);
@@ -65,11 +69,11 @@ class ReservacionController extends Controller
         // 3. Verificar que el empleado existe y está activo
         $empleado = Empleado::where('numero_empleado', $numeroEmpleado)->first();
 
-        if (!$empleado) {
-            Log::warning("Reservaciones: Intento rechazado. Colaborador {$numeroEmpleado} no se encuentra registrado.");
+        if (!$empleado || strtolower(trim($empleado->correo)) !== strtolower($correo)) {
+            Log::warning("Reservaciones: Intento rechazado. Colaborador {$numeroEmpleado} o correo {$correo} no pertenecen al registro.");
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'El número de empleado ingresado no se encuentra registrado en el sistema.');
+                ->with('error', 'El número de empleado o correo no pertenecen al registro.');
         }
 
         if (!$empleado->activo) {
@@ -112,17 +116,18 @@ class ReservacionController extends Controller
     /**
      * Get employee information by employee number.
      */
-    public function getEmpleadoInfo($numeroEmpleado)
+    public function getEmpleadoInfo(Request $request, $numeroEmpleado)
     {
-        Log::info("Reservaciones: Consulta AJAX iniciada para colaborador: {$numeroEmpleado}");
+        $correo = trim($request->query('correo') ?? '');
+        Log::info("Reservaciones: Consulta AJAX iniciada para colaborador: {$numeroEmpleado} y correo: {$correo}");
 
         $empleado = Empleado::where('numero_empleado', $numeroEmpleado)->first();
 
-        if (!$empleado) {
-            Log::warning("Reservaciones: Consulta AJAX fallida. Colaborador {$numeroEmpleado} no registrado.");
+        if (!$empleado || strtolower(trim($empleado->correo)) !== strtolower($correo)) {
+            Log::warning("Reservaciones: Consulta AJAX fallida. Colaborador {$numeroEmpleado} o correo {$correo} no pertenecen al registro.");
             return response()->json([
                 'success' => false,
-                'message' => 'El número de colaborador ingresado no se encuentra registrado.'
+                'message' => 'El número de empleado o correo no pertenecen al registro.'
             ]);
         }
 
