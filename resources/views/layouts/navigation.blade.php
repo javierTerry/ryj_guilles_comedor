@@ -17,9 +17,11 @@
                             {{ __('Dashboard') }}
                         </x-nav-link>
                     @endauth
+                   <!-- Navigation Links 
                     <x-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
-                        {{ __('Registro Comedor') }}
+                        {{ __('Registro Comedor1') }}
                     </x-nav-link>
+                    -->
                     <x-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                         {{ __('Reservar') }}
                     </x-nav-link>
