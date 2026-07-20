@@ -30,6 +30,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Require Reservation Mode
+    |--------------------------------------------------------------------------
+    |
+    | When set to true, employees must have an active reservation and enter
+    | within their reserved time window. Set to false for POC / open access.
+    |
+    */
+
+    'require_reservation' => (bool) env('REQUIRE_RESERVATION', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

@@ -24,9 +24,16 @@
                 <!-- Scanner Control Box -->
                 <div id="scanner-card" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between cursor-pointer">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
-                            Lector de Código / Entrada
-                        </h3>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">
+                                Lector de Código / Entrada
+                            </h3>
+                            @if(!config('app.require_reservation'))
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="Modo POC activo: Permite el ingreso sin reservación previa">
+                                    ⚡ Modo POC
+                                </span>
+                            @endif
+                        </div>
                         <p class="text-xs text-gray-500 mb-6">
                             Escanee el código de barras del gafete del empleado o escriba su número y presione <kbd class="px-1.5 py-0.5 bg-gray-100 border rounded font-mono text-gray-600">Enter</kbd>.
                         </p>
