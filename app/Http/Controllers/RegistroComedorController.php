@@ -64,46 +64,50 @@ class RegistroComedorController extends Controller
         }
 
         $today = Carbon::today()->toDateString();
+        $requireReservation = config('app.require_reservation', false);
+        $horaReservada = 'Modo POC / Acceso Libre';
 
-        // 2.b. Check if the employee has a reservation for today
-        $reservacion = Reservacion::where('empleado_id', $empleado->id)
-            ->where('fecha', $today)
-            ->first();
+        if ($requireReservation) {
+            // 2.b. Check if the employee has a reservation for today
+            $reservacion = Reservacion::where('empleado_id', $empleado->id)
+                ->where('fecha', $today)
+                ->first();
 
-        if (!$reservacion) {
-            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.");
-            return redirect()->route('comedor.index')
-                ->withInput()
-                ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
-        }
+            if (!$reservacion) {
+                Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.");
+                return redirect()->route('comedor.index')
+                    ->withInput()
+                    ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
+            }
 
-        // 2.c. Check if the employee is within the reserved schedule window
-        $horaActual = Carbon::now()->format('H:i');
-        $horaReservada = $reservacion->hora; // '12:30', '13:45', '14:45', '15:45'
-        $valido = false;
+            // 2.c. Check if the employee is within the reserved schedule window
+            $horaActual = Carbon::now()->format('H:i');
+            $horaReservada = $reservacion->hora; // '12:30', '13:45', '14:45', '15:45'
+            $valido = false;
 
-        if ($horaReservada === '12:30') {
-            $valido = ($horaActual >= '12:00' && $horaActual <= '13:30');
-        } elseif ($horaReservada === '13:45') {
-            $valido = ($horaActual >= '13:30' && $horaActual <= '14:30');
-        } elseif ($horaReservada === '14:45') {
-            $valido = ($horaActual >= '14:30' && $horaActual <= '15:45');
-        } elseif ($horaReservada === '15:45') {
-            $valido = ($horaActual >= '15:45' && $horaActual <= '17:00');
-        }
+            if ($horaReservada === '12:30') {
+                $valido = ($horaActual >= '12:00' && $horaActual <= '13:30');
+            } elseif ($horaReservada === '13:45') {
+                $valido = ($horaActual >= '13:30' && $horaActual <= '14:30');
+            } elseif ($horaReservada === '14:45') {
+                $valido = ($horaActual >= '14:30' && $horaActual <= '15:45');
+            } elseif ($horaReservada === '15:45') {
+                $valido = ($horaActual >= '15:45' && $horaActual <= '17:00');
+            }
 
-        if (!$valido) {
-            $formatoHora = [
-                '12:30' => '12:30 p.m. (Ventana: 12:00 a 13:30)',
-                '13:45' => '13:45 p.m. (Ventana: 13:30 a 14:30)',
-                '14:45' => '14:45 p.m. (Ventana: 14:30 a 15:45)',
-                '15:45' => '15:45 p.m. (Ventana: 15:45 a 17:00)',
-            ];
-            $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
-            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.");
-            return redirect()->route('comedor.index')
-                ->withInput()
-                ->with('error', "Horario incorrecto. El empleado {$empleado->nombre} reservó a las {$ventana}, pero está ingresando a las {$horaActual}.");
+            if (!$valido) {
+                $formatoHora = [
+                    '12:30' => '12:30 p.m. (Ventana: 12:00 a 13:30)',
+                    '13:45' => '13:45 p.m. (Ventana: 13:30 a 14:30)',
+                    '14:45' => '14:45 p.m. (Ventana: 14:30 a 15:45)',
+                    '15:45' => '15:45 p.m. (Ventana: 15:45 a 17:00)',
+                ];
+                $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
+                Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.");
+                return redirect()->route('comedor.index')
+                    ->withInput()
+                    ->with('error', "Horario incorrecto. El empleado {$empleado->nombre} reservó a las {$ventana}, pero está ingresando a las {$horaActual}.");
+            }
         }
 
         // 3. Check if already registered today
@@ -129,7 +133,7 @@ class RegistroComedorController extends Controller
         // Get updated total visits
         $totalVisitas = $empleado->registrosComedor()->count();
 
-        Log::info("Kiosco Comedor: Acceso registrado exitosamente para colaborador {$numeroEmpleado} ({$empleado->nombre}) en el horario reservado {$horaReservada}. Total visitas histórico: {$totalVisitas}");
+        Log::info("Kiosco Comedor: Acceso registrado exitosamente para colaborador {$numeroEmpleado} ({$empleado->nombre}) [Horario/Modo: {$horaReservada}]. Total visitas histórico: {$totalVisitas}");
 
         return redirect()->route('comedor.index')
             ->with('success', "¡Registro exitoso! Comida registrada para {$empleado->nombre}.")
