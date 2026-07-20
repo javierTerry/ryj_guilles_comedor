@@ -219,14 +219,7 @@
                         <!-- Logotipo Comedor GILOU -->
                         <div class="flex flex-col mb-8 relative select-none">
                             <div class="relative inline-block">
-                                <!-- "Comedor" en manuscrito rojo -->
-                                <span class="font-brand-logo-cursive text-3xl text-indigo-600 absolute -top-5 left-16 transform rotate-[-6deg] z-10">
-                                    Comedor
-                                </span>
-                                <!-- "GILOU" Serif elegante -->
-                                <span class="font-brand-logo-serif text-6xl font-bold tracking-wider text-gray-900 block">
-                                    GILOU
-                                </span>
+                                <img src="{{ asset('images/logoguilles.jpeg') }}" alt="Comedor Gilou" style="width: 40%; max-width: 800px; height: auto;">
                             </div>
                         </div>
 
@@ -276,7 +269,7 @@
 
                     <!-- Nota al pie -->
                     <div class="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400">
-                        © {{ date('Y') }} Comedor GILOU. Todos los derechos reservados.
+                        © {{ date('Y') }} Soluciones Integrales RyJ. Todos los derechos reservados.
                     </div>
                 </div>
 

@@ -161,8 +161,8 @@
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Puesto
                                 </th>
-                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Total Visitas
+                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider" title="Cálculo de visitas acumuladas de Lunes a Viernes de la semana en curso">
+                                    Visitas (Sem. Actual)
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Estado
