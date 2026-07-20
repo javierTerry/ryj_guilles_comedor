@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empleado;
 use App\Models\EmpleadoLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +15,13 @@ class EmpleadoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Empleado::query()->withCount('registrosComedor');
+        // Rango de la semana actual (Lunes a Viernes)
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $endOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
+
+        $query = Empleado::query()->withCount(['registrosComedor' => function ($q) use ($startOfWeek, $endOfWeek) {
+            $q->whereBetween('fecha', [$startOfWeek, $endOfWeek]);
+        }]);
 
         // Filter by Search (name or employee number)
         if ($request->filled('search')) {

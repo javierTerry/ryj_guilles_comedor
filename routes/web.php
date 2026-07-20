@@ -5,6 +5,7 @@ use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\RegistroComedorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReservacionController;
+use App\Http\Controllers\ReporteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,6 +13,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::post('/dashboard/send-email', [DashboardController::class, 'sendReportEmail'])->middleware(['auth'])->name('dashboard.send_email');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -23,6 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::post('empleados/import', [EmpleadoController::class, 'import'])->name('empleados.import');
     Route::resource('empleados', EmpleadoController::class)->except(['create', 'show', 'edit']);
     Route::patch('empleados/{empleado}/toggle', [EmpleadoController::class, 'toggleStatus'])->name('empleados.toggle');
+
+    // Rutas para Reportes de Visitas y Exportación CSV
+    Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
+    Route::get('reportes/exportar', [ReporteController::class, 'exportCsv'])->name('reportes.export');
 });
 
 // Rutas Públicas para Control de Comedor

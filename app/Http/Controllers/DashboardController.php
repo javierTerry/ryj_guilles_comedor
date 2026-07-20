@@ -6,6 +6,11 @@ use App\Models\Empleado;
 use App\Models\RegistroComedor;
 use Carbon\Carbon;
 
+use App\Mail\DashboardReportMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
 class DashboardController extends Controller
 {
     /**
@@ -13,6 +18,14 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        // Trazabilidad de acceso al menú Dashboard
+        Log::channel('dashboard')->info('Acceso al menú Dashboard realizado', [
+            'usuario_id' => auth()->id(),
+            'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+            'ip' => request()->ip(),
+            'timestamp' => now()->toDateTimeString(),
+        ]);
+
         // 1. KPI Metrics
         $totalEmpleados = Empleado::count();
         $empleadosActivos = Empleado::where('activo', true)->count();
@@ -123,5 +136,98 @@ class DashboardController extends Controller
             'deptLabels' => $deptLabels,
             'deptValues' => $deptValues,
         ]);
+    }
+
+    /**
+     * Send dashboard report via email.
+     */
+    public function sendReportEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+            'periodo' => 'nullable|string|in:Diario,Semanal,Mensual',
+            'notas' => 'nullable|string|max:500',
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingrese una dirección de correo válida.',
+        ]);
+
+        try {
+            $totalEmpleados = Empleado::count();
+            $empleadosActivos = Empleado::where('activo', true)->count();
+            $empleadosInactivos = $totalEmpleados - $empleadosActivos;
+
+            $todayStr = Carbon::today()->toDateString();
+            $accesosHoy = RegistroComedor::where('fecha', $todayStr)->count();
+
+            $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
+            $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
+            $accesosMes = RegistroComedor::whereBetween('fecha', [$startOfMonth, $endOfMonth])->count();
+            $promedioDiario = $accesosMes > 0 ? round($accesosMes / Carbon::now()->day, 1) : 0;
+
+            $rawDepts = RegistroComedor::join('empleados', 'registro_comedors.empleado_id', '=', 'empleados.id')
+                ->selectRaw('COALESCE(empleados.departamento, "Sin departamento") as dept, count(*) as count')
+                ->groupBy('empleados.departamento')
+                ->orderBy('count', 'desc')
+                ->get();
+
+            $deptLabels = [];
+            $deptValues = [];
+            foreach ($rawDepts as $dept) {
+                $deptLabels[] = $dept->dept ?: 'Sin departamento';
+                $deptValues[] = $dept->count;
+            }
+
+            $stats = [
+                'totalEmpleados' => $totalEmpleados,
+                'empleadosActivos' => $empleadosActivos,
+                'empleadosInactivos' => $empleadosInactivos,
+                'accesosHoy' => $accesosHoy,
+                'accesosMes' => $accesosMes,
+                'promedioDiario' => $promedioDiario,
+                'deptLabels' => $deptLabels,
+                'deptValues' => $deptValues,
+            ];
+
+            $periodo = $validated['periodo'] ?? 'Diario';
+            $notas = $validated['notas'] ?? null;
+
+            Mail::to($validated['email'])->send(new DashboardReportMail($stats, $periodo, $notas));
+
+            $logData = [
+                'accion' => 'envio_correo_dashboard',
+                'destinatario' => $validated['email'],
+                'periodo' => $periodo,
+                'notas' => $notas,
+                'usuario_id' => auth()->id(),
+                'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+                'ip' => $request->ip(),
+                'timestamp' => now()->toDateTimeString(),
+            ];
+
+            Log::channel('dashboard')->info("Envío de correo con reporte del Dashboard realizado exitosamente", $logData);
+            Log::channel('reportes')->info("Envío de correo con reporte del Dashboard realizado", $logData);
+
+            return response()->json([
+                'success' => true,
+                'message' => "¡El reporte de estadísticas ha sido enviado exitosamente a {$validated['email']}!"
+            ]);
+        } catch (\Exception $e) {
+            $errorData = [
+                'accion' => 'envio_correo_dashboard_fallo',
+                'destinatario' => $validated['email'] ?? null,
+                'error' => $e->getMessage(),
+                'usuario_id' => auth()->id(),
+                'ip' => $request->ip(),
+            ];
+
+            Log::channel('dashboard')->error("Fallo al enviar correo con reporte del Dashboard", $errorData);
+            Log::channel('reportes')->error("Fallo al enviar correo con reporte del Dashboard", $errorData);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un problema al enviar el correo: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

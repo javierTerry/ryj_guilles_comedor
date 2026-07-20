@@ -5,7 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Comedor GILOU') }}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/jpeg" href="{{ asset('images/logoguilles.jpeg') }}">
+        <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logoguilles.jpeg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logoguilles.jpeg') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

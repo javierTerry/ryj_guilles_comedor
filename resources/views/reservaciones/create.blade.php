@@ -269,7 +269,7 @@
 
                     <!-- Nota al pie -->
                     <div class="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400">
-                        © {{ date('Y') }} Comedor GILOU. Todos los derechos reservados.
+                        © {{ date('Y') }} Soluciones Integrales RyJ. Todos los derechos reservados.
                     </div>
                 </div>
 

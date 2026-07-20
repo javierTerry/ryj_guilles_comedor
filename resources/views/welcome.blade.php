@@ -4,7 +4,12 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Comedor GILOU') }}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/jpeg" href="{{ asset('images/logoguilles.jpeg') }}">
+        <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logoguilles.jpeg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logoguilles.jpeg') }}">
 
         @fonts
 
