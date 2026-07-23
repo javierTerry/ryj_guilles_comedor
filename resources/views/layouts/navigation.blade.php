@@ -16,12 +16,10 @@
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
+                            {{ __('Comedor') }}
+                        </x-nav-link>
                     @endauth
-                   <!-- Navigation Links 
-                    <x-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
-                        {{ __('Registro Comedor1') }}
-                    </x-nav-link>
-                    -->
                     <x-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                         {{ __('Reservar') }}
                     </x-nav-link>
@@ -95,10 +93,10 @@
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
+                    {{ __('Comedor') }}
+                </x-responsive-nav-link>
             @endauth
-            <x-responsive-nav-link :href="route('comedor.index')" :active="request()->routeIs('comedor.index')">
-                {{ __('Registro Comedor') }}
-            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                 {{ __('Reservar') }}
             </x-responsive-nav-link>
