@@ -16,8 +16,16 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * Reservación de las **14:45 p.m.** -> Acceso permitido de **14:30 a 15:45**.
   * Reservación de las **15:45 p.m.** -> Acceso permitido de **15:45 a 17:00**.
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
-* **Alertas Dinámicas:** Integración de SweetAlert2 para mostrar mensajes interactivos de éxito o error al instante (por ejemplo, sin reservación, fuera de horario, empleado inactivo, comida ya registrada o no encontrado).
-* **Historial Oculto:** El listado de accesos del día está protegido; solo los administradores logueados pueden verlo.
+* **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
+  1. **Scanner Control Box (`#scanner-card`):** Formulario de escaneo (`lg:flex-[3] min-w-0` - 30% del espacio relativo).
+  2. **Status Feedback Panels (`#status-card`):** Panel de estatus expandido (`lg:flex-[5] min-w-0` - 50% del espacio relativo).
+  3. **Tarjeta Dedicada de Contador de Accesos (`#counter-card`):** Tarjeta compacta (`lg:flex-[2] min-w-0` - 20% del espacio relativo) con número responsivo (`text-3xl sm:text-4xl md:text-5xl font-black font-mono`).
+  * **Sin desbordamientos:** Los factores de crecimiento de Flexbox deducen automáticamente los espacios `gap-6` del ancho total de pantalla, y `min-w-0` garantiza que la interfaz sea 100% responsiva en cualquier monitor o pantalla de kiosco sin generar scroll horizontal.
+* **Burbujas Contador Responsivas de Accesos (`Nº Entrada`):**
+  * Cada registro de entrada en el menú comedor cuenta con una **burbuja contador en la tabla de historial** (`#1`, `#42`, `#9999`) y en la tarjeta de **Acceso Autorizado**.
+  * Diseñadas con tipografía responsiva de amplio tamaño (`text-base sm:text-lg md:text-xl font-black`) y un ancho mínimo dinámico (`min-w-[4.5rem]`) para garantizar la óptima visibilidad y encuadre de números de hasta **4 dígitos (9999)** sin rompimiento de diseño ni saltos de línea.
+* **Canal Dedicado de Logs (`comedor`):** Registro de trazabilidad exclusivo en `storage/logs/comedor.log` que captura intentos de escaneo, accesos autorizados, número consecutivo del día, rechazos y horario de reservación.
+* **Historial de Registros:** El listado de accesos del día está protegido; los usuarios autenticados pueden consultar el consecutivo en tiempo real.
 
 ### 2. Panel de Estadísticas (Dashboard Administrativo)
 * **URL Protegida:** `/dashboard` (Solo para administradores autenticados).
@@ -40,18 +48,30 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **Importación Masiva y Campo Correo:** Subida y procesamiento de listas de empleados mediante archivos CSV con inclusión obligatoria del correo electrónico y descarga de plantilla oficial actualizada.
 * **Estado de Empleado:** Switch interactivo para activar o desactivar empleados de forma rápida (un empleado desactivado no podrá registrar comidas).
 
-### 4. Módulo de Reportes de Visitas y Exportación a CSV
-* **URL Protegida:** `/reportes` (Acceso mediante nuevo enlace en el menú de navegación principal y móvil).
-* **Filtros Avanzados y Rango de Fechas:** Permite consultar la nómina de colaboradores y acotar el volumen de sus visitas al comedor filtrando por:
-  * **Rango de Fechas de Visitas (`fecha_inicio` y `fecha_fin`)**: Filtra y contabiliza únicamente los accesos ocurridos dentro del período seleccionado, recalculando las métricas sin omitir empleados del listado.
+### 4. Módulo de Reportes y Submenús (General y Visitas)
+* **URL Protegida:** `/reportes` (Acceso mediante menú desplegable y móvil "Reportes").
+* **Estructura de Submenús:**
+  * **Reporte General (`/reportes`):** Muestra el resumen del catálogo de colaboradores acotando el conteo acumulado de sus visitas al comedor por rango de fecha.
+  * **Reporte de Visitas (`/reportes/visitas`):** Consulta detallada de cada acceso individual al comedor con su horario exacto de ingreso (`fecha_hora`).
+* **Valores e Información en el Reporte de Visitas:**
+  * Nombre del colaborador.
+  * Número de empleado.
+  * Correo electrónico.
+  * Departamento y Puesto.
+  * Fecha y Horario exacto de ingreso al comedor.
+  * Estatus (Activo / Inactivo).
+* **Comportamiento de Filtro por Defecto (Semana Actual):**
+  * Cuando no se aplican filtros de fecha explícitos, el **Reporte de Visitas** toma por defecto automáticamente únicamente los accesos correspondientes a la **semana actual** (Lunes a Domingo en curso).
+* **Filtros Avanzados y Rango de Fechas:** Permite consultar ambas vistas acotando la información por:
+  * **Rango de Fechas de Visitas (`fecha_inicio` y `fecha_fin`)**: Filtra los accesos ocurridos dentro del período seleccionado.
   * **Nombre o Número de Empleado** (búsqueda parcial).
   * **Departamento** (lista desplegable dinámica).
   * **Estatus del Empleado** (Todos / Activos / Inactivos).
-* **Tarjeta KPI de Visitas Contabilizadas:** Muestra en el encabezado la suma total de visitas generadas en el rango de fechas especificado (o del histórico general si no se indica rango).
-* **Visualización de Visitas en Tabla:** Columna **Visitas Comedor** dedicada en la tabla principal para identificar de un vistazo el volumen de accesos por colaborador en el rango activo.
-* **Carga Inicial y Paginación:** Carga por defecto a todos los empleados ordenados por volumen descendente de visitas con paginación configurable (25, 50, 75 o 100 registros por página).
-* **Descarga Masiva en CSV:** Generación en tiempo real de archivos CSV codificados en UTF-8 con BOM (para apertura óptima en Microsoft Excel) que incorporan las visitas acotadas por el rango de fecha seleccionado y todos los datos del colaborador.
-* **Canal Dedicado de Logs (`reportes`):** Registro de trazabilidad exclusivo en `storage/logs/reportes.log` que captura eventos de consulta, rangos de fechas filtrados, volúmenes de visitas, descargas CSV e IPs de usuario.
+  * **Registros por Página** (25, 50, 75 o 100 por página).
+* **Descarga Masiva en CSV:** Generación en tiempo real de archivos CSV codificados en UTF-8 con BOM tanto para el Reporte General (`/reportes/exportar`) como para el Reporte de Visitas (`/reportes/visitas/exportar`).
+* **Canales Dedicados de Logs:**
+  * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general de empleados.
+  * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para consultas y exportaciones del reporte de visitas detallado.
 
 ### 5. Reservaciones de Comedor (Acceso Público)
 * **URL Pública:** `/reservar` (Accesible para cualquiera en red local).
@@ -128,7 +148,24 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.1.0 (Actual)**:
+* **v2.3.1 (Actual)**:
+  * Optimizado el layout a factores de crecimiento proporcionales **3:5:2 (`30% - 50% - 20%`)** en Flexbox:
+    * **Scanner Control Box (`#scanner-card`)**: `lg:flex-[3] min-w-0`.
+    * **Status Feedback Panels (`#status-card`)**: `lg:flex-[5] min-w-0`.
+    * **Contador de Accesos (`#counter-card`)**: `lg:flex-[2] min-w-0`.
+  * Incorporada la propiedad `min-w-0` y ajuste inteligente de espacios `gap-6` para eliminar el scroll horizontal y lograr una perfecta adaptabilidad responsiva en pantallas de cualquier resolución.
+* **v2.3.0**:
+  * Incorporadas **Burbujas Contador de Registros de Entrada** en la vista del menú comedor (`/comedor`).
+  * Agregada la columna **`Nº Entrada`** en la tabla de historial de comidas del día con burbujas responsivas de alto contraste (`#1`, `#42`, `#9999`) diseñadas con tipografía de amplio tamaño y min-width adaptativo para soportar números de hasta 4 dígitos sin deformar la interfaz.
+  * Añadida burbuja contador destacada en la tarjeta de **Acceso Autorizado** mostrando el número consecutivo de acceso del día (`#Acceso Hoy`).
+  * Creado el canal dedicado de logs **`comedor`** en `config/logging.php` generando trazabilidad diaria en `storage/logs/comedor.log`.
+* **v2.2.0**:
+  * Agregados los submenús de reportes: **Reporte General** y **Reporte de Visitas**.
+  * Creada la vista de **Reporte de Visitas** (`/reportes/visitas`) mostrando detalles de Nombre, Nº Empleado, Correo, Departamento, Puesto, Estatus y el horario exacto de ingreso al comedor.
+  * Implementado el filtro por defecto a la **Semana Actual** en el Reporte de Visitas cuando no se aplican filtros de rango de fechas.
+  * Añadida la exportación en CSV para el Reporte de Visitas (`/reportes/visitas/exportar`).
+  * Configurado el canal dedicado de trazabilidad **`visitas`** en `config/logging.php` generando logs en `storage/logs/visitas.log`.
+* **v2.1.0**:
   * Agregado el canal dedicado de logs **`dashboard`** en `config/logging.php` para registrar la actividad de navegación del Dashboard y los eventos de despacho del reporte por correo electrónico (vía interfaz web y comandos Artisan) en `storage/logs/dashboard.log`.
 * **v2.0.0**:
   * Incorporado filtro por **Rango de Fechas (`fecha_inicio` y `fecha_fin`)** en el menú de reportes para acotar el conteo de visitas al comedor por colaborador en el período seleccionado.

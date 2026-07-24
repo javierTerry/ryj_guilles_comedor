@@ -81,6 +81,22 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'visitas' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/visitas.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        'comedor' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/comedor.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'dashboard' => [
             'driver' => 'daily',
             'path' => storage_path('logs/dashboard.log'),

@@ -43,13 +43,19 @@ class RegistroComedorController extends Controller
 
         $numeroEmpleado = $request->input('numero_empleado');
 
-        Log::info("Kiosco Comedor: Intento de ingreso de colaborador: {$numeroEmpleado}");
+        Log::channel('comedor')->info("Kiosco Comedor: Intento de ingreso de colaborador: {$numeroEmpleado}", [
+            'ip' => $request->ip(),
+            'numero_empleado' => $numeroEmpleado,
+        ]);
 
         // 1. Find employee
         $empleado = Empleado::where('numero_empleado', $numeroEmpleado)->first();
 
         if (!$empleado) {
-            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} no registrado.");
+            Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} no registrado.", [
+                'ip' => $request->ip(),
+                'numero_empleado' => $numeroEmpleado,
+            ]);
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "El número de empleado {$numeroEmpleado} no está registrado en el sistema.");
@@ -57,7 +63,10 @@ class RegistroComedorController extends Controller
 
         // 2. Check if active
         if (!$empleado->activo) {
-            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) está inactivo.");
+            Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) está inactivo.", [
+                'ip' => $request->ip(),
+                'empleado_id' => $empleado->id,
+            ]);
             return redirect()->route('comedor.index')
                 ->withInput()
                 ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) está marcado como INACTIVO.");
@@ -74,7 +83,10 @@ class RegistroComedorController extends Controller
                 ->first();
 
             if (!$reservacion) {
-                Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.");
+                Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.", [
+                    'ip' => $request->ip(),
+                    'empleado_id' => $empleado->id,
+                ]);
                 return redirect()->route('comedor.index')
                     ->withInput()
                     ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
@@ -103,7 +115,12 @@ class RegistroComedorController extends Controller
                     '15:45' => '15:45 p.m. (Ventana: 15:45 a 17:00)',
                 ];
                 $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
-                Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.");
+                Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.", [
+                    'ip' => $request->ip(),
+                    'empleado_id' => $empleado->id,
+                    'hora_reservada' => $horaReservada,
+                    'hora_actual' => $horaActual,
+                ]);
                 return redirect()->route('comedor.index')
                     ->withInput()
                     ->with('error', "Horario incorrecto. El empleado {$empleado->nombre} reservó a las {$ventana}, pero está ingresando a las {$horaActual}.");
@@ -117,7 +134,11 @@ class RegistroComedorController extends Controller
 
         if ($alreadyEaten) {
             $horaRegistro = Carbon::parse($alreadyEaten->fecha_hora)->format('H:i:s');
-            Log::warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) ya registró comida hoy a las {$horaRegistro}.");
+            Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) ya registró comida hoy a las {$horaRegistro}.", [
+                'ip' => $request->ip(),
+                'empleado_id' => $empleado->id,
+                'hora_registro_previo' => $horaRegistro,
+            ]);
             return redirect()->route('comedor.index')
                 ->with('error_duplicated', "El empleado {$empleado->nombre} ({$numeroEmpleado}) ya registró su comida hoy a las {$horaRegistro}. Límite de 1 acceso diario.")
                 ->with('duplicated_employee', $empleado);
@@ -130,15 +151,23 @@ class RegistroComedorController extends Controller
             'fecha_hora' => Carbon::now(),
         ]);
 
-        // Get updated total visits
+        // Get updated total visits for employee and total accesses today
         $totalVisitas = $empleado->registrosComedor()->count();
+        $registrosHoyTotal = RegistroComedor::where('fecha', $today)->count();
 
-        Log::info("Kiosco Comedor: Acceso registrado exitosamente para colaborador {$numeroEmpleado} ({$empleado->nombre}) [Horario/Modo: {$horaReservada}]. Total visitas histórico: {$totalVisitas}");
+        Log::channel('comedor')->info("Kiosco Comedor: Acceso registrado exitosamente para colaborador {$numeroEmpleado} ({$empleado->nombre}) [Horario/Modo: {$horaReservada}]. Nº Registro de Hoy: {$registrosHoyTotal}. Total visitas histórico: {$totalVisitas}", [
+            'ip' => $request->ip(),
+            'empleado_id' => $empleado->id,
+            'registro_id' => $registro->id,
+            'numero_registro_hoy' => $registrosHoyTotal,
+            'total_visitas' => $totalVisitas,
+        ]);
 
         return redirect()->route('comedor.index')
             ->with('success', "¡Registro exitoso! Comida registrada para {$empleado->nombre}.")
             ->with('last_registered', $empleado)
             ->with('last_registered_time', Carbon::now()->format('H:i:s'))
-            ->with('last_registered_total', $totalVisitas);
+            ->with('last_registered_total', $totalVisitas)
+            ->with('last_registered_today_total', $registrosHoyTotal);
     }
 }
