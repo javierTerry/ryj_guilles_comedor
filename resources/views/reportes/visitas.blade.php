@@ -3,20 +3,20 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Reporte General de Empleados') }}
+                    {{ __('Reporte de Visitas al Comedor') }}
                 </h2>
                 <p class="text-xs text-gray-500 mt-1">
-                    Consulte todos los empleados ordenados de forma descendente por el volumen de sus visitas al comedor acotado por rango de fecha.
+                    Consulta detallada de accesos al comedor con horario de ingreso, filtrada por la semana actual por defecto.
                 </p>
             </div>
-            <a href="{{ route('reportes.export', request()->query()) }}"
+            <a href="{{ route('reportes.visitas_export', request()->query()) }}"
                 class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition duration-150 gap-2"
-                title="Descargar reporte completo en formato CSV para Excel">
+                title="Descargar reporte de visitas en formato CSV para Excel">
                 <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Descargar Reporte CSV
+                Descargar Visitas CSV
             </a>
         </div>
     </x-slot>
@@ -28,16 +28,16 @@
             <div class="border-b border-gray-200 bg-white px-4 rounded-xl shadow-sm">
                 <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                     <a href="{{ route('reportes.index') }}"
-                       class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2"
-                       aria-current="page">
-                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00-2 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         Reporte General (Resumen)
                     </a>
                     <a href="{{ route('reportes.visitas') }}"
-                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2"
+                       aria-current="page">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Reporte de Visitas (Detalle e Ingresos)
@@ -49,9 +49,10 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Empleados Consultados</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Visitas Registradas</p>
                         <h3 class="text-3xl font-extrabold text-indigo-600 mt-1">
-                            {{ number_format($totalEmpleadosFiltrados) }}</h3>
+                            {{ number_format($totalVisitas) }}
+                        </h3>
                     </div>
                     <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,13 +64,15 @@
 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Visitas Contabilizadas en Rango</p>
-                        <h3 class="text-3xl font-extrabold text-amber-600 mt-1">{{ number_format($totalVisitas) }}</h3>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rango de Consulta</p>
+                        <h3 class="text-lg font-bold text-amber-600 mt-1">
+                            Del {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
+                        </h3>
                         <p class="text-xs text-gray-400 mt-0.5">
-                            @if(request('fecha_inicio') || request('fecha_fin'))
-                                Del {{ request('fecha_inicio') ? \Carbon\Carbon::parse(request('fecha_inicio'))->format('d/m/Y') : 'Inicio' }} al {{ request('fecha_fin') ? \Carbon\Carbon::parse(request('fecha_fin'))->format('d/m/Y') : 'Hoy' }}
+                            @if(!$hasCustomDateFilter)
+                                <span class="text-indigo-600 font-semibold">🗓️ Semana Actual (Por Defecto)</span>
                             @else
-                                Acumulado Histórico General
+                                Personalizado por filtro
                             @endif
                         </p>
                     </div>
@@ -84,7 +87,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Paginación / Formato</p>
-                        <h3 class="text-xl font-bold text-slate-700 mt-1">{{ $perPage }} <span class="text-xs font-semibold text-gray-400">empleados/pág</span></h3>
+                        <h3 class="text-xl font-bold text-slate-700 mt-1">{{ $perPage }} <span class="text-xs font-semibold text-gray-400">visitas/pág</span></h3>
                         <p class="text-xs text-emerald-600 font-bold mt-0.5">CSV (UTF-8 Excel)</p>
                     </div>
                     <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
@@ -106,13 +109,13 @@
                     Filtros de Búsqueda y Rango de Fechas
                 </h3>
 
-                <form method="GET" action="{{ route('reportes.index') }}" class="space-y-4 w-full">
+                <form method="GET" action="{{ route('reportes.visitas') }}" class="space-y-4 w-full">
 
                     <!-- PRIMERA FILA: BÚSQUEDA, DEPARTAMENTO Y ESTATUS -->
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
                         <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
                         <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5 ">Nombre o Nº Empleado</label>
+                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
                                 placeholder="Ej: 1024 o Juan"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
@@ -148,15 +151,15 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
                         <!-- 4. FECHA INICIO -->
                         <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="fecha_inicio" class="block text-xs font-semibold text-gray-600 mb-1.5 ">Fecha Inicio Visitas</label>
-                            <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ request('fecha_inicio') }}"
+                            <label for="fecha_inicio" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Inicio Visitas</label>
+                            <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ $fechaInicio }}"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
                         <!-- 5. FECHA FIN -->
                         <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="fecha_fin" class="block text-xs font-semibold text-gray-600 mb-1.5 ">Fecha Fin Visitas</label>
-                            <input type="date" name="fecha_fin" id="fecha_fin" value="{{ request('fecha_fin') }}"
+                            <label for="fecha_fin" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Fin Visitas</label>
+                            <input type="date" name="fecha_fin" id="fecha_fin" value="{{ $fechaFin }}"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
@@ -173,18 +176,23 @@
                         </div>
                     </div>
 
-                    <!-- TERCERA FILA: BOTONES DE ACCIÓN (FILTRAR / LIMPIAR) -->
+                    <!-- TERCERA FILA: BOTONES DE ACCIÓN Y NOTA DE FILTRO -->
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
                         <div class="text-xs text-gray-500 font-medium">
-                            @if(request('fecha_inicio') || request('fecha_fin'))
+                            @if(!$hasCustomDateFilter)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-semibold gap-1 border border-indigo-100">
+                                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Mostrando automáticamente las visitas de la Semana Actual ({{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }})
+                                </span>
+                            @else
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 font-semibold gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Filtro Rango Visitas: {{ request('fecha_inicio') ?? 'Sin inicio' }} a {{ request('fecha_fin') ?? 'Sin fin' }}
+                                    Filtro Rango Visitas: {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
                                 </span>
-                            @else
-                                <span class="text-gray-400">Conteo de visitas: Histórico completo (sin acotar rango)</span>
                             @endif
                         </div>
 
@@ -199,9 +207,9 @@
                             </button>
 
                             @if ($hasFilters)
-                                <a href="{{ route('reportes.index') }}"
+                                <a href="{{ route('reportes.visitas') }}"
                                     class="h-10 inline-flex items-center justify-center px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition whitespace-nowrap"
-                                    title="Limpiar filtros">
+                                    title="Limpiar filtros (Regresa a la semana actual por defecto)">
                                     Limpiar Filtros
                                 </a>
                             @endif
@@ -211,20 +219,19 @@
                 </form>
             </div>
 
-            <!-- TABLA DE EMPLEADOS -->
+            <!-- TABLA DE VISITAS DETALLADAS -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
-                <!-- PAGINADOR SUPERIOR (INICIO DE LA TABLA) -->
-                @if ($empleados->hasPages())
-                    <div
-                        class="px-6 py-3 border-b border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <!-- PAGINADOR SUPERIOR -->
+                @if ($visitas->hasPages())
+                    <div class="px-6 py-3 border-b border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-between items-center gap-2">
                         <span class="text-xs text-gray-500 font-medium">
-                            Mostrando del <strong>{{ $empleados->firstItem() }}</strong> al
-                            <strong>{{ $empleados->lastItem() }}</strong> de
-                            <strong>{{ number_format($empleados->total()) }}</strong> colaboradores
+                            Mostrando del <strong>{{ $visitas->firstItem() }}</strong> al
+                            <strong>{{ $visitas->lastItem() }}</strong> de
+                            <strong>{{ number_format($visitas->total()) }}</strong> visitas registradas
                         </span>
                         <div class="text-xs">
-                            {{ $empleados->links() }}
+                            {{ $visitas->links() }}
                         </div>
                     </div>
                 @endif
@@ -233,45 +240,41 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Nº Empleado
                                 </th>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Colaborador
                                 </th>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Correo Electrónico
                                 </th>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Departamento / Puesto
                                 </th>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Visitas Comedor
+                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Horario / Fecha de Ingreso
                                 </th>
-                                <th scope="col"
-                                    class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Estatus
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse ($empleados as $emp)
+                            @forelse ($visitas as $visita)
+                                @php
+                                    $emp = $visita->empleado;
+                                    $fechaHoraObj = $visita->fecha_hora ? \Carbon\Carbon::parse($visita->fecha_hora) : null;
+                                @endphp
                                 <tr class="hover:bg-gray-50/50 transition">
                                     <!-- Nº EMPLEADO -->
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 tracking-wider">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 tracking-wider">
                                         {{ $emp->numero_empleado ?? '-' }}
                                     </td>
 
                                     <!-- NOMBRE -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-gray-900">{{ $emp->nombre ?? 'Sin nombre' }}
-                                        </div>
+                                        <div class="text-sm font-semibold text-gray-900">{{ $emp->nombre ?? 'Sin nombre' }}</div>
                                     </td>
 
                                     <!-- CORREO -->
@@ -281,31 +284,30 @@
 
                                     <!-- DEPARTAMENTO Y PUESTO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        <div class="font-medium text-gray-900">
-                                            {{ $emp->departamento ?? 'Sin departamento' }}</div>
+                                        <div class="font-medium text-gray-900">{{ $emp->departamento ?? 'Sin departamento' }}</div>
                                         <div class="text-xs text-gray-400">{{ $emp->puesto ?? 'Sin puesto' }}</div>
                                     </td>
 
-                                    <!-- VISITAS COMEDOR EN RANGO -->
+                                    <!-- HORARIO Y FECHA DE INGRESO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
-                                            <svg class="w-3.5 h-3.5 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
-                                            {{ number_format($emp->registros_comedor_count) }} {{ $emp->registros_comedor_count == 1 ? 'visita' : 'visitas' }}
-                                        </span>
+                                        <div class="inline-flex flex-col items-center px-3 py-1.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-indigo-900">
+                                            <span class="text-xs font-bold font-mono text-indigo-700">
+                                                🕒 {{ $fechaHoraObj ? $fechaHoraObj->format('H:i:s') : '-' }}
+                                            </span>
+                                            <span class="text-[11px] text-gray-500 font-medium">
+                                                {{ $fechaHoraObj ? $fechaHoraObj->format('d/m/Y') : ($visita->fecha ? \Carbon\Carbon::parse($visita->fecha)->format('d/m/Y') : '-') }}
+                                            </span>
+                                        </div>
                                     </td>
 
                                     <!-- ESTATUS -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                        @if ($emp->activo)
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                        @if ($emp && $emp->activo)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
                                                 Activo
                                             </span>
                                         @else
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
                                                 Inactivo
                                             </span>
                                         @endif
@@ -314,15 +316,11 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <p class="text-base font-semibold text-gray-700">No se encontraron empleados
-                                            registrados</p>
-                                        <p class="text-xs text-gray-400 mt-1">Intente ajustando o limpiando los criterios de
-                                            búsqueda seleccionados.</p>
+                                        <p class="text-base font-semibold text-gray-700">No se encontraron visitas registradas en este período</p>
+                                        <p class="text-xs text-gray-400 mt-1">Intente cambiando el rango de fechas o ajustando los filtros de búsqueda.</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -330,10 +328,10 @@
                     </table>
                 </div>
 
-                <!-- PAGINADOR INFERIOR (PIE DE TABLA) -->
-                @if ($empleados->hasPages())
+                <!-- PAGINADOR INFERIOR -->
+                @if ($visitas->hasPages())
                     <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
-                        {{ $empleados->links() }}
+                        {{ $visitas->links() }}
                     </div>
                 @endif
             </div>
