@@ -19,31 +19,46 @@ class ReservacionController extends Controller
         $now = \Carbon\Carbon::now();
         $reservasAbiertas = $now->gte(\Carbon\Carbon::today()->setTime(1, 30));
 
-        $libres1230 = 180 - Reservacion::where('fecha', $fecha)->where('hora', '12:30')->count();
-        $libres1345 = 180 - Reservacion::where('fecha', $fecha)->where('hora', '13:45')->count();
-        $libres1445 = 180 - Reservacion::where('fecha', $fecha)->where('hora', '14:45')->count();
-        $libres1545 = 180 - Reservacion::where('fecha', $fecha)->where('hora', '15:45')->count();
+        $libres1230 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '12:30')->count();
+        $libres1315 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '13:15')->count();
+        $libres1400 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '14:00')->count();
+        $libres1445 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '14:45')->count();
 
         $horariosStatus = [
             '12:30' => [
-                'libres' => $libres1230,
+                'etiqueta' => '12:30 p.m. a 1:00 p.m.',
+                'libres' => max(0, $libres1230),
+                'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(12, 15)) && $libres1230 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(1, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(12, 15)) ? 'Cerrado' : ($libres1230 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(12, 15)) ? 'Cerrado' : ($libres1230 <= 0 ? 'Lleno' : 'libres'))
             ],
-            '13:45' => [
-                'libres' => $libres1345,
-                'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(13, 30)) && $libres1345 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(1, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 30)) ? 'Cerrado' : ($libres1345 <= 0 ? 'Lleno' : 'libres'))
+            '13:15' => [
+                'etiqueta' => '1:15 p.m. a 1:45 p.m.',
+                'libres' => max(0, $libres1315),
+                'capacidad' => 120,
+                'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(13, 0)) && $libres1315 > 0,
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 0)) ? 'Cerrado' : ($libres1315 <= 0 ? 'Lleno' : 'libres'))
+            ],
+            '14:00' => [
+                'etiqueta' => '2:00 p.m. a 2:30 p.m.',
+                'libres' => max(0, $libres1400),
+                'capacidad' => 120,
+                'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(13, 45)) && $libres1400 > 0,
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 45)) ? 'Cerrado' : ($libres1400 <= 0 ? 'Lleno' : 'libres'))
             ],
             '14:45' => [
-                'libres' => $libres1445,
+                'etiqueta' => '2:45 p.m. a 3:15 p.m.',
+                'libres' => max(0, $libres1445),
+                'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(14, 30)) && $libres1445 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(1, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? 'Cerrado' : ($libres1445 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? 'Cerrado' : ($libres1445 <= 0 ? 'Lleno' : 'libres'))
             ],
-            '15:45' => [
-                'libres' => $libres1545,
-                'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(15, 30)) && $libres1545 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(1, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(15, 30)) ? 'Cerrado' : ($libres1545 <= 0 ? 'Lleno' : 'libres'))
+            '15:30' => [
+                'etiqueta' => '3:30 p.m. a 4:00 p.m.',
+                'libres' => 'Acceso Libre',
+                'capacidad' => 'Libre',
+                'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(15, 15)),
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(15, 15)) ? 'Cerrado' : 'Acceso libre')
             ],
         ];
 
@@ -74,23 +89,24 @@ class ReservacionController extends Controller
         // B. Validar anticipación de 15 minutos para el horario seleccionado
         $limites = [
             '12:30' => \Carbon\Carbon::today()->setTime(12, 15),
-            '13:45' => \Carbon\Carbon::today()->setTime(13, 30),
+            '13:15' => \Carbon\Carbon::today()->setTime(13, 0),
+            '14:00' => \Carbon\Carbon::today()->setTime(13, 45),
             '14:45' => \Carbon\Carbon::today()->setTime(14, 30),
-            '15:45' => \Carbon\Carbon::today()->setTime(15, 30),
+            '15:30' => \Carbon\Carbon::today()->setTime(15, 15),
         ];
 
         if (isset($limites[$hora]) && $now->gte($limites[$hora])) {
             Log::warning("Reservaciones: Intento rechazado. El horario de reservación para las {$hora} ya ha expirado (límite superado).");
             return redirect()->back()
                 ->withInput()
-                ->with('error', "El tiempo límite para reservar el horario de las {$hora} p.m. ha expirado.");
+                ->with('error', "El tiempo límite para reservar el horario seleccionado ({$hora}) ha expirado.");
         }
 
         // 1. Validar el formato inicial del número de empleado, correo y la hora
         $request->validate([
             'numero_empleado' => 'required|numeric|max_digits:10',
             'correo' => 'required|email|max:255',
-            'hora' => ['required', Rule::in(['12:30', '13:45', '14:45', '15:45'])],
+            'hora' => ['required', Rule::in(['12:30', '13:15', '14:00', '14:45', '15:30'])],
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
@@ -101,16 +117,18 @@ class ReservacionController extends Controller
             'hora.in' => 'El horario seleccionado no es válido.',
         ]);
 
-        // 2. Verificar cupo (máximo 180 por horario)
-        $reservasCount = Reservacion::where('fecha', $fecha)
-            ->where('hora', $hora)
-            ->count();
+        // 2. Verificar cupo (máximo 120 por horario, excepto 15:30 que es acceso libre)
+        if ($hora !== '15:30') {
+            $reservasCount = Reservacion::where('fecha', $fecha)
+                ->where('hora', $hora)
+                ->count();
 
-        if ($reservasCount >= 180) {
-            Log::warning("Reservaciones: Intento rechazado por cupo límite (180) alcanzado en horario {$hora} para colaborador: {$numeroEmpleado}");
-            return redirect()->back()
-                ->withInput()
-                ->with('error', "El horario {$hora} p.m. ya tiene el límite de 180 lugares ocupados para el día de hoy.");
+            if ($reservasCount >= 120) {
+                Log::warning("Reservaciones: Intento rechazado por cupo límite (120) alcanzado en horario {$hora} para colaborador: {$numeroEmpleado}");
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', "El horario seleccionado ya tiene el límite de 120 lugares ocupados para el día de hoy.");
+            }
         }
 
         // 3. Verificar que el empleado existe y está activo
