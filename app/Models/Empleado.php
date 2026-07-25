@@ -38,4 +38,12 @@ class Empleado extends Model
     {
         return $this->hasMany(Reservacion::class);
     }
+
+    /**
+     * Get the surveys associated with the employee.
+     */
+    public function encuestas()
+    {
+        return $this->hasMany(Encuesta::class);
+    }
 }
