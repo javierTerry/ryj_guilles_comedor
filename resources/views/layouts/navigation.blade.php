@@ -23,6 +23,9 @@
                     <x-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                         {{ __('Reservar') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('encuestas.create')" :active="request()->routeIs('encuestas.create')">
+                        {{ __('Encuesta') }}
+                    </x-nav-link>
                     @auth
                         <x-nav-link :href="route('empleados.index')" :active="request()->routeIs('empleados.index')">
                             {{ __('Empleados') }}
@@ -47,6 +50,9 @@
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('reportes.visitas')" :active="request()->routeIs('reportes.visitas')">
                                         {{ __('Reporte de Visitas') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link :href="route('reportes.encuestas')" :active="request()->routeIs('reportes.encuestas')">
+                                        {{ __('Reporte de Encuestas') }}
                                     </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
@@ -132,6 +138,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('reportes.visitas')" :active="request()->routeIs('reportes.visitas')">
                         {{ __('Reporte de Visitas') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('reportes.encuestas')" :active="request()->routeIs('reportes.encuestas')">
+                        {{ __('Reporte de Encuestas') }}
                     </x-responsive-nav-link>
                 </div>
             @endauth

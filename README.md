@@ -9,12 +9,13 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 ### 1. Registro de Comedor (Acceso Público Kiosco)
 * **URL Pública:** `/comedor` (Accesible para cualquiera en red local, no requiere inicio de sesión).
 * **Flujo de Escaneo Rápido:** Permite registrar accesos digitando el número de empleado o mediante lectores de códigos de barras.
-* **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo.
-* **Validación de Horario Reservado:** Controla que el ingreso ocurra dentro de las ventanas de tolerancia asignadas al horario reservado:
-  * Reservación de las **12:30 p.m.** -> Acceso permitido de **12:00 a 13:30**.
-  * Reservación de las **13:45 p.m.** -> Acceso permitido de **13:30 a 14:30**.
-  * Reservación de las **14:45 p.m.** -> Acceso permitido de **14:30 a 15:45**.
-  * Reservación de las **15:45 p.m.** -> Acceso permitido de **15:45 a 17:00**.
+* **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo (excepto en el horario de acceso libre).
+* **Validación de Horarios Reservados y Capacidades:**
+  * **12:30 p.m. a 1:00 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 12:00 a 13:15).
+  * **1:15 p.m. a 1:45 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:00 a 14:00).
+  * **2:00 p.m. a 2:30 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:45 a 14:45).
+  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 14:30 a 15:30).
+  * **3:30 p.m. a 4:00 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
 * **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
   1. **Scanner Control Box (`#scanner-card`):** Formulario de escaneo (`lg:flex-[3] min-w-0` - 30% del espacio relativo).
@@ -73,7 +74,33 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general de empleados.
   * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para consultas y exportaciones del reporte de visitas detallado.
 
-### 5. Reservaciones de Comedor (Acceso Público)
+### 5. Encuesta de Satisfacción del Comedor (Acceso Público)
+* **URL Pública:** `/encuesta` (Accesible sin necesidad de inicio de sesión).
+* **Validación de Comensal por AJAX & SweetAlert2:**
+  * Para habilitar el formulario de evaluación, el comensal ingresa su **número de empleado**.
+  * **Verificación de Ingreso al Comedor:** El sistema valida contra la base de datos que el colaborador **haya registrado su acceso al comedor en la fecha actual** (`registro_comedors`). Si no ha ingresado hoy, se muestra una alerta SweetAlert indicando: *"La encuesta es exclusivamente para usuarios que ya realizaron su ingreso al comedor el día de hoy."*
+  * **Control de Unicidad Diaria (1 Encuesta por día):** Se restringe la encuesta a una sola vez al día por comensal (`UNIQUE [empleado_id, fecha]`). Si ya la realizó, se notifica mediante SweetAlert.
+* **Criterios de Evaluación y Estrellas (1 a 5):**
+  * **Calidad de alimentos:** Sabor, frescura y variedad *(Ponderación interna: 30%)*.
+  * **Limpieza e higiene:** Instalaciones, utensilios y manipulación *(Ponderación interna: 25%)*.
+  * **Temperatura adecuada:** Alimentos calientes (≥60°C) / fríos (≤7°C) *(Ponderación interna: 20%)*.
+  * **Atención y eficiencia:** Tiempo de espera y trato personal *(Ponderación interna: 15%)*.
+  * **Presentación:** Línea fría y caliente *(Ponderación interna: 10%)*.
+  * *Nota:* Las ponderaciones internas son transparentes para el usuario comensal y se emplean exclusivamente para cálculos estadísticos internos.
+* **Sistema de Calificación:**
+  * **5 Estrellas:** Excelente (100%)
+  * **4 Estrellas:** Bueno (80%)
+  * **3 Estrellas:** Regular (60%)
+  * **2 Estrellas:** Deficiente (40%)
+  * **1 Estrella:** Muy deficiente (20%)
+* **Cálculos y Conversiones de Base de Datos:**
+  * `calificacion`: Promedio decimal (1.00 a 5.00) de las 5 evaluaciones.
+  * `conversion`: Campo compuesto en porcentaje: `((calificacion / 5) * 100)`.
+  * `ponderacion_total`: Promedio ponderado de negocio: `(Calidad*0.30 + Limpieza*0.25 + Temperatura*0.20 + Atención*0.15 + Presentación*0.10)`.
+* **Canal Dedicado de Logs (`encuestas`):**
+  * Registro de auditoría en `storage/logs/encuestas.log` que almacena los intentos de validación, denegaciones por falta de ingreso o duplicidad, y encuestas registradas exitosamente.
+
+### 6. Reservaciones de Comedor (Acceso Público)
 * **URL Pública:** `/reservar` (Accesible para cualquiera en red local).
 * **Diseño e Interacción:** Inspirado en "Comedor GILOU" con fuentes personalizadas, inputs minimalistas con iconos de Heroicons y selección rápida de horarios (12:30 p.m., 13:45 p.m., 14:45 p.m., 15:45 p.m.) reactiva mediante Alpine.js.
 * **Validaciones del Sistema:**
@@ -144,11 +171,27 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * `resources/views/reservaciones/create.blade.php`: Formulario de reservación pública Comedor GILOU.
   * `resources/views/layouts/navigation.blade.php`: Menú de navegación dinámico adaptativo para visitantes y administradores.
 
----
-
 ## 📌 Historial de Versiones
 
-* **v2.3.1 (Actual)**:
+* **v2.5.0 (Actual)**:
+  * Agregada la vista del **Reporte de Encuestas de Satisfacción** (`/reportes/encuestas`) accesible desde el submenú de navegación de Reportes.
+  * Carga por defecto del rango de la **Semana Actual** (Lunes a Domingo) al ingresar al menú de encuestas.
+  * Tarjetas KPI de resumen: *Total Encuestas*, *Promedio Calificación (Estrellas)*, *Promedio Conversión (%)* y *Promedio Ponderado Interno (%)*.
+  * Tabla interactiva con desglose detallado por criterio (Calidad 30%, Limpieza 25%, Temperatura 20%, Atención 15%, Presentación 10%), calificaciones y comentarios.
+  * Filtros dinámicos por Búsqueda de Colaborador (Nombre/Nº), Departamento, Estatus, Rango de Fechas y Paginación (25, 50, 75, 100 registros por página).
+  * Exportación completa en CSV UTF-8 para Excel (`/reportes/encuestas/exportar`).
+  * Trazabilidad registrada en el canal de logs **`encuestas`** (`storage/logs/encuestas.log`).
+* **v2.4.0**:
+  * Creado el **Módulo de Encuesta de Satisfacción del Comedor** (`/encuesta`) de acceso público.
+  * Implementado flujo de validación de comensal por AJAX con alertas interactivas de SweetAlert2.
+  * Verificación obligatoria de ingreso previo al comedor en la fecha actual antes de liberar el formulario.
+  * Restricción a nivel de controlador y base de datos de 1 encuesta por día por colaborador (`UNIQUE [empleado_id, fecha]`).
+  * Sistema de evaluación por 5 estrellas en 5 criterios clave (Calidad, Limpieza, Temperatura, Atención, Presentación).
+  * Campos de conversión en porcentaje (`(calificacion / 5) * 100`) y ponderaciones internas estadísticas (30%, 25%, 20%, 15%, 10%).
+  * Configurado canal de logs dedicado **`encuestas`** en `config/logging.php` para almacenar la trazabilidad en `storage/logs/encuestas.log`.
+* **v2.3.2**:
+  * Actualización de horarios (12:30, 13:15, 14:00, 14:45, 15:30) y capacidad máxima de 120 lugares por turno, con horario de Acceso Libre de 3:30 p.m. a 4:00 p.m.
+* **v2.3.1**:
   * Optimizado el layout a factores de crecimiento proporcionales **3:5:2 (`30% - 50% - 20%`)** en Flexbox:
     * **Scanner Control Box (`#scanner-card`)**: `lg:flex-[3] min-w-0`.
     * **Status Feedback Panels (`#status-card`)**: `lg:flex-[5] min-w-0`.
