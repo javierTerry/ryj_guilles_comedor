@@ -62,7 +62,7 @@
             this.$dispatch('open-modal', 'editar-empleado');
         }
     }">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-6">
 
 
 
