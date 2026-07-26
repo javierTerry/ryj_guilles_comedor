@@ -22,7 +22,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- PESTAÑAS DE NAVEGACIÓN DE REPORTES -->
             <div class="border-b border-gray-200 bg-white px-4 rounded-xl shadow-sm">

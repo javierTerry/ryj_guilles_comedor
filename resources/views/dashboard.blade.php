@@ -47,7 +47,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8">
-        <div id="dashboard-report-content" class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8 bg-gray-50 p-4 rounded-2xl">
+        <div id="dashboard-report-content" class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-8 bg-gray-50 p-4 rounded-2xl">
             
             <!-- HEADER DE IMPRESIÓN / REPORTE -->
             <div class="hidden print:block pb-4 border-b border-gray-200 mb-6">

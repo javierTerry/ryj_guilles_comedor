@@ -16,7 +16,7 @@
             });
         }
     }" x-init="initFocus()">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Flex Layout: Responsive 3-Card Row with 30%, 50%, and 20% Proportions (3:5:2 Ratio without overflow) -->
             <div class="flex flex-col lg:flex-row gap-6 items-stretch w-full">
