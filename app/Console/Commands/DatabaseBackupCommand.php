@@ -46,8 +46,10 @@ class DatabaseBackupCommand extends Command
 
                 if (file_exists($dbPath)) {
                     copy($dbPath, $backupFile);
-                    exec("gzip -f " . escapeshellarg($backupFile));
-                    $backupFile .= ".gz";
+                    if (function_exists('exec')) {
+                        \exec("gzip -f " . \escapeshellarg($backupFile));
+                        $backupFile .= ".gz";
+                    }
                     $this->info("Respaldo SQLite creado exitosamente: {$backupFile}");
                 } else {
                     $this->error("No se encontró el archivo de base de datos SQLite en: {$dbPath}");
@@ -62,20 +64,26 @@ class DatabaseBackupCommand extends Command
 
                 $backupFile = "{$backupDir}/{$filename}.sql.gz";
 
-                $passwordFlag = !empty($password) ? '-p' . escapeshellarg($password) : '';
+                $passwordFlag = !empty($password) ? '-p' . \escapeshellarg($password) : '';
                 $command = sprintf(
                     'mysqldump --host=%s --port=%s --user=%s %s %s > %s',
-                    escapeshellarg($host),
-                    escapeshellarg($port),
-                    escapeshellarg($username),
+                    \escapeshellarg($host),
+                    \escapeshellarg($port),
+                    \escapeshellarg($username),
                     $passwordFlag,
-                    escapeshellarg($database),
-                    escapeshellarg($backupFile)
+                    \escapeshellarg($database),
+                    \escapeshellarg($backupFile)
                 );
 
                 Log::channel('backups')->info("Command: {$command}");
 
-                exec($command, $output, $returnVar);
+                if (!function_exists('exec')) {
+                    $this->error("La función 'exec' de PHP está deshabilitada en php.ini.");
+                    Log::channel('backups')->error("La función 'exec' está deshabilitada en el servidor (disable_functions).");
+                    return 1;
+                }
+
+                \exec($command, $output, $returnVar);
 
                 if ($returnVar !== 0) {
                     $this->error("Error al ejecutar mysqldump (código {$returnVar}).");
