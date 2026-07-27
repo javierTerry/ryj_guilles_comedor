@@ -22,7 +22,7 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-stretch">
                 
                 <!-- TARJETA DEL FORMULARIO DE RESERVACIONES -->
-                <div class="md:col-span-5 w-full bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
+                <div id="panel-reservacion" class="md:col-span-5 w-full bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-start h-full">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
                         Haz tu reservación
                     </h2>
@@ -232,7 +232,7 @@
                 </div>
 
                 <!-- PANEL INFORMATIVO Y LOGOTIPO -->
-                <div class="md:col-span-7 w-full bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
+                <div id="panel-informativo" class="md:col-span-7 w-full bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
                     <div>
                         <!-- Logotipo Comedor GILOU -->
                         <div class="flex flex-col mb-8 relative select-none">
@@ -319,8 +319,13 @@
                             
                         </div>
                     </div>
-                   
+</br>
+                    <div>
+                        Agradecemos tu apoyo y colaboración para mantener un servicio más ágil, ordenado y eficiente para todos.
+                        Para dudas o soporte técnico, favor de contactar a Pamela Martínez.
+                    </div>
                 </div>
+                
 
             </div>
         </div>
