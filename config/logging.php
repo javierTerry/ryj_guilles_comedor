@@ -121,6 +121,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'isu_report' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/isu_report.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

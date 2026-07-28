@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('reportes/visitas/exportar', [ReporteController::class, 'exportVisitasCsv'])->name('reportes.visitas_export');
     Route::get('reportes/encuestas', [ReporteController::class, 'encuestas'])->name('reportes.encuestas');
     Route::get('reportes/encuestas/exportar', [ReporteController::class, 'exportEncuestasCsv'])->name('reportes.encuestas_export');
+    Route::get('reportes/isu', [ReporteController::class, 'isu'])->name('reportes.isu');
 });
 
 // Rutas Públicas para Control de Comedor

@@ -97,10 +97,21 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * `calificacion`: Promedio decimal (1.00 a 5.00) de las 5 evaluaciones.
   * `conversion`: Campo compuesto en porcentaje: `((calificacion / 5) * 100)`.
   * `ponderacion_total`: Promedio ponderado de negocio: `(Calidad*0.30 + Limpieza*0.25 + Temperatura*0.20 + Atención*0.15 + Presentación*0.10)`.
-* **Canal Dedicado de Logs (`encuestas`):**
-  * Registro de auditoría en `storage/logs/encuestas.log` que almacena los intentos de validación, denegaciones por falta de ingreso o duplicidad, y encuestas registradas exitosamente.
+### 7. Informe de Satisfacción del Usuario (ISU) en PDF
+* **URL Protegida:** `/reportes/isu` (Acceso desde el submenú de Reportes).
+* **Generación de Reporte PDF Filtrable por Período:**
+  * **Semana Actual:** Filtra automáticamente de Lunes a Domingo de la semana en curso (calculado dinámicamente sin importar qué día de la semana se pida).
+  * **Quincena:** Filtra el período del 1 al 15 del mes actual.
+  * **Mensual:** Filtra desde el 1er día hasta el último día del mes actual.
+* **4 Secciones Principales (Diseño Réplica Oficial):**
+  * **Sección 1: Resumen Ejecutivo ISU:** Indicador visual tipo medidor/arco de cumplimiento mínimo contractual e índice global.
+  * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación.
+  * **Sección 3: Hallazgos Críticos & Plan de Acción:** Tabla estructurada de notas al pie con hallazgos y acciones acordadas.
+  * **Sección 4: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
+* **Botón de Imprimir / Descargar PDF:** Optimizado con reglas CSS `@media print` para renderizado perfecto en A4.
+* **Canal Dedicado de Logs (`isu_report`):** Almacena la trazabilidad de consultas del informe ISU en `storage/logs/isu_report.log`.
 
-### 6. Reservaciones de Comedor (Acceso Público)
+---
 * **URL Pública:** `/reservar` (Accesible para cualquiera en red local).
 * **Diseño e Interacción:** Inspirado en "Comedor GILOU" con fuentes personalizadas, inputs minimalistas con iconos de Heroicons y selección rápida de horarios (12:30 p.m., 13:45 p.m., 14:45 p.m., 15:45 p.m.) reactiva mediante Alpine.js.
 * **Validaciones del Sistema:**
@@ -173,7 +184,14 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.5.0 (Actual)**:
+* **v2.6.0 (Actual)**:
+  * Creado el **Informe de Satisfacción del Usuario (ISU)** en formato PDF (`/reportes/isu`).
+  * Réplica del diseño de referencia con 4 secciones principales: Resumen Ejecutivo ISU, Detalle por Criterios, Hallazgos Críticos & Plan de Acción, y Análisis de Tendencia Trimestral.
+  * Filtros de período dinámicos: **Semana Actual** (Lunes a Domingo calculado automáticamente), **Quincena** (1 al 15 del mes actual) y **Mensual** (1er al último día del mes).
+  * Promedios por criterios calculados a partir de las evaluaciones registradas (`calidad`, `limpieza`, `temperatura`, `atencion`, `presentacion`).
+  * Tendencia trimestral basada en el promedio de conversión (`conversion`) de los últimos 4 meses.
+  * Canal de logs dedicado **`isu_report`** en `config/logging.php` con archivos en `storage/logs/isu_report.log`.
+* **v2.5.0**:
   * Agregada la vista del **Reporte de Encuestas de Satisfacción** (`/reportes/encuestas`) accesible desde el submenú de navegación de Reportes.
   * Carga por defecto del rango de la **Semana Actual** (Lunes a Domingo) al ingresar al menú de encuestas.
   * Tarjetas KPI de resumen: *Total Encuestas*, *Promedio Calificación (Estrellas)*, *Promedio Conversión (%)* y *Promedio Ponderado Interno (%)*.

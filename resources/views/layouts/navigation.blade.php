@@ -54,6 +54,9 @@
                                     <x-dropdown-link :href="route('reportes.encuestas')" :active="request()->routeIs('reportes.encuestas')">
                                         {{ __('Reporte de Encuestas') }}
                                     </x-dropdown-link>
+                                    <x-dropdown-link :href="route('reportes.isu')" :active="request()->routeIs('reportes.isu')">
+                                        {{ __('Informe ISU (PDF)') }}
+                                    </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
                         </div>
