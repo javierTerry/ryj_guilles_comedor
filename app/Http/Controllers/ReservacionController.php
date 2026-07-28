@@ -17,7 +17,7 @@ class ReservacionController extends Controller
     {
         $fecha = \Carbon\Carbon::today()->toDateString();
         $now = \Carbon\Carbon::now();
-        $reservasAbiertas = $now->gte(\Carbon\Carbon::today()->setTime(1, 30));
+        $reservasAbiertas = $now->gte(\Carbon\Carbon::today()->setTime(8, 0));
 
         $libres1230 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '12:30')->count();
         $libres1315 = 120 - Reservacion::where('fecha', $fecha)->where('hora', '13:15')->count();
@@ -30,35 +30,35 @@ class ReservacionController extends Controller
                 'libres' => max(0, $libres1230),
                 'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(12, 15)) && $libres1230 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(12, 15)) ? 'Cerrado' : ($libres1230 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(12, 15)) ? 'Cerrado' : ($libres1230 <= 0 ? 'Lleno' : 'libres'))
             ],
             '13:15' => [
                 'etiqueta' => '1:15 p.m. a 1:45 p.m.',
                 'libres' => max(0, $libres1315),
                 'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(13, 0)) && $libres1315 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 0)) ? 'Cerrado' : ($libres1315 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 0)) ? 'Cerrado' : ($libres1315 <= 0 ? 'Lleno' : 'libres'))
             ],
             '14:00' => [
                 'etiqueta' => '2:00 p.m. a 2:30 p.m.',
                 'libres' => max(0, $libres1400),
                 'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(13, 45)) && $libres1400 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 45)) ? 'Cerrado' : ($libres1400 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(13, 45)) ? 'Cerrado' : ($libres1400 <= 0 ? 'Lleno' : 'libres'))
             ],
             '14:45' => [
                 'etiqueta' => '2:45 p.m. a 3:15 p.m.',
                 'libres' => max(0, $libres1445),
                 'capacidad' => 120,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(14, 30)) && $libres1445 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? 'Cerrado' : ($libres1445 <= 0 ? 'Lleno' : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? 'Cerrado' : ($libres1445 <= 0 ? 'Lleno' : 'libres'))
             ],
             '15:30' => [
                 'etiqueta' => '3:30 p.m. a 4:00 p.m.',
                 'libres' => 'Acceso Libre',
                 'capacidad' => 'Libre',
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(15, 15)),
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 30)) ? 'Inicia 8:30 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(15, 15)) ? 'Cerrado' : 'Acceso libre')
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(15, 15)) ? 'Cerrado' : 'Acceso libre')
             ],
         ];
 
@@ -77,13 +77,13 @@ class ReservacionController extends Controller
 
         Log::info("Reservaciones: Intento de reservación iniciado para colaborador: {$numeroEmpleado} con correo: {$correo} en horario: {$hora}");
 
-        // A. Validar que la reserva sea después de las 8:30 a.m.
+        // A. Validar que la reserva sea después de las 8:00 a.m.
         $now = \Carbon\Carbon::now();
-        if ($now->lt(\Carbon\Carbon::today()->setTime(8, 30))) {
-            Log::warning("Reservaciones: Intento rechazado. Reservaciones no iniciadas aún (antes de las 8:30 a.m.).");
+        if ($now->lt(\Carbon\Carbon::today()->setTime(8, 0))) {
+            Log::warning("Reservaciones: Intento rechazado. Reservaciones no iniciadas aún (antes de las 8:00 a.m.).");
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'El horario para empezar la reserva solo puede ser después de las 8:30 a.m.');
+                ->with('error', 'El horario para empezar la reserva solo puede ser después de las 8:00 a.m.');
         }
 
         // B. Validar anticipación de 15 minutos para el horario seleccionado

@@ -36,7 +36,7 @@
                             </span>
                             <div>
                                 <h4 class="font-bold text-sm">Reservaciones no iniciadas</h4>
-                                <p class="text-xs mt-0.5">El registro de reservaciones diarias está programado para iniciar a las 8:30 a.m.</p>
+                                <p class="text-xs mt-0.5">El registro de reservaciones diarias está programado para iniciar a las 8:00 a.m.</p>
                             </div>
                         </div>
                     @endif
@@ -361,18 +361,18 @@
             const numEmp = document.getElementById('numero_empleado').value.trim();
             const correo = document.getElementById('correo').value.trim();
 
-            // Validación de horario de apertura (8:30 a.m.)
+            // Validación de horario de apertura (8:00 a.m.)
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             const currentTimeMinutes = currentHour * 60 + currentMinute;
 
-            // 8:30 AM is 8 * 60 + 30 = 510 minutes
-            if (currentTimeMinutes < 110) {
+            // 8:00 AM is 8 * 60 = 480 minutes
+            if (currentTimeMinutes < 480) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Reservaciones no iniciadas',
-                    text: 'El horario para empezar la reserva solo puede ser después de las 8:30 a.m.',
+                    text: 'El horario para empezar la reserva solo puede ser después de las 8:00 a.m.',
                     confirmButtonColor: '#4f46e5'
                 });
                 return;

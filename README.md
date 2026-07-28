@@ -117,7 +117,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **Validaciones del Sistema:**
   * Requisito de **Número de Colaborador y Correo Electrónico registrado** obligatorio para validar la identidad antes de agendar.
   * El número de colaborador debe ser numérico y no exceder los 10 dígitos.
-  * **Control de Apertura Diaria (8:30 a.m.):** Las reservaciones solo pueden realizarse a partir de las 8:30 a.m. Muestra aviso informativo si se intenta acceder previamente.
+  * **Control de Apertura Diaria (8:00 a.m.):** Las reservaciones solo pueden realizarse a partir de las 8:00 a.m. Muestra aviso informativo si se intenta acceder previamente.
   * **Corte Anticipado de 15 Minutos por Horario:** Cierre automático del horario 15 minutos antes de su inicio (12:30 cierra a las 12:15, 13:45 a las 13:30, 14:45 a las 14:30, 15:45 a las 15:30).
   * El colaborador debe existir previamente en el sistema y estar activo.
   * Límite estricto de una reservación por día por empleado y cupo máximo de 180 lugares por horario.
@@ -282,7 +282,7 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Creado el Mailable `DashboardReportMail`, la plantilla HTML de correo `emails/dashboard_report.blade.php` y el comando de consola Artisan `dashboard:send-report` para ejecuciones programadas y envío automático recurrente.
 * **v1.6.0**:
   * Agregada validación de **Correo Electrónico** obligatorio junto con el número de colaborador para realizar reservaciones.
-  * Implementado control de horario de **apertura de reservaciones a las 8:30 a.m.** (bloqueo automático previo).
+  * Implementado control de horario de **apertura de reservaciones a las 8:00 a.m.** (bloqueo automático previo).
   * Implementado límite de **corte anticipado de 15 minutos por horario** de reservación (12:15, 13:30, 14:30, 15:30).
   * Integrado el campo `correo` en la gestión de empleados (CRUD, validación de unicidad, importación masiva CSV y plantilla oficial descargable).
 * **v1.5.0**:
