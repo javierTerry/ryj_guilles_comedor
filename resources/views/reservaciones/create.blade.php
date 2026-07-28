@@ -130,7 +130,7 @@
                                     :class="selectedHora === '12:30' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-300' : (@json(!$horariosStatus['12:30']['habilitado']) ? 'bg-gray-100/90 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200')"
                                     style="flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 16px; border-width: 1px; border-style: solid; text-align: center; transition: all 0.2s; min-height: 66px;"
                                 >
-                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '12:30' ? 'text-white' : ''">12:30 p.m.</span>
+                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '12:30' ? 'text-white' : ''">12:30 p.m. a</p> 1:00 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '12:30' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['12:30']['habilitado'])
                                             Cerrado
@@ -148,7 +148,7 @@
                                     :class="selectedHora === '13:15' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-300' : (@json(!$horariosStatus['13:15']['habilitado']) ? 'bg-gray-100/90 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200')"
                                     style="flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 16px; border-width: 1px; border-style: solid; text-align: center; transition: all 0.2s; min-height: 66px;"
                                 >
-                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '13:15' ? 'text-white' : ''">1:15 p.m.</span>
+                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '13:15' ? 'text-white' : ''">1:15 p.m. a</p> 1:45 p.m</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '13:15' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['13:15']['habilitado'])
                                             Cerrado
@@ -166,7 +166,7 @@
                                     :class="selectedHora === '14:00' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-300' : (@json(!$horariosStatus['14:00']['habilitado']) ? 'bg-gray-100/90 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200')"
                                     style="flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 16px; border-width: 1px; border-style: solid; text-align: center; transition: all 0.2s; min-height: 66px;"
                                 >
-                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:00' ? 'text-white' : ''">2:00 p.m.</span>
+                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:00' ? 'text-white' : ''">2:00 p.m. a</p> 2:30 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:00' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['14:00']['habilitado'])
                                             Cerrado
@@ -184,7 +184,7 @@
                                     :class="selectedHora === '14:45' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-300' : (@json(!$horariosStatus['14:45']['habilitado']) ? 'bg-gray-100/90 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200')"
                                     style="flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 16px; border-width: 1px; border-style: solid; text-align: center; transition: all 0.2s; min-height: 66px;"
                                 >
-                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:45' ? 'text-white' : ''">2:45 p.m.</span>
+                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:45' ? 'text-white' : ''">2:45 p.m. a</p> 3:15 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:45' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['14:45']['habilitado'])
                                             Cerrado
@@ -202,7 +202,7 @@
                                     :class="selectedHora === '15:30' ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300' : (@json(!$horariosStatus['15:30']['habilitado']) ? 'bg-gray-100/90 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100')"
                                     style="flex: 1 1 0%; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 16px; border-width: 1px; border-style: solid; text-align: center; transition: all 0.2s; min-height: 66px;"
                                 >
-                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '15:30' ? 'text-white' : ''">3:30 p.m.</span>
+                                    <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '15:30' ? 'text-white' : ''">3:30 p.m. a</p> 4:00 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5 {{ old('hora') === '15:30' ? 'text-emerald-100' : 'text-emerald-600 font-bold' }}" :class="selectedHora === '15:30' ? 'text-emerald-100' : ''">
                                         @if(!$horariosStatus['15:30']['habilitado'])
                                             <span class="text-emerald-600 font-semibold">Cerrado</span>
