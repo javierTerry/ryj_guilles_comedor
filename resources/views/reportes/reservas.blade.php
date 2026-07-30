@@ -3,20 +3,20 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Reporte de Visitas al Comedor') }}
+                    {{ __('Reporte de Reservaciones por Día') }}
                 </h2>
                 <p class="text-xs text-gray-500 mt-1">
-                    Consulta detallada de accesos al comedor con horario de ingreso, filtrada por la semana actual por defecto.
+                    Consulta detallada de reservaciones de comedor por colaborador y horario, filtrada por el día actual por defecto.
                 </p>
             </div>
-            <a href="{{ route('reportes.visitas_export', request()->query()) }}"
+            <a href="{{ route('reportes.reservas_export', request()->query()) }}"
                 class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition duration-150 gap-2"
-                title="Descargar reporte de visitas en formato CSV para Excel">
+                title="Descargar reporte de reservaciones en formato CSV para Excel">
                 <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Descargar Visitas CSV
+                Descargar Reservas CSV
             </a>
         </div>
     </x-slot>
@@ -35,16 +35,16 @@
                         Reporte General (Resumen)
                     </a>
                     <a href="{{ route('reportes.visitas') }}"
-                       class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2"
-                       aria-current="page">
-                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Reporte de Visitas (Detalle e Ingresos)
                     </a>
                     <a href="{{ route('reportes.reservas') }}"
-                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2"
+                       aria-current="page">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Reporte de Reservas (Día / Horarios)
@@ -70,15 +70,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Visitas Registradas</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Reservaciones Registradas</p>
                         <h3 class="text-3xl font-extrabold text-indigo-600 mt-1">
-                            {{ number_format($totalVisitas) }}
+                            {{ number_format($totalReservas) }}
                         </h3>
                     </div>
                     <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                         </h3>
                         <p class="text-xs text-gray-400 mt-0.5">
                             @if(!$hasCustomDateFilter)
-                                <span class="text-indigo-600 font-semibold">🗓️ Semana Actual (Por Defecto)</span>
+                                <span class="text-indigo-600 font-semibold">📅 Día Actual (Por Defecto)</span>
                             @else
                                 Personalizado por filtro
                             @endif
@@ -100,7 +100,7 @@
                     <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Paginación / Formato</p>
-                        <h3 class="text-xl font-bold text-slate-700 mt-1">{{ $perPage }} <span class="text-xs font-semibold text-gray-400">visitas/pág</span></h3>
+                        <h3 class="text-xl font-bold text-slate-700 mt-1">{{ $perPage }} <span class="text-xs font-semibold text-gray-400">reservas/pág</span></h3>
                         <p class="text-xs text-emerald-600 font-bold mt-0.5">CSV (UTF-8 Excel)</p>
                     </div>
                     <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
@@ -130,12 +130,12 @@
                     Filtros de Búsqueda y Rango de Fechas
                 </h3>
 
-                <form method="GET" action="{{ route('reportes.visitas') }}" class="space-y-4 w-full">
+                <form method="GET" action="{{ route('reportes.reservas') }}" class="space-y-4 w-full">
 
-                    <!-- PRIMERA FILA: BÚSQUEDA, DEPARTAMENTO Y ESTATUS -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
+                    <!-- PRIMERA FILA: BÚSQUEDA, DEPARTAMENTO, ESTATUS Y HORARIO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full pt-3 border-t border-gray-100">
                         <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div>
                             <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
                                 placeholder="Ej: 1024 o Juan"
@@ -143,7 +143,7 @@
                         </div>
 
                         <!-- 2. FILTRO DEPARTAMENTO -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div>
                             <label for="departamento" class="block text-xs font-semibold text-gray-600 mb-1.5">Departamento</label>
                             <select name="departamento" id="departamento"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -157,7 +157,7 @@
                         </div>
 
                         <!-- 3. FILTRO ESTATUS -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div>
                             <label for="estatus" class="block text-xs font-semibold text-gray-600 mb-1.5">Estatus Empleado</label>
                             <select name="estatus" id="estatus"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -166,26 +166,40 @@
                                 <option value="0" {{ request('estatus') === '0' ? 'selected' : '' }}>Inactivo</option>
                             </select>
                         </div>
+
+                        <!-- 4. FILTRO HORARIO RESERVADO -->
+                        <div>
+                            <label for="hora" class="block text-xs font-semibold text-gray-600 mb-1.5">Horario Reservado</label>
+                            <select name="hora" id="hora"
+                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Todos los horarios</option>
+                                <option value="12:30" {{ request('hora') === '12:30' ? 'selected' : '' }}>12:30 p.m.</option>
+                                <option value="13:15" {{ request('hora') === '13:15' ? 'selected' : '' }}>1:15 p.m.</option>
+                                <option value="14:00" {{ request('hora') === '14:00' ? 'selected' : '' }}>2:00 p.m.</option>
+                                <option value="14:45" {{ request('hora') === '14:45' ? 'selected' : '' }}>2:45 p.m.</option>
+                                <option value="15:30" {{ request('hora') === '15:30' ? 'selected' : '' }}>3:30 p.m.</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- SEGUNDA FILA: FECHA INICIO, FECHA FIN Y REGISTROS POR PÁGINA -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
-                        <!-- 4. FECHA INICIO -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="fecha_inicio" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Inicio Visitas</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full pt-3 border-t border-gray-100">
+                        <!-- 5. FECHA INICIO -->
+                        <div>
+                            <label for="fecha_inicio" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Inicio Reservas</label>
                             <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ $fechaInicio }}"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
-                        <!-- 5. FECHA FIN -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="fecha_fin" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Fin Visitas</label>
+                        <!-- 6. FECHA FIN -->
+                        <div>
+                            <label for="fecha_fin" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Fin Reservas</label>
                             <input type="date" name="fecha_fin" id="fecha_fin" value="{{ $fechaFin }}"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
-                        <!-- 6. COMBO SELECTOR DE REGISTROS POR PÁGINA -->
-                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <!-- 7. COMBO SELECTOR DE REGISTROS POR PÁGINA -->
+                        <div>
                             <label for="per_page" class="block text-xs font-semibold text-gray-600 mb-1.5">Registros por Página</label>
                             <select name="per_page" id="per_page" onchange="this.form.submit()"
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 font-medium">
@@ -205,14 +219,14 @@
                                     <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Mostrando automáticamente las visitas de la Semana Actual ({{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }})
+                                    Mostrando automáticamente las reservaciones del Día Actual ({{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }})
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 font-semibold gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Filtro Rango Visitas: {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
+                                    Filtro Rango Reservaciones: {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
                                 </span>
                             @endif
                         </div>
@@ -228,9 +242,9 @@
                             </button>
 
                             @if ($hasFilters)
-                                <a href="{{ route('reportes.visitas') }}"
+                                <a href="{{ route('reportes.reservas') }}"
                                     class="h-10 inline-flex items-center justify-center px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition whitespace-nowrap"
-                                    title="Limpiar filtros (Regresa a la semana actual por defecto)">
+                                    title="Limpiar filtros (Regresa al día actual por defecto)">
                                     Limpiar Filtros
                                 </a>
                             @endif
@@ -240,19 +254,19 @@
                 </form>
             </div>
 
-            <!-- TABLA DE VISITAS DETALLADAS -->
+            <!-- TABLA DE RESERVACIONES DETALLADAS -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                 <!-- PAGINADOR SUPERIOR -->
-                @if ($visitas->hasPages())
+                @if ($reservas->hasPages())
                     <div class="px-6 py-3 border-b border-gray-100 bg-gray-50/80 flex flex-col sm:flex-row justify-between items-center gap-2">
                         <span class="text-xs text-gray-500 font-medium">
-                            Mostrando del <strong>{{ $visitas->firstItem() }}</strong> al
-                            <strong>{{ $visitas->lastItem() }}</strong> de
-                            <strong>{{ number_format($visitas->total()) }}</strong> visitas registradas
+                            Mostrando del <strong>{{ $reservas->firstItem() }}</strong> al
+                            <strong>{{ $reservas->lastItem() }}</strong> de
+                            <strong>{{ number_format($reservas->total()) }}</strong> reservaciones registradas
                         </span>
                         <div class="text-xs">
-                            {{ $visitas->links() }}
+                            {{ $reservas->links() }}
                         </div>
                     </div>
                 @endif
@@ -274,7 +288,13 @@
                                     Departamento / Puesto
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Horario / Fecha de Ingreso
+                                    Horario Reservado
+                                </th>
+                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Fecha Reservación
+                                </th>
+                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Fecha de Registro
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Estatus
@@ -282,10 +302,10 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse ($visitas as $visita)
+                            @forelse ($reservas as $reserva)
                                 @php
-                                    $emp = $visita->empleado;
-                                    $fechaHoraObj = $visita->fecha_hora ? \Carbon\Carbon::parse($visita->fecha_hora) : null;
+                                    $emp = $reserva->empleado;
+                                    $fechaObj = $reserva->fecha ? \Carbon\Carbon::parse($reserva->fecha) : null;
                                 @endphp
                                 <tr class="hover:bg-gray-50/50 transition">
                                     <!-- Nº EMPLEADO -->
@@ -309,19 +329,24 @@
                                         <div class="text-xs text-gray-400">{{ $emp->puesto ?? 'Sin puesto' }}</div>
                                     </td>
 
-                                    <!-- HORARIO Y FECHA DE INGRESO -->
+                                    <!-- HORARIO RESERVADO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <div class="inline-flex flex-col items-center px-3 py-1.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-indigo-900">
-                                            <span class="text-xs font-bold font-mono text-indigo-700">
-                                                🕒 {{ $fechaHoraObj ? $fechaHoraObj->format('H:i:s') : '-' }}
-                                            </span>
-                                            <span class="text-[11px] text-gray-500 font-medium">
-                                                {{ $fechaHoraObj ? $fechaHoraObj->format('d/m/Y') : ($visita->fecha ? \Carbon\Carbon::parse($visita->fecha)->format('d/m/Y') : '-') }}
-                                            </span>
-                                        </div>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs font-mono">
+                                            🕒 {{ $reserva->hora ? $reserva->hora . ' p.m.' : '-' }}
+                                        </span>
                                     </td>
 
-                                    <!-- ESTATUS -->
+                                    <!-- FECHA DE RESERVACIÓN -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900">
+                                        {{ $fechaObj ? $fechaObj->format('d/m/Y') : '-' }}
+                                    </td>
+
+                                    <!-- FECHA DE REGISTRO (CREACIÓN) -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-gray-600 font-mono">
+                                        {{ $reserva->created_at ? $reserva->created_at->format('d/m/Y H:i:s') : '-' }}
+                                    </td>
+
+                                    <!-- ESTATUS EMPLEADO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         @if ($emp && $emp->activo)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
@@ -336,12 +361,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
-                                        <p class="text-base font-semibold text-gray-700">No se encontraron visitas registradas en este período</p>
-                                        <p class="text-xs text-gray-400 mt-1">Intente cambiando el rango de fechas o ajustando los filtros de búsqueda.</p>
+                                        <p class="text-base font-semibold text-gray-700">No se encontraron reservaciones para esta fecha</p>
+                                        <p class="text-xs text-gray-400 mt-1">Intente cambiando la fecha o ajustando los criterios de búsqueda.</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -350,9 +375,9 @@
                 </div>
 
                 <!-- PAGINADOR INFERIOR -->
-                @if ($visitas->hasPages())
+                @if ($reservas->hasPages())
                     <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
-                        {{ $visitas->links() }}
+                        {{ $reservas->links() }}
                     </div>
                 @endif
             </div>

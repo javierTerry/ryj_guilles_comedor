@@ -51,6 +51,9 @@
                                     <x-dropdown-link :href="route('reportes.visitas')" :active="request()->routeIs('reportes.visitas')">
                                         {{ __('Reporte de Visitas') }}
                                     </x-dropdown-link>
+                                    <x-dropdown-link :href="route('reportes.reservas')" :active="request()->routeIs('reportes.reservas')">
+                                        {{ __('Reporte de Reservas') }}
+                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('reportes.encuestas')" :active="request()->routeIs('reportes.encuestas')">
                                         {{ __('Reporte de Encuestas') }}
                                     </x-dropdown-link>
@@ -142,8 +145,14 @@
                     <x-responsive-nav-link :href="route('reportes.visitas')" :active="request()->routeIs('reportes.visitas')">
                         {{ __('Reporte de Visitas') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('reportes.reservas')" :active="request()->routeIs('reportes.reservas')">
+                        {{ __('Reporte de Reservas') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('reportes.encuestas')" :active="request()->routeIs('reportes.encuestas')">
                         {{ __('Reporte de Encuestas') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('reportes.isu')" :active="request()->routeIs('reportes.isu')">
+                        {{ __('Informe ISU (PDF)') }}
                     </x-responsive-nav-link>
                 </div>
             @endauth

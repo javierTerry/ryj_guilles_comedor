@@ -27,11 +27,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('empleados', EmpleadoController::class)->except(['create', 'show', 'edit']);
     Route::patch('empleados/{empleado}/toggle', [EmpleadoController::class, 'toggleStatus'])->name('empleados.toggle');
 
-    // Rutas para Reportes de Visitas, Encuestas y Exportación CSV
+    // Rutas para Reportes de Visitas, Reservaciones, Encuestas e ISU PDF y Exportación CSV
     Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('reportes/exportar', [ReporteController::class, 'exportCsv'])->name('reportes.export');
     Route::get('reportes/visitas', [ReporteController::class, 'visitas'])->name('reportes.visitas');
     Route::get('reportes/visitas/exportar', [ReporteController::class, 'exportVisitasCsv'])->name('reportes.visitas_export');
+    Route::get('reportes/reservas', [ReporteController::class, 'reservas'])->name('reportes.reservas');
+    Route::get('reportes/reservas/exportar', [ReporteController::class, 'exportReservasCsv'])->name('reportes.reservas_export');
     Route::get('reportes/encuestas', [ReporteController::class, 'encuestas'])->name('reportes.encuestas');
     Route::get('reportes/encuestas/exportar', [ReporteController::class, 'exportEncuestasCsv'])->name('reportes.encuestas_export');
     Route::get('reportes/isu', [ReporteController::class, 'isu'])->name('reportes.isu');
