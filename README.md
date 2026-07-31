@@ -49,30 +49,36 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **Importación Masiva y Campo Correo:** Subida y procesamiento de listas de empleados mediante archivos CSV con inclusión obligatoria del correo electrónico y descarga de plantilla oficial actualizada.
 * **Estado de Empleado:** Switch interactivo para activar o desactivar empleados de forma rápida (un empleado desactivado no podrá registrar comidas).
 
-### 4. Módulo de Reportes y Submenús (General y Visitas)
-* **URL Protegida:** `/reportes` (Acceso mediante menú desplegable y móvil "Reportes").
+### 4. Módulo de Reportes y Submenús (General, Visitas y Reservaciones)
+* **URL Protegida:** `/reportes` (Acceso exclusivo para usuarios autenticados mediante menú desplegable y móvil "Reportes").
 * **Estructura de Submenús:**
   * **Reporte General (`/reportes`):** Muestra el resumen del catálogo de colaboradores acotando el conteo acumulado de sus visitas al comedor por rango de fecha.
   * **Reporte de Visitas (`/reportes/visitas`):** Consulta detallada de cada acceso individual al comedor con su horario exacto de ingreso (`fecha_hora`).
-* **Valores e Información en el Reporte de Visitas:**
-  * Nombre del colaborador.
+  * **Reporte de Reservas (`/reportes/reservas`):** Consulta detallada de reservaciones agendadas por día y horario por los colaboradores.
+* **Valores e Información en el Reporte de Reservaciones:**
   * Número de empleado.
+  * Nombre del colaborador.
   * Correo electrónico.
   * Departamento y Puesto.
-  * Fecha y Horario exacto de ingreso al comedor.
-  * Estatus (Activo / Inactivo).
-* **Comportamiento de Filtro por Defecto (Semana Actual):**
-  * Cuando no se aplican filtros de fecha explícitos, el **Reporte de Visitas** toma por defecto automáticamente únicamente los accesos correspondientes a la **semana actual** (Lunes a Domingo en curso).
-* **Filtros Avanzados y Rango de Fechas:** Permite consultar ambas vistas acotando la información por:
-  * **Rango de Fechas de Visitas (`fecha_inicio` y `fecha_fin`)**: Filtra los accesos ocurridos dentro del período seleccionado.
+  * Fecha de reservación.
+  * Horario reservado (12:30 p.m., 13:15 p.m., 14:00 p.m., 14:45 p.m., 15:30 p.m.).
+  * Estatus del empleado (Activo / Inactivo).
+* **Comportamiento del Filtro por Defecto:**
+  * **Reporte de Visitas:** Toma automáticamente la **semana actual** (Lunes a Domingo en curso).
+  * **Reporte de Reservas:** Toma por defecto únicamente las reservaciones del **día actual** (`Carbon::today()`).
+* **Filtros Avanzados y Rango de Fechas:** Permite consultar acotando la información por:
+  * **Rango de Fechas (`fecha_inicio` y `fecha_fin`)**: Permite extender o personalizar el rango de reservaciones o visitas.
   * **Nombre o Número de Empleado** (búsqueda parcial).
   * **Departamento** (lista desplegable dinámica).
   * **Estatus del Empleado** (Todos / Activos / Inactivos).
+  * **Horario Reservado** (12:30, 13:15, 14:00, 14:45, 15:30).
   * **Registros por Página** (25, 50, 75 o 100 por página).
-* **Descarga Masiva en CSV:** Generación en tiempo real de archivos CSV codificados en UTF-8 con BOM tanto para el Reporte General (`/reportes/exportar`) como para el Reporte de Visitas (`/reportes/visitas/exportar`).
+* **Descarga Masiva en CSV:** Generación en tiempo real de archivos CSV codificados en UTF-8 con BOM tanto para el Reporte General (`/reportes/exportar`), Reporte de Visitas (`/reportes/visitas/exportar`) y Reporte de Reservaciones (`/reportes/reservas/exportar`).
 * **Canales Dedicados de Logs:**
-  * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general de empleados.
-  * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para consultas y exportaciones del reporte de visitas detallado.
+  * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general.
+  * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para el reporte de visitas.
+  * Canal **`reservas`**: Trazabilidad en `storage/logs/reservas.log` para el reporte de reservaciones por día.
+
 
 ### 5. Encuesta de Satisfacción del Comedor (Acceso Público)
 * **URL Pública:** `/encuesta` (Accesible sin necesidad de inicio de sesión).
@@ -179,13 +185,23 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * `resources/views/dashboard.blade.php`: Contenedores y scripts de Chart.js para los 4 gráficos.
   * `resources/views/comedor/index.blade.php`: Pantalla del kiosco de escaneo.
   * `resources/views/reportes/index.blade.php`: Módulo de reportes de empleados con filtros de rango de fechas, resumen de visitas y exportación a CSV.
+  * `resources/views/reportes/reservas.blade.php`: Módulo de reporte de reservaciones por día con filtros, tarjetas KPI y exportación CSV.
   * `resources/views/reservaciones/create.blade.php`: Formulario de reservación pública Comedor GILOU.
   * `resources/views/layouts/navigation.blade.php`: Menú de navegación dinámico adaptativo para visitantes y administradores.
 
 ## 📌 Historial de Versiones
 
-* **v2.6.0 (Actual)**:
+* **v2.7.0 (Actual)**:
+  * Creado el **Reporte de Reservaciones por Día** (`/reportes/reservas`), accesible exclusivamente para usuarios autenticados.
+  * Configurada la carga por defecto al **día actual** (`Carbon::today()`) cuando no se especifican filtros de fecha.
+  * Tarjetas KPI de resumen: *Total Reservaciones Registradas*, *Rango de Consulta* y *Paginación / Formato*.
+  * Filtros dinámicos horizontales por Búsqueda de Colaborador (Nombre/Nº), Departamento, Estatus Empleado, Horario Reservado (12:30, 13:15, 14:00, 14:45, 15:30), Rango de Fechas y Paginación (25, 50, 75, 100 registros por página).
+  * Función de descarga directa en formato CSV UTF-8 con BOM para Excel (`/reportes/reservas/exportar`).
+  * Canal de logs dedicado **`reservas`** configurado en `config/logging.php` con registro de auditoría en `storage/logs/reservas.log`.
+  * Pestaña de navegación integrada en la barra superior de todos los módulos de reportes y en el desplegable principal `navigation.blade.php`.
+* **v2.6.0**:
   * Creado el **Informe de Satisfacción del Usuario (ISU)** en formato PDF (`/reportes/isu`).
+
   * Réplica del diseño de referencia con 4 secciones principales: Resumen Ejecutivo ISU, Detalle por Criterios, Hallazgos Críticos & Plan de Acción, y Análisis de Tendencia Trimestral.
   * Filtros de período dinámicos: **Semana Actual** (Lunes a Domingo calculado automáticamente), **Quincena** (1 al 15 del mes actual) y **Mensual** (1er al último día del mes).
   * Promedios por criterios calculados a partir de las evaluaciones registradas (`calidad`, `limpieza`, `temperatura`, `atencion`, `presentacion`).

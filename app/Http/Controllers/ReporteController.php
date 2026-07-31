@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Empleado;
 use App\Models\RegistroComedor;
 use App\Models\Encuesta;
+use App\Models\Reservacion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -739,4 +740,218 @@ class ReporteController extends Controller
             'tendenciaTrimestral'
         ));
     }
+
+    /**
+     * Muestra la vista del reporte detallado de reservaciones por día.
+     * Si no se aplican filtros de fecha, toma por defecto la fecha del día actual.
+     */
+    public function reservas(Request $request)
+    {
+        $departamentos = Empleado::select('departamento')
+            ->whereNotNull('departamento')
+            ->where('departamento', '!=', '')
+            ->distinct()
+            ->orderBy('departamento')
+            ->pluck('departamento');
+
+        // Si no se proporcionaron fechas explícitas, usar por defecto la fecha del día actual
+        $hasCustomDateFilter = $request->filled('fecha_inicio') || $request->filled('fecha_fin');
+
+        $fechaInicio = $request->input('fecha_inicio', Carbon::today()->format('Y-m-d'));
+        $fechaFin = $request->input('fecha_fin', Carbon::today()->format('Y-m-d'));
+
+        // Consulta base sobre Reservacion con relación a Empleado
+        $query = Reservacion::with('empleado')
+            ->whereHas('empleado');
+
+        if ($fechaInicio) {
+            $query->whereDate('fecha', '>=', $fechaInicio);
+        }
+        if ($fechaFin) {
+            $query->whereDate('fecha', '<=', $fechaFin);
+        }
+
+        // Filtro por Búsqueda (Nombre o Número de Empleado)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('empleado', function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtro por Departamento
+        if ($request->filled('departamento')) {
+            $dept = $request->input('departamento');
+            $query->whereHas('empleado', function ($q) use ($dept) {
+                $q->where('departamento', $dept);
+            });
+        }
+
+        // Filtro por Estatus (Activo / Inactivo)
+        if ($request->filled('estatus')) {
+            $estatus = $request->input('estatus') === '1';
+            $query->whereHas('empleado', function ($q) use ($estatus) {
+                $q->where('activo', $estatus);
+            });
+        }
+
+        // Filtro por Horario Reservado
+        if ($request->filled('hora')) {
+            $query->where('hora', $request->input('hora'));
+        }
+
+        // Rango de registros por página (Default: 25. Opciones: 25, 50, 75, 100)
+        $perPage = (int) $request->input('per_page', 25);
+        if (!in_array($perPage, [25, 50, 75, 100])) {
+            $perPage = 25;
+        }
+
+        // Total de reservaciones filtradas
+        $totalReservas = (clone $query)->count();
+
+        // Paginación dinámica ordenada por fecha y hora ascendente
+        $reservas = $query->orderBy('fecha', 'desc')
+                          ->orderBy('hora', 'asc')
+                          ->paginate($perPage)
+                          ->withQueryString();
+
+        $hasFilters = $request->anyFilled(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora']) || $request->filled('per_page');
+
+        // Trazabilidad en canal dedicado 'reservas'
+        Log::channel('reservas')->info('Consulta de reporte de reservaciones por día realizada', [
+            'usuario_id' => auth()->id(),
+            'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+            'ip' => $request->ip(),
+            'per_page' => $perPage,
+            'fecha_inicio_usada' => $fechaInicio,
+            'fecha_fin_usada' => $fechaFin,
+            'es_dia_actual_default' => !$hasCustomDateFilter,
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'per_page'])),
+            'total_reservas' => $totalReservas,
+        ]);
+
+        return view('reportes.reservas', compact(
+            'reservas',
+            'departamentos',
+            'totalReservas',
+            'hasFilters',
+            'hasCustomDateFilter',
+            'perPage',
+            'fechaInicio',
+            'fechaFin'
+        ));
+    }
+
+    /**
+     * Genera y descarga el archivo CSV con las reservaciones filtradas.
+     */
+    public function exportReservasCsv(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio', Carbon::today()->format('Y-m-d'));
+        $fechaFin = $request->input('fecha_fin', Carbon::today()->format('Y-m-d'));
+
+        $query = Reservacion::with('empleado')->whereHas('empleado');
+
+        if ($fechaInicio) {
+            $query->whereDate('fecha', '>=', $fechaInicio);
+        }
+        if ($fechaFin) {
+            $query->whereDate('fecha', '<=', $fechaFin);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('empleado', function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('departamento')) {
+            $dept = $request->input('departamento');
+            $query->whereHas('empleado', function ($q) use ($dept) {
+                $q->where('departamento', $dept);
+            });
+        }
+
+        if ($request->filled('estatus')) {
+            $estatus = $request->input('estatus') === '1';
+            $query->whereHas('empleado', function ($q) use ($estatus) {
+                $q->where('activo', $estatus);
+            });
+        }
+
+        if ($request->filled('hora')) {
+            $query->where('hora', $request->input('hora'));
+        }
+
+        $totalExportar = (clone $query)->count();
+
+        // Trazabilidad en canal dedicado 'reservas'
+        Log::channel('reservas')->info('Exportación de archivo CSV de reporte de reservaciones generada', [
+            'usuario_id' => auth()->id(),
+            'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+            'ip' => $request->ip(),
+            'fecha_inicio' => $fechaInicio,
+            'fecha_fin' => $fechaFin,
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora'])),
+            'total_registros_exportados' => $totalExportar,
+        ]);
+
+        $filename = 'reporte_reservaciones_comedor_' . date('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM para compatibilidad con Microsoft Excel UTF-8
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($handle, [
+                'ID Reservación',
+                'Nº Empleado',
+                'Nombre del Colaborador',
+                'Correo Electrónico',
+                'Departamento',
+                'Puesto',
+                'Estatus Empleado',
+                'Fecha Reservación',
+                'Horario Reservado',
+                'Fecha de Registro'
+            ]);
+
+            $query->orderBy('fecha', 'desc')
+                  ->orderBy('hora', 'asc')
+                  ->chunk(500, function ($reservas) use ($handle) {
+                      foreach ($reservas as $reserva) {
+                          $emp = $reserva->empleado;
+                          fputcsv($handle, [
+                              $reserva->id,
+                              $emp->numero_empleado ?? '',
+                              $emp->nombre ?? '',
+                              $emp->correo ?? '',
+                              $emp->departamento ?? 'Sin departamento',
+                              $emp->puesto ?? 'Sin puesto',
+                              $emp->activo ? 'Activo' : 'Inactivo',
+                              $reserva->fecha ? Carbon::parse($reserva->fecha)->format('d/m/Y') : '',
+                              $reserva->hora ? $reserva->hora . ' p.m.' : '',
+                              $reserva->created_at ? $reserva->created_at->format('d/m/Y H:i:s') : '',
+                          ]);
+                      }
+                  });
+
+            fclose($handle);
+        };
+
+        return new StreamedResponse($callback, 200, $headers);
+    }
 }
+
