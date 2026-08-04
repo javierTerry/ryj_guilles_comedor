@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReservacionController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\EncuestaController;
+use App\Http\Controllers\Admin\MenuRoleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,6 +38,15 @@ Route::middleware('auth')->group(function () {
     Route::get('reportes/encuestas', [ReporteController::class, 'encuestas'])->name('reportes.encuestas');
     Route::get('reportes/encuestas/exportar', [ReporteController::class, 'exportEncuestasCsv'])->name('reportes.encuestas_export');
     Route::get('reportes/isu', [ReporteController::class, 'isu'])->name('reportes.isu');
+});
+
+// Rutas de Administración Exclusivas para Super Admin (Rol 1)
+Route::middleware(['auth', 'role:1'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('menu-roles', [MenuRoleController::class, 'index'])->name('menu-roles.index');
+    Route::get('menu-roles/visibilidad-menus', [MenuRoleController::class, 'menus'])->name('menu-roles.menus');
+    Route::put('menu-roles/visibilidad-menus', [MenuRoleController::class, 'updateMenuRoles'])->name('menu-roles.update-menus');
+    Route::get('menu-roles/usuarios', [MenuRoleController::class, 'users'])->name('menu-roles.users');
+    Route::patch('menu-roles/usuarios/{user}', [MenuRoleController::class, 'updateUserRole'])->name('menu-roles.update-user-role');
 });
 
 // Rutas Públicas para Control de Comedor
