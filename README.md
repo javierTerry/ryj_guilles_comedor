@@ -12,9 +12,9 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo (excepto en el horario de acceso libre).
 * **Validación de Horarios Reservados y Capacidades:**
   * **12:30 p.m. a 1:00 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 12:00 a 13:15).
-  * **1:15 p.m. a 1:45 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:00 a 14:00).
-  * **2:00 p.m. a 2:30 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:45 a 14:45).
-  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 14:30 a 15:30).
+  * **1:15 p.m. a 1:45 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:00 a 14:00).
+  * **2:00 p.m. a 2:30 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:45 a 14:45).
+  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 100 lugares (Ventana de ingreso: 14:30 a 15:30).
   * **3:30 p.m. a 4:00 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
 * **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
@@ -191,7 +191,18 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.7.0 (Actual)**:
+* **v2.8.0 (Actual)**:
+  * **Actualización de Capacidades de Horarios de Comedor**:
+    * **1:15 p.m.** (13:15) y **2:00 p.m.** (14:00): Incrementado de 120 a **140 lugares**.
+    * **2:45 p.m.** (14:45): Reducido de 120 a **100 lugares**.
+    * **12:30 p.m.** (12:30): Mantiene su capacidad de **120 lugares**.
+  * **Leyendas Dinámicas en la Selección Rápida de Horario (UI)**:
+    * Se removió la leyenda de texto "Cerrado" cuando un horario no tiene lugares disponibles o está inhabilitado.
+    * En su lugar, la interfaz muestra dinámicamente la proporción actual de lugares reservados respecto a la capacidad total (ejemplo: `140/140`, `120/120`, `100/100`), manteniendo informados a los colaboradores sin mostrar la etiqueta "Cerrado".
+  * **Canal Dedicado de Trazabilidad y Logging (`reservas_horarios`)**:
+    * Configurado el nuevo canal de log `'reservas_horarios'` en `config/logging.php` con destino en `storage/logs/reservas_horarios.log`.
+    * Registro completo de auditoría y trazabilidad para consultas de disponibilidad de horarios, intentos de reservación, validaciones de cupo, rechazos por duplicados/inactividad y confirmaciones AJAX.
+* **v2.7.0**:
   * Creado el **Reporte de Reservaciones por Día** (`/reportes/reservas`), accesible exclusivamente para usuarios autenticados.
   * Configurada la carga por defecto al **día actual** (`Carbon::today()`) cuando no se especifican filtros de fecha.
   * Tarjetas KPI de resumen: *Total Reservaciones Registradas*, *Rango de Consulta* y *Paginación / Formato*.
