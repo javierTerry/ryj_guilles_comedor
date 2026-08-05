@@ -12,9 +12,9 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo (excepto en el horario de acceso libre).
 * **Validación de Horarios Reservados y Capacidades:**
   * **12:30 p.m. a 1:00 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 12:00 a 13:15).
-  * **1:15 p.m. a 1:45 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:00 a 14:00).
-  * **2:00 p.m. a 2:30 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 13:45 a 14:45).
-  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 14:30 a 15:30).
+  * **1:15 p.m. a 1:45 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:00 a 14:00).
+  * **2:00 p.m. a 2:30 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:45 a 14:45).
+  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 100 lugares (Ventana de ingreso: 14:30 a 15:30).
   * **3:30 p.m. a 4:00 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
 * **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
@@ -191,7 +191,18 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.7.0 (Actual)**:
+* **v2.8.0 (Actual)**:
+  * **Actualización de Capacidades de Horarios de Comedor**:
+    * **1:15 p.m.** (13:15) y **2:00 p.m.** (14:00): Incrementado de 120 a **140 lugares**.
+    * **2:45 p.m.** (14:45): Reducido de 120 a **100 lugares**.
+    * **12:30 p.m.** (12:30): Mantiene su capacidad de **120 lugares**.
+  * **Leyendas Dinámicas en la Selección Rápida de Horario (UI)**:
+    * Se removió la leyenda de texto "Cerrado" cuando un horario no tiene lugares disponibles o está inhabilitado.
+    * En su lugar, la interfaz muestra dinámicamente la proporción actual de lugares reservados respecto a la capacidad total (ejemplo: `140/140`, `120/120`, `100/100`), manteniendo informados a los colaboradores sin mostrar la etiqueta "Cerrado".
+  * **Canal Dedicado de Trazabilidad y Logging (`reservas_horarios`)**:
+    * Configurado el nuevo canal de log `'reservas_horarios'` en `config/logging.php` con destino en `storage/logs/reservas_horarios.log`.
+    * Registro completo de auditoría y trazabilidad para consultas de disponibilidad de horarios, intentos de reservación, validaciones de cupo, rechazos por duplicados/inactividad y confirmaciones AJAX.
+* **v2.7.0**:
   * Creado el **Reporte de Reservaciones por Día** (`/reportes/reservas`), accesible exclusivamente para usuarios autenticados.
   * Configurada la carga por defecto al **día actual** (`Carbon::today()`) cuando no se especifican filtros de fecha.
   * Tarjetas KPI de resumen: *Total Reservaciones Registradas*, *Rango de Consulta* y *Paginación / Formato*.
@@ -284,6 +295,24 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v1.8.1**:
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
+* **v1.9.0**:
+  * **Sistema de Validación y Gestión de Roles de Usuario**:
+    * Creada la tabla `roles` con 3 niveles jerárquicos: **Rol 1 (Super Admin)**, **Rol 2 (Admin)** y **Rol 3 (Usuario)**.
+    * Agregado el campo `role_id` a la tabla `users` con relación de llave foránea.
+  * **Gestión Dinámica de Menús y Submenús por Rol**:
+    * Creadas las tablas `menus` y `menu_role` para la asignación configurable de permisos de visibilidad de menús y submenús.
+    * El **Super Admin (Rol 1)** posee visibilidad total e irrestricta de todos los menús y submenús del sistema, y es el único usuario con permisos para asignar qué roles pueden visualizar cada menú o submenú.
+    * Actualizada la plantilla de navegación (`navigation.blade.php`) para renderizar dinámicamente menús y submenús según los permisos de rol del usuario autenticado mediante `Menu::getForUser()`.
+  * **Estructura de Submenús en "Gestión de Menús y Roles"**:
+    * Creado el submenú **"Asignación de Visibilidad de Menús y Submenús por Rol"** (`admin.menu-roles.menus`) para administrar la matriz de visibilidad.
+    * Creado el submenú **"Asignación de Roles a Usuarios Registrados"** (`admin.menu-roles.users`) para la asignación de nivel de rol a cada usuario.
+  * **Paginación Configurable de Usuarios Registrados**:
+    * Implementada paginación en la vista de asignación de usuarios con selector dinámico de límite por página: **15 (por defecto), 25, 50 y 100 registros**, preservando la navegación y parámetros GET.
+  * **Middleware de Autorización por Rol**:
+    * Creado el middleware `CheckRole` (`role`) y registrado su alias en `bootstrap/app.php` para proteger rutas administrativas y verificar privilegios de acceso.
+  * **Trazabilidad y Canal de Log Propio (`roles`)**:
+    * Configurado el canal de log dedicado `'roles'` en `config/logging.php` que almacena registros diarios en `storage/logs/roles.log`.
+    * Auditoría automática de cambios en permisos de menús, reasignaciones de rol a usuarios y accesos denegados por restricciones de seguridad.
 * **v1.8.0**:
   * Creado el **Módulo de Reportes de Visitas** (`/reportes`) accesible mediante una nueva opción en el menú de navegación principal.
   * Implementada la **Exportación a CSV** por demanda (`/reportes/exportar`) integrando codificación UTF-8 BOM para compatibilidad directa con Excel. El archivo descargado incluye todos los datos del empleado (Número, Nombre, Correo, Departamento, Puesto, Estatus) acompañados del Día de la Semana, Fecha y Hora exacta de acceso.

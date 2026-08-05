@@ -133,7 +133,7 @@
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '12:30' ? 'text-white' : ''">12:30 p.m. a</p> 1:00 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '12:30' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['12:30']['habilitado'])
-                                            Cerrado
+                                            {{ $horariosStatus['12:30']['reservados'] }}/{{ $horariosStatus['12:30']['capacidad'] }}
                                         @else
                                             {{ $horariosStatus['12:30']['libres'] }} libres
                                         @endif
@@ -151,7 +151,7 @@
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '13:15' ? 'text-white' : ''">1:15 p.m. a</p> 1:45 p.m</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '13:15' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['13:15']['habilitado'])
-                                            Cerrado
+                                            {{ $horariosStatus['13:15']['reservados'] }}/{{ $horariosStatus['13:15']['capacidad'] }}
                                         @else
                                             {{ $horariosStatus['13:15']['libres'] }} libres
                                         @endif
@@ -169,7 +169,7 @@
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:00' ? 'text-white' : ''">2:00 p.m. a</p> 2:30 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:00' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['14:00']['habilitado'])
-                                            Cerrado
+                                            {{ $horariosStatus['14:00']['reservados'] }}/{{ $horariosStatus['14:00']['capacidad'] }}
                                         @else
                                             {{ $horariosStatus['14:00']['libres'] }} libres
                                         @endif
@@ -187,7 +187,7 @@
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:45' ? 'text-white' : ''">2:45 p.m. a</p> 3:15 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:45' ? 'text-indigo-100' : ''">
                                         @if(!$horariosStatus['14:45']['habilitado'])
-                                            Cerrado
+                                            {{ $horariosStatus['14:45']['reservados'] }}/{{ $horariosStatus['14:45']['capacidad'] }}
                                         @else
                                             {{ $horariosStatus['14:45']['libres'] }} libres
                                         @endif
@@ -204,11 +204,7 @@
                                 >
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '15:30' ? 'text-white' : ''">3:30 p.m. a</p> 4:00 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5 {{ old('hora') === '15:30' ? 'text-emerald-100' : 'text-emerald-600 font-bold' }}" :class="selectedHora === '15:30' ? 'text-emerald-100' : ''">
-                                        @if(!$horariosStatus['15:30']['habilitado'])
-                                            <span class="text-emerald-600 font-semibold">Cerrado</span>
-                                        @else
-                                            Acceso libre
-                                        @endif
+                                        Acceso libre
                                     </span>
                                 </button>
                             </div>
@@ -264,7 +260,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
-                                <span>Capacidad de 120 lugares por horario (Acceso libre de 3:30 p.m. a 4:00 p.m.).</span>
+                                <span>Capacidad: 120 (12:30), 140 (1:15 y 2:00) y 100 (2:45) lugares por horario (Acceso libre de 3:30 p.m. a 4:00 p.m.).</span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
