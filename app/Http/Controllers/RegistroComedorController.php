@@ -76,6 +76,16 @@ class RegistroComedorController extends Controller
         $requireReservation = config('app.require_reservation', false);
         $horaReservada = 'Modo POC / Acceso Libre';
 
+        // Lista de excepciones temporal (hardcoded) para números de empleado exentos de reservación
+        $empleadosExentos = ['163', '501382', '202563', '501383']; // Reemplazar con los números reales necesarios
+        $esExceptuado = in_array($numeroEmpleado, $empleadosExentos);
+
+        if ($esExceptuado) {
+            $requireReservation = false;
+            $horaReservada = 'Excepción de Reservación';
+            Log::channel('comedor')->info("Kiosco Comedor: Acceso por excepción (exento de reservación) para colaborador {$numeroEmpleado} ({$empleado->nombre})");
+        }
+
         if ($requireReservation) {
             $horaActual = Carbon::now()->format('H:i');
 
