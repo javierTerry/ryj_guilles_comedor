@@ -14,7 +14,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **12:30 p.m. a 1:00 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 12:00 a 13:15).
   * **1:15 p.m. a 1:45 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:00 a 14:00).
   * **2:00 p.m. a 2:30 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:45 a 14:45).
-  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 100 lugares (Ventana de ingreso: 14:30 a 15:30).
+  * **2:45 p.m. a 3:15 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 14:30 a 15:30).
   * **3:30 p.m. a 4:00 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
 * **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
@@ -194,7 +194,7 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v2.8.0 (Actual)**:
   * **Actualización de Capacidades de Horarios de Comedor**:
     * **1:15 p.m.** (13:15) y **2:00 p.m.** (14:00): Incrementado de 120 a **140 lugares**.
-    * **2:45 p.m.** (14:45): Reducido de 120 a **100 lugares**.
+    * **2:45 p.m.** (14:45): Incrementado a **140 lugares**.
     * **12:30 p.m.** (12:30): Mantiene su capacidad de **120 lugares**.
   * **Leyendas Dinámicas en la Selección Rápida de Horario (UI)**:
     * Se removió la leyenda de texto "Cerrado" cuando un horario no tiene lugares disponibles o está inhabilitado.

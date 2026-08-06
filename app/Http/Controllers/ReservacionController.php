@@ -27,7 +27,7 @@ class ReservacionController extends Controller
         $libres1230 = 120 - $count1230;
         $libres1315 = 140 - $count1315;
         $libres1400 = 140 - $count1400;
-        $libres1445 = 100 - $count1445;
+        $libres1445 = 140 - $count1445;
 
         $horariosStatus = [
             '12:30' => [
@@ -58,9 +58,9 @@ class ReservacionController extends Controller
                 'etiqueta' => '2:45 p.m. a 3:15 p.m.',
                 'libres' => max(0, $libres1445),
                 'reservados' => $count1445,
-                'capacidad' => 100,
+                'capacidad' => 140,
                 'habilitado' => $reservasAbiertas && $now->lt(\Carbon\Carbon::today()->setTime(14, 30)) && $libres1445 > 0,
-                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? "{$count1445}/100" : ($libres1445 <= 0 ? "100/100" : 'libres'))
+                'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? "{$count1445}/140" : ($libres1445 <= 0 ? "140/140" : 'libres'))
             ],
             '15:30' => [
                 'etiqueta' => '3:30 p.m. a 4:00 p.m.',
@@ -77,7 +77,7 @@ class ReservacionController extends Controller
             '12:30' => "{$count1230}/120",
             '13:15' => "{$count1315}/140",
             '14:00' => "{$count1400}/140",
-            '14:45' => "{$count1445}/100",
+            '14:45' => "{$count1445}/140",
         ]);
 
         return view('reservaciones.create', compact('horariosStatus', 'reservasAbiertas'));
@@ -141,7 +141,7 @@ class ReservacionController extends Controller
                 '12:30' => 120,
                 '13:15' => 140,
                 '14:00' => 140,
-                '14:45' => 100,
+                '14:45' => 140,
             ];
             $capacidadMaxima = $capacidades[$hora] ?? 120;
 
