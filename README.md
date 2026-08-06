@@ -9,7 +9,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 ### 1. Registro de Comedor (Acceso Público Kiosco)
 * **URL Pública:** `/comedor` (Accesible para cualquiera en red local, no requiere inicio de sesión).
 * **Flujo de Escaneo Rápido:** Permite registrar accesos digitando el número de empleado o mediante lectores de códigos de barras.
-* **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo (excepto en el horario de acceso libre).
+* **Control de Reservación Obligatoria:** Verifica que el empleado cuente con una reservación registrada para la fecha actual antes de permitir el consumo (excepto en el horario de acceso libre o si el colaborador se encuentra en la lista de excepciones).
 * **Validación de Horarios Reservados y Capacidades:**
   * **12:30 p.m. a 1:00 p.m.:** Capacidad de 120 lugares (Ventana de ingreso: 12:00 a 13:15).
   * **1:15 p.m. a 1:45 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:00 a 14:00).
@@ -192,6 +192,8 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 ## 📌 Historial de Versiones
 
 * **v2.8.0 (Actual)**:
+  * **Excepción de Acceso para Colaboradores**:
+    * Implementación de una lista de excepciones inicial (hardcoded) para 4 números de empleado que les permite el ingreso al comedor sin necesidad de contar con reservación o sin importar el horario.
   * **Actualización de Capacidades de Horarios de Comedor**:
     * **1:15 p.m.** (13:15) y **2:00 p.m.** (14:00): Incrementado de 120 a **140 lugares**.
     * **2:45 p.m.** (14:45): Incrementado a **140 lugares**.
