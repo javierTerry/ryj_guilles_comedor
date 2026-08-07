@@ -132,11 +132,7 @@
                                 >
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '12:30' ? 'text-white' : ''">12:30 p.m. a</p> 1:00 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '12:30' ? 'text-indigo-100' : ''">
-                                        @if(!$horariosStatus['12:30']['habilitado'])
-                                            {{ $horariosStatus['12:30']['reservados'] }}/{{ $horariosStatus['12:30']['capacidad'] }}
-                                        @else
-                                            {{ $horariosStatus['12:30']['libres'] }} libres
-                                        @endif
+                                        {{ $horariosStatus['12:30']['reservados'] }}/{{ $horariosStatus['12:30']['capacidad'] }}
                                     </span>
                                 </button>
 
@@ -150,11 +146,7 @@
                                 >
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '13:15' ? 'text-white' : ''">1:15 p.m. a</p> 1:45 p.m</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '13:15' ? 'text-indigo-100' : ''">
-                                        @if(!$horariosStatus['13:15']['habilitado'])
-                                            {{ $horariosStatus['13:15']['reservados'] }}/{{ $horariosStatus['13:15']['capacidad'] }}
-                                        @else
-                                            {{ $horariosStatus['13:15']['libres'] }} libres
-                                        @endif
+                                        {{ $horariosStatus['13:15']['reservados'] }}/{{ $horariosStatus['13:15']['capacidad'] }}
                                     </span>
                                 </button>
 
@@ -168,11 +160,7 @@
                                 >
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:00' ? 'text-white' : ''">2:00 p.m. a</p> 2:30 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:00' ? 'text-indigo-100' : ''">
-                                        @if(!$horariosStatus['14:00']['habilitado'])
-                                            {{ $horariosStatus['14:00']['reservados'] }}/{{ $horariosStatus['14:00']['capacidad'] }}
-                                        @else
-                                            {{ $horariosStatus['14:00']['libres'] }} libres
-                                        @endif
+                                        {{ $horariosStatus['14:00']['reservados'] }}/{{ $horariosStatus['14:00']['capacidad'] }}
                                     </span>
                                 </button>
 
@@ -186,11 +174,7 @@
                                 >
                                     <span class="font-bold text-xs sm:text-sm truncate w-full block" :class="selectedHora === '14:45' ? 'text-white' : ''">2:45 p.m. a</p> 3:15 p.m.</span>
                                     <span class="text-[11px] sm:text-xs truncate w-full block mt-0.5" :class="selectedHora === '14:45' ? 'text-indigo-100' : ''">
-                                        @if(!$horariosStatus['14:45']['habilitado'])
-                                            {{ $horariosStatus['14:45']['reservados'] }}/{{ $horariosStatus['14:45']['capacidad'] }}
-                                        @else
-                                            {{ $horariosStatus['14:45']['libres'] }} libres
-                                        @endif
+                                        {{ $horariosStatus['14:45']['reservados'] }}/{{ $horariosStatus['14:45']['capacidad'] }}
                                     </span>
                                 </button>
 
