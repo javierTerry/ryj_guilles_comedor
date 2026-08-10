@@ -63,7 +63,7 @@ class ReservacionController extends Controller
                 'mensaje' => $now->lt(\Carbon\Carbon::today()->setTime(8, 0)) ? 'Inicia 8:00 a.m.' : ($now->gte(\Carbon\Carbon::today()->setTime(14, 30)) ? "{$count1445}/140" : ($libres1445 <= 0 ? "140/140" : 'libres'))
             ],
             '15:30' => [
-                'etiqueta' => '3:30 p.m. a 4:00 p.m.',
+                'etiqueta' => '3:30 p.m. a 4:30 p.m.',
                 'libres' => 'Acceso Libre',
                 'reservados' => 0,
                 'capacidad' => 'Libre',
