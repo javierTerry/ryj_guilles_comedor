@@ -94,7 +94,7 @@ class RegistroComedorController extends Controller
                 ->where('fecha', $today)
                 ->first();
 
-            // Si estamos en el horario de Acceso Libre (3:30 p.m. a 4:00 p.m. -> ventana 15:30 a 16:30) se permite el ingreso
+            // Si estamos en el horario de Acceso Libre (3:30 p.m. a 4:30 p.m. -> ventana 15:30 a 16:30) se permite el ingreso
             $esAccesoLibre = ($horaActual >= '15:30' && $horaActual <= '16:30');
 
             if (!$reservacion && !$esAccesoLibre) {
@@ -131,7 +131,7 @@ class RegistroComedorController extends Controller
                     '13:15' => '1:15 p.m. a 1:45 p.m. (Ventana: 13:00 a 14:00)',
                     '14:00' => '2:00 p.m. a 2:30 p.m. (Ventana: 13:45 a 14:45)',
                     '14:45' => '2:45 p.m. a 3:15 p.m. (Ventana: 14:30 a 15:30)',
-                    '15:30' => '3:30 p.m. a 4:00 p.m. (Acceso Libre)',
+                    '15:30' => '3:30 p.m. a 4:30 p.m. (Acceso Libre)',
                 ];
                 $ventana = $formatoHora[$horaReservada] ?? $horaReservada;
                 Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) reservó a las {$ventana} pero ingresó a las {$horaActual}.", [

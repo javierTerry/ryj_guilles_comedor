@@ -15,7 +15,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **1:15 p.m. a 1:45 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:00 a 14:00).
   * **2:00 p.m. a 2:30 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 13:45 a 14:45).
   * **2:45 p.m. a 3:15 p.m.:** Capacidad de 140 lugares (Ventana de ingreso: 14:30 a 15:30).
-  * **3:30 p.m. a 4:00 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
+  * **3:30 p.m. a 4:30 p.m.:** Acceso libre sin restricción de cupo (Ventana de ingreso: 15:15 a 16:30).
 * **Control de Duplicados:** Restricción a nivel de base de datos (`UNIQUE [empleado_id, fecha]`) para impedir que un empleado registre más de una comida por día.
 * **Estructura Lado a Lado Responsiva en Proporción 3:5:2 (`30% - 50% - 20%`):**
   1. **Scanner Control Box (`#scanner-card`):** Formulario de escaneo (`lg:flex-[3] min-w-0` - 30% del espacio relativo).
@@ -237,7 +237,7 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Campos de conversión en porcentaje (`(calificacion / 5) * 100`) y ponderaciones internas estadísticas (30%, 25%, 20%, 15%, 10%).
   * Configurado canal de logs dedicado **`encuestas`** en `config/logging.php` para almacenar la trazabilidad en `storage/logs/encuestas.log`.
 * **v2.3.2**:
-  * Actualización de horarios (12:30, 13:15, 14:00, 14:45, 15:30) y capacidad máxima de 120 lugares por turno, con horario de Acceso Libre de 3:30 p.m. a 4:00 p.m.
+  * Actualización de horarios (12:30, 13:15, 14:00, 14:45, 15:30) y capacidad máxima de 120 lugares por turno, con horario de Acceso Libre de 3:30 p.m. a 4:30 p.m.
 * **v2.3.1**:
   * Optimizado el layout a factores de crecimiento proporcionales **3:5:2 (`30% - 50% - 20%`)** en Flexbox:
     * **Scanner Control Box (`#scanner-card`)**: `lg:flex-[3] min-w-0`.
