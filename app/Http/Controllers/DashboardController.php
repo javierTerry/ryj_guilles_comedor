@@ -38,18 +38,39 @@ class DashboardController extends Controller
         $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
         $accesosMes = RegistroComedor::whereBetween('fecha', [$startOfMonth, $endOfMonth])->count();
 
-        // 2. Daily Accesses Chart (Last 15 days)
+        // Cálculo de Promedio Diario considerando únicamente días laborables (Lunes a Viernes) del mes en curso
+        $now = Carbon::now();
+        $startOfMonthObj = $now->copy()->startOfMonth();
+        $todayObj = $now->copy();
+
+        $diasLaborablesTranscurridos = 0;
+        for ($dateIter = $startOfMonthObj->copy(); $dateIter->lte($todayObj); $dateIter->addDay()) {
+            if ($dateIter->isWeekday()) {
+                $diasLaborablesTranscurridos++;
+            }
+        }
+
+        $accesosMesLaborables = RegistroComedor::whereBetween('fecha', [$startOfMonthObj->toDateString(), $todayObj->toDateString()])
+            ->whereRaw('WEEKDAY(fecha) < 5')
+            ->count();
+
+        $promedioDiario = $diasLaborablesTranscurridos > 0 ? round($accesosMesLaborables / $diasLaborablesTranscurridos, 1) : 0;
+
+        // 2. Daily Accesses Chart (Last 15 days - Filtrado exclusivamente para días laborables Lunes a Viernes)
         $dailyLabels = [];
         $dailyValues = [];
         for ($i = 14; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
-            $dateStr = $date->toDateString();
-            $dailyLabels[$dateStr] = $date->format('d/m');
-            $dailyValues[$dateStr] = 0;
+            if ($date->isWeekday()) {
+                $dateStr = $date->toDateString();
+                $dailyLabels[$dateStr] = $date->format('d/m');
+                $dailyValues[$dateStr] = 0;
+            }
         }
 
         $rawDaily = RegistroComedor::selectRaw('fecha, count(*) as count')
             ->where('fecha', '>=', Carbon::now()->subDays(14)->toDateString())
+            ->whereRaw('WEEKDAY(fecha) < 5')
             ->groupBy('fecha')
             ->get();
 
@@ -123,6 +144,7 @@ class DashboardController extends Controller
             'empleadosInactivos' => $empleadosInactivos,
             'accesosHoy' => $accesosHoy,
             'accesosMes' => $accesosMes,
+            'promedioDiario' => $promedioDiario,
 
             'dailyLabels' => array_values($dailyLabels),
             'dailyValues' => array_values($dailyValues),

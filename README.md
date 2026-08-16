@@ -298,6 +298,10 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
 * **v2.0.0**:
+  * **Dashboard de Estadísticas (Filtro Días Laborables Lunes a Viernes)**:
+    * Actualizado el gráfico **"Accesos Diarios (Últimos 15 días)"** en [DashboardController.php](file:app/Http/Controllers/DashboardController.php) y [dashboard.blade.php](file:resources/views/dashboard.blade.php) para considerar exclusivamente los días laborables (Lunes a Viernes / `$date->isWeekday()`), excluyendo sábados y domingos de la serie temporal.
+    * Reestructurada la métrica **"Promedio Diario"** para calcular la media estimada dividiendo los consumos entre la cantidad de días laborables (Lunes a Viernes) transcurridos en el mes en curso.
+    * Sincronizado el cálculo en el comando Artisan `SendDashboardReportCommand` para envíos automáticos por correo.
   * **Reporte de Reservaciones (Métricas de Asistencia y Estatus)**:
     * Agregadas en la vista inicial del reporte (`/reportes/reservas`) las tarjetas KPI de resumen: **"Total Reservaciones Registradas"**, **"Acudieron al Comedor"** (con porcentaje de cumplimiento de asistencia) y **"Reservaciones Canceladas"**.
     * Incorporadas en la tabla del reporte y en la exportación CSV (`exportReservasCsv`) las columnas **"Estatus Reserva"** (`Activa` / `Cancelada`) y **"Asistencia Al Comedor"** (`🟢 Acudió` / `🟡 Pendiente` / `⚪ Cancelada`).
