@@ -801,14 +801,29 @@ class ReporteController extends Controller
             $query->where('hora', $request->input('hora'));
         }
 
+        // Filtro por Estatus de Reservación (activa / cancelada)
+        if ($request->filled('estatus_reserva')) {
+            $query->where('estatus', $request->input('estatus_reserva'));
+        }
+
         // Rango de registros por página (Default: 25. Opciones: 25, 50, 75, 100)
         $perPage = (int) $request->input('per_page', 25);
         if (!in_array($perPage, [25, 50, 75, 100])) {
             $perPage = 25;
         }
 
-        // Total de reservaciones filtradas
+        // Métricas de Reservación y Asistencia
         $totalReservas = (clone $query)->count();
+
+        // Conteo de cuántos colaboradores con reservación activa ya acudieron al comedor en la fecha de su reservación
+        $totalAcudieron = (clone $query)
+            ->where('estatus', 'activa')
+            ->whereHas('empleado.registrosComedor', function ($q) {
+                $q->whereColumn('registro_comedors.fecha', 'reservaciones.fecha');
+            })
+            ->count();
+
+        $totalCanceladas = (clone $query)->where('estatus', 'cancelada')->count();
 
         // Paginación dinámica ordenada por fecha y hora ascendente
         $reservas = $query->orderBy('fecha', 'desc')
@@ -816,7 +831,20 @@ class ReporteController extends Controller
                           ->paginate($perPage)
                           ->withQueryString();
 
-        $hasFilters = $request->anyFilled(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora']) || $request->filled('per_page');
+        // Mapa de asistencias para las reservaciones paginadas (1 sola consulta optimizada)
+        $empleadosIds = $reservas->pluck('empleado_id')->unique();
+        $fechas = $reservas->pluck('fecha')->unique();
+
+        $asistenciasMap = RegistroComedor::whereIn('empleado_id', $empleadosIds)
+            ->whereIn('fecha', $fechas)
+            ->get(['empleado_id', 'fecha'])
+            ->mapWithKeys(function ($item) {
+                $fechaStr = ($item->fecha instanceof Carbon) ? $item->fecha->toDateString() : (string)$item->fecha;
+                return [$item->empleado_id . '_' . $fechaStr => true];
+            })
+            ->toArray();
+
+        $hasFilters = $request->anyFilled(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva']) || $request->filled('per_page');
 
         // Trazabilidad en canal dedicado 'reservas'
         Log::channel('reservas')->info('Consulta de reporte de reservaciones por día realizada', [
@@ -827,14 +855,19 @@ class ReporteController extends Controller
             'fecha_inicio_usada' => $fechaInicio,
             'fecha_fin_usada' => $fechaFin,
             'es_dia_actual_default' => !$hasCustomDateFilter,
-            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'per_page'])),
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva', 'per_page'])),
             'total_reservas' => $totalReservas,
+            'total_acudieron' => $totalAcudieron,
+            'total_canceladas' => $totalCanceladas,
         ]);
 
         return view('reportes.reservas', compact(
             'reservas',
             'departamentos',
             'totalReservas',
+            'totalAcudieron',
+            'totalCanceladas',
+            'asistenciasMap',
             'hasFilters',
             'hasCustomDateFilter',
             'perPage',
@@ -886,6 +919,10 @@ class ReporteController extends Controller
             $query->where('hora', $request->input('hora'));
         }
 
+        if ($request->filled('estatus_reserva')) {
+            $query->where('estatus', $request->input('estatus_reserva'));
+        }
+
         $totalExportar = (clone $query)->count();
 
         // Trazabilidad en canal dedicado 'reservas'
@@ -895,7 +932,7 @@ class ReporteController extends Controller
             'ip' => $request->ip(),
             'fecha_inicio' => $fechaInicio,
             'fecha_fin' => $fechaFin,
-            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora'])),
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva'])),
             'total_registros_exportados' => $totalExportar,
         ]);
 
@@ -925,14 +962,35 @@ class ReporteController extends Controller
                 'Estatus Empleado',
                 'Fecha Reservación',
                 'Horario Reservado',
+                'Estatus Reservación',
+                'Asistencia al Comedor',
                 'Fecha de Registro'
             ]);
 
             $query->orderBy('fecha', 'desc')
                   ->orderBy('hora', 'asc')
-                  ->chunk(500, function ($reservas) use ($handle) {
+                  ->chunk(200, function ($reservas) use ($handle) {
+                      $empleadosIds = $reservas->pluck('empleado_id')->unique();
+                      $fechas = $reservas->pluck('fecha')->unique();
+
+                      $asistenciasMap = RegistroComedor::whereIn('empleado_id', $empleadosIds)
+                          ->whereIn('fecha', $fechas)
+                          ->get(['empleado_id', 'fecha'])
+                          ->mapWithKeys(function ($item) {
+                              $fechaStr = ($item->fecha instanceof Carbon) ? $item->fecha->toDateString() : (string)$item->fecha;
+                              return [$item->empleado_id . '_' . $fechaStr => true];
+                          })
+                          ->toArray();
+
                       foreach ($reservas as $reserva) {
                           $emp = $reserva->empleado;
+                          $fechaStr = $reserva->fecha ? Carbon::parse($reserva->fecha)->toDateString() : '';
+                          $keyAsistencia = $reserva->empleado_id . '_' . $fechaStr;
+                          $acudio = isset($asistenciasMap[$keyAsistencia]);
+
+                          $estatusReserva = ucfirst($reserva->estatus ?? 'activa');
+                          $asistenciaTexto = $reserva->estatus === 'cancelada' ? 'Cancelada' : ($acudio ? 'Sí (Acudió)' : 'No (Sin Asistencia)');
+
                           fputcsv($handle, [
                               $reserva->id,
                               $emp->numero_empleado ?? '',
@@ -943,6 +1001,8 @@ class ReporteController extends Controller
                               $emp->activo ? 'Activo' : 'Inactivo',
                               $reserva->fecha ? Carbon::parse($reserva->fecha)->format('d/m/Y') : '',
                               $reserva->hora ? $reserva->hora . ' p.m.' : '',
+                              $estatusReserva,
+                              $asistenciaTexto,
                               $reserva->created_at ? $reserva->created_at->format('d/m/Y H:i:s') : '',
                           ]);
                       }

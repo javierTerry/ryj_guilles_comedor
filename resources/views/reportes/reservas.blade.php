@@ -6,7 +6,7 @@
                     {{ __('Reporte de Reservaciones por Día') }}
                 </h2>
                 <p class="text-xs text-gray-500 mt-1">
-                    Consulta detallada de reservaciones de comedor por colaborador y horario, filtrada por el día actual por defecto.
+                    Consulta detallada de reservaciones de comedor por colaborador y horario, trazabilidad de asistencia y estado de reservaciones.
                 </p>
             </div>
             <a href="{{ route('reportes.reservas_export', request()->query()) }}"
@@ -24,16 +24,18 @@
     <div class="py-8">
         <div class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- TARJETAS DE RESUMEN -->
+            <!-- TARJETAS DE RESUMEN DE MÉTRICAS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <!-- 1. TOTAL RESERVACIONES REGISTRADAS -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Reservaciones Registradas</p>
                         <h3 class="text-3xl font-extrabold text-indigo-600 mt-1">
                             {{ number_format($totalReservas) }}
                         </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">En el rango filtrado</p>
                     </div>
-                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <div class="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -41,45 +43,50 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <!-- 2. CUÁNTAS YA ACUDIERON (ASISTENCIA AL COMEDOR) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rango de Consulta</p>
-                        <h3 class="text-lg font-bold text-amber-600 mt-1">
-                            Del {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            @if(!$hasCustomDateFilter)
-                                <span class="text-indigo-600 font-semibold">📅 Día Actual (Por Defecto)</span>
-                            @else
-                                Personalizado por filtro
-                            @endif
-                        </p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acudieron al Comedor</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 class="text-3xl font-extrabold text-emerald-600">
+                                {{ number_format($totalAcudieron) }}
+                            </h3>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                {{ $totalReservas > 0 ? round(($totalAcudieron / $totalReservas) * 100, 1) : 0 }}% Asistencia
+                            </span>
+                        </div>
+                        <p class="text-xs text-emerald-600 font-semibold mt-0.5">Colaboradores que asistieron</p>
                     </div>
-                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <!-- 3. CANCELADAS / RANGO -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Paginación / Formato</p>
-                        <h3 class="text-xl font-bold text-slate-700 mt-1">{{ $perPage }} <span class="text-xs font-semibold text-gray-400">reservas/pág</span></h3>
-                        <p class="text-xs text-emerald-600 font-bold mt-0.5">CSV (UTF-8 Excel)</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Reservaciones Canceladas</p>
+                        <h3 class="text-3xl font-extrabold text-rose-600 mt-1">
+                            {{ number_format($totalCanceladas) }}
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            Del {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}
+                        </p>
                     </div>
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <div class="p-3.5 bg-rose-50 text-rose-600 rounded-2xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
 
             <!-- PANEL DE FILTROS Y RANGO DE FECHAS -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -90,21 +97,21 @@
 
                 <form method="GET" action="{{ route('reportes.reservas') }}" class="space-y-4 w-full">
 
-                    <!-- PRIMERA FILA: BÚSQUEDA, DEPARTAMENTO, ESTATUS Y HORARIO -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full pt-3 border-t border-gray-100">
+                    <!-- PRIMERA FILA: BÚSQUEDA Y DEPARTAMENTO -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full pt-3 border-t border-gray-100">
                         <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
-                        <div>
+                        <div class="w-full">
                             <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                placeholder="Ej: 1024 o Juan"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                placeholder="Buscar por número o nombre de colaborador..."
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
 
                         <!-- 2. FILTRO DEPARTAMENTO -->
-                        <div>
+                        <div class="w-full">
                             <label for="departamento" class="block text-xs font-semibold text-gray-600 mb-1.5">Departamento</label>
                             <select name="departamento" id="departamento"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Todos los departamentos</option>
                                 @foreach ($departamentos as $dept)
                                     <option value="{{ $dept }}" {{ request('departamento') == $dept ? 'selected' : '' }}>
@@ -113,23 +120,26 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
 
-                        <!-- 3. FILTRO ESTATUS -->
-                        <div>
+                    <!-- SEGUNDA FILA: ESTATUS EMPLEADO, HORARIO RESERVADO Y ESTATUS RESERVA (DISTRIBUIDOS UNIFORMEMENTE AL MISMO NIVEL) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full pt-3 border-t border-gray-100">
+                        <!-- 3. ESTATUS EMPLEADO -->
+                        <div class="w-full">
                             <label for="estatus" class="block text-xs font-semibold text-gray-600 mb-1.5">Estatus Empleado</label>
                             <select name="estatus" id="estatus"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Todos los estatus</option>
                                 <option value="1" {{ request('estatus') === '1' ? 'selected' : '' }}>Activo</option>
                                 <option value="0" {{ request('estatus') === '0' ? 'selected' : '' }}>Inactivo</option>
                             </select>
                         </div>
 
-                        <!-- 4. FILTRO HORARIO RESERVADO -->
-                        <div>
+                        <!-- 4. HORARIO RESERVADO -->
+                        <div class="w-full">
                             <label for="hora" class="block text-xs font-semibold text-gray-600 mb-1.5">Horario Reservado</label>
                             <select name="hora" id="hora"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Todos los horarios</option>
                                 <option value="12:30" {{ request('hora') === '12:30' ? 'selected' : '' }}>12:30 p.m.</option>
                                 <option value="13:15" {{ request('hora') === '13:15' ? 'selected' : '' }}>1:15 p.m.</option>
@@ -138,29 +148,37 @@
                                 <option value="15:30" {{ request('hora') === '15:30' ? 'selected' : '' }}>3:30 p.m.</option>
                             </select>
                         </div>
+
+                        <!-- 5. ESTATUS RESERVA -->
+                        <div class="w-full">
+                            <label for="estatus_reserva" class="block text-xs font-semibold text-gray-600 mb-1.5">Estatus Reserva</label>
+                            <select name="estatus_reserva" id="estatus_reserva"
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Todos los estados</option>
+                                <option value="activa" {{ request('estatus_reserva') === 'activa' ? 'selected' : '' }}>Activas</option>
+                                <option value="cancelada" {{ request('estatus_reserva') === 'cancelada' ? 'selected' : '' }}>Canceladas</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- SEGUNDA FILA: FECHA INICIO, FECHA FIN Y REGISTROS POR PÁGINA -->
+                    <!-- TERCERA FILA: FECHA INICIO, FECHA FIN Y REGISTROS POR PÁGINA -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full pt-3 border-t border-gray-100">
-                        <!-- 5. FECHA INICIO -->
                         <div>
                             <label for="fecha_inicio" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Inicio Reservas</label>
                             <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ $fechaInicio }}"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
-                        <!-- 6. FECHA FIN -->
                         <div>
                             <label for="fecha_fin" class="block text-xs font-semibold text-gray-600 mb-1.5">Fecha Fin Reservas</label>
                             <input type="date" name="fecha_fin" id="fecha_fin" value="{{ $fechaFin }}"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500 bg-amber-50/30" />
                         </div>
 
-                        <!-- 7. COMBO SELECTOR DE REGISTROS POR PÁGINA -->
                         <div>
                             <label for="per_page" class="block text-xs font-semibold text-gray-600 mb-1.5">Registros por Página</label>
                             <select name="per_page" id="per_page" onchange="this.form.submit()"
-                                class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 font-medium">
+                                class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 font-medium">
                                 <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 por página (por defecto)</option>
                                 <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 por página</option>
                                 <option value="75" {{ $perPage == 75 ? 'selected' : '' }}>75 por página</option>
@@ -169,18 +187,18 @@
                         </div>
                     </div>
 
-                    <!-- TERCERA FILA: BOTONES DE ACCIÓN Y NOTA DE FILTRO -->
+                    <!-- TERCERA FILA: BOTONES DE ACCIÓN -->
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
                         <div class="text-xs text-gray-500 font-medium">
                             @if(!$hasCustomDateFilter)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-semibold gap-1 border border-indigo-100">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold gap-1 border border-indigo-100">
                                     <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Mostrando automáticamente las reservaciones del Día Actual ({{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }})
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 font-semibold gap-1">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-semibold gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
@@ -191,7 +209,7 @@
 
                         <div class="flex items-center gap-3 w-full sm:w-auto">
                             <button type="submit"
-                                class="flex-1 sm:flex-none h-10 inline-flex items-center justify-center px-6 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm gap-2 whitespace-nowrap">
+                                class="flex-1 sm:flex-none h-10 inline-flex items-center justify-center px-6 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-2xs gap-2 whitespace-nowrap">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -201,7 +219,7 @@
 
                             @if ($hasFilters)
                                 <a href="{{ route('reportes.reservas') }}"
-                                    class="h-10 inline-flex items-center justify-center px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition whitespace-nowrap"
+                                    class="h-10 inline-flex items-center justify-center px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold transition whitespace-nowrap"
                                     title="Limpiar filtros (Regresa al día actual por defecto)">
                                     Limpiar Filtros
                                 </a>
@@ -213,7 +231,7 @@
             </div>
 
             <!-- TABLA DE RESERVACIONES DETALLADAS -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
                 <!-- PAGINADOR SUPERIOR -->
                 @if ($reservas->hasPages())
@@ -252,10 +270,10 @@
                                     Fecha Reservación
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Fecha de Registro
+                                    Estatus Reserva
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Estatus
+                                    Asistencia Al Comedor
                                 </th>
                             </tr>
                         </thead>
@@ -264,6 +282,9 @@
                                 @php
                                     $emp = $reserva->empleado;
                                     $fechaObj = $reserva->fecha ? \Carbon\Carbon::parse($reserva->fecha) : null;
+                                    $fechaStr = $fechaObj ? $fechaObj->toDateString() : '';
+                                    $keyAsistencia = $reserva->empleado_id . '_' . $fechaStr;
+                                    $acudio = isset($asistenciasMap[$keyAsistencia]);
                                 @endphp
                                 <tr class="hover:bg-gray-50/50 transition">
                                     <!-- Nº EMPLEADO -->
@@ -289,7 +310,7 @@
 
                                     <!-- HORARIO RESERVADO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs font-mono">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 font-mono">
                                             🕒 {{ $reserva->hora ? $reserva->hora . ' p.m.' : '-' }}
                                         </span>
                                     </td>
@@ -299,12 +320,7 @@
                                         {{ $fechaObj ? $fechaObj->format('d/m/Y') : '-' }}
                                     </td>
 
-                                    <!-- FECHA DE REGISTRO (CREACIÓN) -->
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-gray-600 font-mono">
-                                        {{ $reserva->created_at ? $reserva->created_at->format('d/m/Y H:i:s') : '-' }}
-                                    </td>
-
-                                    <!-- ESTATUS RESERVACIÓN Y EMPLEADO -->
+                                    <!-- ESTATUS RESERVACIÓN -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                         @if (($reserva->estatus ?? 'activa') === 'cancelada')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
@@ -313,6 +329,23 @@
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                                 ✅ Activa
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    <!-- ASISTENCIA AL COMEDOR (ACUDIÓ) -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                        @if (($reserva->estatus ?? 'activa') === 'cancelada')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                                ⚪ Cancelada
+                                            </span>
+                                        @elseif ($acudio)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-2xs">
+                                                🟢 Acudió
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                🟡 Pendiente / Sin registro
                                             </span>
                                         @endif
                                     </td>

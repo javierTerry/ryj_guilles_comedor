@@ -297,6 +297,15 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v1.8.1**:
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
+* **v2.0.0**:
+  * **Reporte de Reservaciones (Métricas de Asistencia y Estatus)**:
+    * Agregadas en la vista inicial del reporte (`/reportes/reservas`) las tarjetas KPI de resumen: **"Total Reservaciones Registradas"**, **"Acudieron al Comedor"** (con porcentaje de cumplimiento de asistencia) y **"Reservaciones Canceladas"**.
+    * Incorporadas en la tabla del reporte y en la exportación CSV (`exportReservasCsv`) las columnas **"Estatus Reserva"** (`Activa` / `Cancelada`) y **"Asistencia Al Comedor"** (`🟢 Acudió` / `🟡 Pendiente` / `⚪ Cancelada`).
+    * Agregado el filtro rápido por estatus de reservación (Todas / Activas / Canceladas).
+  * **Componente Blade Reutilizable `UserCard` (`laravel-blade-ui`)**:
+    * Diseñado en `resources/views/components/ui/user-card.blade.php` un componente Blade modular utilizando Tailwind CSS, avatar/iniciales, badge dinámico de estatus (`Activo`, `Inactivo`, `Pendiente`) y menú desplegable de acciones interactivo mediante Alpine.js.
+  * **Suite de Pruebas Automatizadas con Pest PHP (`laravel-pest-testing`)**:
+    * Generado en `tests/Feature/ReservacionTest.php` un conjunto de pruebas de integración para el endpoint `reservaciones.store` evaluando casos de éxito (happy path), validación de payloads, rechazo a colaboradores inactivos y restricción de duplicados por día.
 * **v1.9.0**:
   * **Sistema de Validación y Gestión de Roles de Usuario**:
     * Creada la tabla `roles` con 3 niveles jerárquicos: **Rol 1 (Super Admin)**, **Rol 2 (Admin)** y **Rol 3 (Usuario)**.
