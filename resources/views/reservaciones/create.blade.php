@@ -20,6 +20,31 @@
 
     <div class="py-8">
         <div class="w-full max-w-[95%] lg:max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- SUBMENÚ DE NAVEGACIÓN DE RESERVACIONES -->
+            <div class="flex items-center space-x-2 border-b border-gray-200 mb-6 pb-2">
+                <a href="{{ route('reservaciones.create') }}"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.create') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Reservar
+                    </span>
+                </a>
+                <a href="{{ route('reservaciones.cancel_view') }}"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.cancel_view') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Cancelar
+                    </span>
+                </a>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
                 <!-- TARJETA DEL FORMULARIO DE RESERVACIONES -->
@@ -211,119 +236,8 @@
                     </form>
                 </div>
 
-                <!-- PANEL INFORMATIVO Y LOGOTIPO -->
-                <div id="panel-informativo"
-                    class="md:col-span-7 w-full bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
-                    <div>
-                        <!-- Logotipo Comedor GILOU -->
-                        <div class="flex flex-col mb-8 relative select-none">
-                            <div class="relative inline-block">
-                                <img src="{{ asset('images/logoguilles.jpeg') }}" alt="Comedor Gilou"
-                                    class="w-44 sm:w-52 md:w-60 h-auto">
-                            </div>
-                        </div>
-
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">
-                            Reserva tu lugar en el comedor
-                        </h3>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-8">
-                            Para asegurar una mejor atención y coordinar el servicio de alimentos diariamente, por favor
-                            registre su reservación ingresando su número de colaborador y seleccionando el horario de su
-                            preferencia. Las reservaciones se realizan exclusivamente para el día de hoy.
-                        </p>
-
-                        <!-- Puntos de guía -->
-                        <div class="space-y-4 text-sm text-gray-500">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <span>5 Horarios Disponibles: 12:30 p.m. a 1:00 p.m., 1:15 p.m. a 1:45 p.m., 2:00 p.m. a
-                                    2:30 p.m., 2:45 p.m. a 3:15 p.m. y 3:30 p.m. a 4:30 p.m.</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                </div>
-                                <span>Capacidad: 120 (12:30), 140 (1:15, 2:00 y 2:45) lugares por horario (Acceso libre
-                                    de 3:30 p.m. a 4:30 p.m.).</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <span>Límite de 1 reservación por día por colaborador.
-                                    <p>Podrás reservar hasta 15 minutos antes de tu horario de comida, sujeto a
-                                        disponibilidad.
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4h4m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <span>
-                                    El sistema de reservas estará disponible todos los días a partir de las 8:00 a.m.
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                                        <path fill-rule="evenodd"
-                                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span>El colaborador debe estar registrado y activo en el sistema.</span>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                    </svg>
-                                </div>
-                                <span>Llega puntual dentro del horario que reservaste. Si no acudes en el horario
-                                    seleccionado, tu QR quedará inhabilitado. En ese caso, únicamente podrás ingresar en
-                                    el último horario disponible (3:30 p.m.)</span>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
-                                <span>
-                                    La línea de servicio cerrará al concluir cada turno y permanecerá cerrada durante 15
-                                    minutos. Durante ese periodo no habrá acceso (o servicio)
-                                </span>
-                            </div>
-
-
-                        </div>
-                    </div>
-                    </br>
-                    <div>
-                        Agradecemos tu apoyo y colaboración para mantener un servicio más ágil, ordenado y eficiente
-                        para todos.
-                        Para dudas o soporte técnico, favor de contactar a Pamela Martínez.
-                    </div>
-                </div>
+                <!-- PANEL INFORMATIVO REUTILIZABLE -->
+                @include('reservaciones.partials.panel-informativo')
 
 
             </div>
@@ -337,12 +251,12 @@
                     icon: 'success',
                     title: '¡Reservación Exitosa!',
                     html: `
-                            <div class="text-left mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm space-y-2">
-                                <div><span class="font-bold text-gray-500">Colaborador:</span> <span class="text-gray-900 font-semibold">{{ session('success_reservation')['empleado'] }}</span></div>
-                                <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-gray-900 font-semibold">{{ \Carbon\Carbon::parse(session('success_reservation')['fecha'])->format('d/m/Y') }}</span></div>
-                                <div><span class="font-bold text-gray-500">Horario:</span> <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">{{ session('success_reservation')['hora'] }} p.m.</span></div>
-                            </div>
-                        `,
+                                <div class="text-left mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm space-y-2">
+                                    <div><span class="font-bold text-gray-500">Colaborador:</span> <span class="text-gray-900 font-semibold">{{ session('success_reservation')['empleado'] }}</span></div>
+                                    <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-gray-900 font-semibold">{{ \Carbon\Carbon::parse(session('success_reservation')['fecha'])->format('d/m/Y') }}</span></div>
+                                    <div><span class="font-bold text-gray-500">Horario:</span> <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">{{ session('success_reservation')['hora'] }} p.m.</span></div>
+                                </div>
+                            `,
                     confirmButtonText: 'Entendido',
                     confirmButtonColor: '#4f46e5',
                     customClass: {
@@ -360,14 +274,15 @@
             const numEmp = document.getElementById('numero_empleado').value.trim();
             const correo = document.getElementById('correo').value.trim();
 
-            // Validación de horario de apertura (8:00 a.m.)
+            const requireReservation = @json(config('app.require_reservation', false));
+
+            // Validación de horario de apertura (8:00 a.m.) en modo normal (require_reservation = true)
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             const currentTimeMinutes = currentHour * 60 + currentMinute;
 
-            // 8:00 AM is 8 * 60 = 480 minutes
-            if (currentTimeMinutes < 480) {
+            if (requireReservation && currentTimeMinutes < 480) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Reservaciones no iniciadas',
@@ -381,21 +296,22 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Horario requerido',
-                    text: 'Por favor, elija uno de los cuatro horarios disponibles.',
+                    text: 'Por favor, elija uno de los horarios disponibles.',
                     confirmButtonColor: '#4f46e5'
                 });
                 return;
             }
 
-            // Validación de límites de 15 minutos de anticipación por horario
+            // Validación de límites de 15 minutos de anticipación en modo normal (require_reservation = true)
             const limits = {
-                '12:30': 12 * 60 + 15, // 12:15
-                '13:45': 13 * 60 + 30, // 13:30
-                '14:45': 14 * 60 + 30, // 14:30
-                '15:45': 15 * 60 + 30  // 15:30
+                '12:30': 12 * 60 + 15,
+                '13:15': 13 * 60 + 0,
+                '14:00': 13 * 60 + 45,
+                '14:45': 14 * 60 + 30,
+                '15:30': 15 * 60 + 15
             };
 
-            if (limits[hora] && currentTimeMinutes >= limits[hora]) {
+            if (requireReservation && limits[hora] && currentTimeMinutes >= limits[hora]) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Horario expirado',

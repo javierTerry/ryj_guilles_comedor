@@ -57,6 +57,9 @@ Route::post('comedor/registrar', [RegistroComedorController::class, 'store'])->n
 Route::get('reservar', [ReservacionController::class, 'create'])->name('reservaciones.create');
 Route::post('reservar', [ReservacionController::class, 'store'])->name('reservaciones.store');
 Route::get('reservar/empleado/{numero_empleado}', [ReservacionController::class, 'getEmpleadoInfo'])->name('reservaciones.empleado_info');
+Route::get('reservar/cancelar', [ReservacionController::class, 'cancelView'])->name('reservaciones.cancel_view');
+Route::post('reservar/buscar-reservacion', [ReservacionController::class, 'buscarReservacion'])->name('reservaciones.buscar_reservacion');
+Route::post('reservar/cancelar', [ReservacionController::class, 'cancelStore'])->name('reservaciones.cancel_store');
 
 // Rutas Públicas para Encuesta de Satisfacción del Comedor
 Route::get('encuesta', [EncuestaController::class, 'create'])->name('encuestas.create');

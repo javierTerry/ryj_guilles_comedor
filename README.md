@@ -315,10 +315,21 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * **Trazabilidad y Canal de Log Propio (`roles`)**:
     * Configurado el canal de log dedicado `'roles'` en `config/logging.php` que almacena registros diarios en `storage/logs/roles.log`.
     * Auditoría automática de cambios en permisos de menús, reasignaciones de rol a usuarios y accesos denegados por restricciones de seguridad.
-* **v1.8.0**:
+* **v1.7.2**:
   * Creado el **Módulo de Reportes de Visitas** (`/reportes`) accesible mediante una nueva opción en el menú de navegación principal.
   * Implementada la **Exportación a CSV** por demanda (`/reportes/exportar`) integrando codificación UTF-8 BOM para compatibilidad directa con Excel. El archivo descargado incluye todos los datos del empleado (Número, Nombre, Correo, Departamento, Puesto, Estatus) acompañados del Día de la Semana, Fecha y Hora exacta de acceso.
   * Diseñado un panel de filtros avanzados para segmentar la información por **Estatus del Empleado**, **Departamento**, **Nombre/Número de Colaborador** y **Rango de Fechas (Inicio - Fin)**.
+* **v1.8.0**:
+  * Implementado en modo **POC** el flujo de **Cancelación y Modificación de Horario de Reservaciones**.
+  * Generado el submenú **"Cancelar"** en la navegación y pestañas de la interfaz para alternar fácilmente entre los submenús "Reservar" y "Cancelar".
+  * Reestructurada la vista de reservaciones duplicando la tarjeta de reservación como `#panel-cancelacion` y extrayendo el `#panel-informativo` a una vista parcial reutilizable (`resources/views/reservaciones/partials/panel-informativo.blade.php`).
+  * Aplicada la regla de negocio de **anticipación mínima de 30 minutos** antes del horario reservado previamente para permitir la cancelación o cambio.
+  * Diseñado un flujo interactivo con **SweetAlert2** para validar Número de Colaborador y Correo Electrónico y desplegar las opciones:
+    1. **Cancelar Reservación**: Cambia el estatus a `'cancelada'` y libera el cupo de forma inmediata en el sistema.
+    2. **Cambiar Horario**: Permite seleccionar un nuevo horario disponible, marca la reservación anterior como cancelada y registra la nueva reservación activa, conservando el historial.
+    3. **Cerrar sin cambios**: Permite cerrar el modal sin aplicar ninguna modificación.
+  * Creado un canal dedicado de trazabilidad en logs: `Log::channel('cancelaciones')` escribiendo en `storage/logs/cancelaciones.log`.
+  * Actualizada la migración de base de datos (`2026_08_15_000000_add_estatus_to_reservaciones_table.php`) para añadir la columna `estatus` (`'activa'`, `'cancelada'`) y eliminar la restricción de unicidad estricta para asegurar que el historial se conserve en el reporte de reservaciones.
 * **v1.7.1**:
   * Reemplazado el logotipo por defecto en el componente `<x-application-logo>` por la imagen oficial de **Comedor GILOU** en el encabezado (header) y la barra de navegación.
   * Configurado el **Favicon oficial** en la sección `<head>` de todas las plantillas (`app`, `guest`, `welcome`) utilizando la imagen del logotipo de **Comedor GILOU** para mostrar la marca en las pestañas del navegador web.

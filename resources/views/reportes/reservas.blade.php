@@ -304,15 +304,15 @@
                                         {{ $reserva->created_at ? $reserva->created_at->format('d/m/Y H:i:s') : '-' }}
                                     </td>
 
-                                    <!-- ESTATUS EMPLEADO -->
+                                    <!-- ESTATUS RESERVACIÓN Y EMPLEADO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                        @if ($emp && $emp->activo)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                                                Activo
+                                        @if (($reserva->estatus ?? 'activa') === 'cancelada')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                🚫 Cancelada
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                                                Inactivo
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                ✅ Activa
                                             </span>
                                         @endif
                                     </td>
