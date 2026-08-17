@@ -8,32 +8,25 @@
                 <p class="text-xs text-gray-500 mt-0.5">Métricas de consumo e indicadores en tiempo real</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="hidden md:inline-flex px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
-                    Actualizado en tiempo real
-                </span>
 
                 <!-- BOTÓN DESCARGAR PDF -->
-                <button
-                    type="button"
-                    onclick="downloadDashboardPDF()"
+                <button type="button" onclick="downloadDashboardPDF()"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-semibold rounded-xl shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                    title="Descargar el Dashboard con las gráficas actuales en PDF"
-                >
+                    title="Descargar el Dashboard con las gráficas actuales en PDF">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span>Descargar PDF</span>
                 </button>
 
                 <!-- BOTÓN ENVIAR POR CORREO -->
-                <button
-                    type="button"
-                    onclick="sendDashboardReportEmail()"
+                <button type="button" onclick="sendDashboardReportEmail()"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                    title="Enviar o programar el reporte del dashboard por correo electrónico"
-                >
+                    title="Enviar o programar el reporte del dashboard por correo electrónico">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span>Enviar por Correo</span>
                 </button>
@@ -44,22 +37,32 @@
     <!-- Chart.js & html2pdf.js CDNs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom CSS for strict canvas overflow containment -->
+    <style>
+        #dashboard-report-content canvas {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+    </style>
 
     <div class="py-8">
-        <div id="dashboard-report-content" class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-8 bg-gray-50 p-4 rounded-2xl">
-            
+        <div id="dashboard-report-content"
+            class="w-full max-w-[95%] lg:max-w-[90%] mx-auto sm:px-6 lg:px-8 space-y-8 bg-gray-50 p-4 rounded-2xl">
+
             <!-- HEADER DE IMPRESIÓN / REPORTE -->
             <div class="hidden print:block pb-4 border-b border-gray-200 mb-6">
                 <h1 class="text-2xl font-bold text-gray-900">Reporte Estadístico de Comedor GILOU</h1>
-                <p class="text-xs text-gray-500">Fecha de emisión: {{ now()->translatedFormat('d \d\e F \d\e Y - H:i') }} hrs</p>
+                <p class="text-xs text-gray-500">Fecha de emisión:
+                    {{ now()->translatedFormat('d \d\e F \d\e Y - H:i') }} hrs
+                </p>
             </div>
 
             <!-- KPI CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="page-break-inside: avoid; break-inside: avoid;">
+
                 <!-- CARD 1: Total Empleados -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Empleados</p>
@@ -67,7 +70,9 @@
                         </div>
                         <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
                             </svg>
                         </div>
                     </div>
@@ -78,7 +83,8 @@
                 </div>
 
                 <!-- CARD 2: Accesos Hoy -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Comidas Hoy</p>
@@ -86,7 +92,9 @@
                         </div>
                         <div class="p-3 rounded-lg bg-emerald-50 text-emerald-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
                             </svg>
                         </div>
                     </div>
@@ -96,7 +104,8 @@
                 </div>
 
                 <!-- CARD 3: Accesos Mes -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Comidas este Mes</p>
@@ -104,7 +113,9 @@
                         </div>
                         <div class="p-3 rounded-lg bg-violet-50 text-violet-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
                             </svg>
                         </div>
                     </div>
@@ -114,17 +125,20 @@
                 </div>
 
                 <!-- CARD 4: Promedio Diario (Estimado) -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Promedio Diario</p>
                             <h3 class="text-3xl font-extrabold text-gray-800 mt-2">
-                                {{ $accesosMes > 0 ? round($accesosMes / Carbon\Carbon::now()->day, 1) : 0 }}
+                                {{ $promedioDiario }}
                             </h3>
                         </div>
                         <div class="p-3 rounded-lg bg-amber-50 text-amber-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                </path>
                             </svg>
                         </div>
                     </div>
@@ -136,54 +150,54 @@
             </div>
 
             <!-- CHARTS ROW 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full min-w-0" style="page-break-inside: avoid; break-inside: avoid;">
+
                 <!-- Chart 1: Daily Accesses -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
                         Accesos Diarios (Últimos 15 días)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="dailyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="dailyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart 2: Hourly Distribution -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-violet-500 rounded-full mr-2"></span>
-                        Distribución de Horarios (Hora Pico)
+                        Distribución de Horarios (12:00 a 17:00 hrs)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="hourlyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="hourlyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
             </div>
 
             <!-- CHARTS ROW 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full min-w-0" style="page-break-inside: avoid; break-inside: avoid;">
+
                 <!-- Chart 3: Monthly Accesses -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
                         Accesos Mensuales (Año Actual)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="monthlyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="monthlyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart 4: Department Breakdown -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-amber-500 rounded-full mr-2"></span>
                         Accesos por Departamento
                     </h3>
-                    <div class="relative flex items-center justify-center" style="height: 320px;">
-                        <canvas id="deptChart"></canvas>
+                    <div class="relative flex items-center justify-center w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="deptChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
@@ -194,7 +208,7 @@
 
     <!-- Chart configurations and export functions script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Colors configuration
             const colors = {
                 indigo: 'rgba(99, 102, 241, 1)',
@@ -323,7 +337,7 @@
             // 4. DEPARTMENT BREAKDOWN CHART
             const ctxDept = document.getElementById('deptChart').getContext('2d');
             const deptValues = @json($deptValues);
-            
+
             if (deptValues.length === 0) {
                 ctxDept.font = "14px Figtree, sans-serif";
                 ctxDept.fillStyle = "#9ca3af";
@@ -383,11 +397,12 @@
 
             const element = document.getElementById('dashboard-report-content');
             const options = {
-                margin:       [8, 8, 8, 8],
-                filename:     'Reporte_Dashboard_Comedor_' + new Date().toISOString().slice(0, 10) + '.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                margin: [8, 8, 8, 8],
+                filename: 'Reporte_Dashboard_Comedor_' + new Date().toISOString().slice(0, 10) + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             html2pdf().set(options).from(element).save().then(() => {
@@ -477,35 +492,35 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(res => res.json())
-                    .then(response => {
-                        Swal.close();
-                        if (response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '¡Reporte Enviado!',
-                                text: response.message,
-                                confirmButtonColor: '#059669',
-                                customClass: { popup: 'rounded-2xl border border-gray-100' }
-                            });
-                        } else {
+                        .then(res => res.json())
+                        .then(response => {
+                            Swal.close();
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Reporte Enviado!',
+                                    text: response.message,
+                                    confirmButtonColor: '#059669',
+                                    customClass: { popup: 'rounded-2xl border border-gray-100' }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'No se pudo enviar',
+                                    text: response.message || 'Ocurrió un fallo al enviar el reporte.',
+                                    confirmButtonColor: '#ef4444'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            Swal.close();
                             Swal.fire({
                                 icon: 'error',
-                                title: 'No se pudo enviar',
-                                text: response.message || 'Ocurrió un fallo al enviar el reporte.',
+                                title: 'Error de red',
+                                text: 'No se pudo establecer contacto con el servidor: ' + err.message,
                                 confirmButtonColor: '#ef4444'
                             });
-                        }
-                    })
-                    .catch(err => {
-                        Swal.close();
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error de red',
-                            text: 'No se pudo establecer contacto con el servidor: ' + err.message,
-                            confirmButtonColor: '#ef4444'
                         });
-                    });
                 }
             });
         }

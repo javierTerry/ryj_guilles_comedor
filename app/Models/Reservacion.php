@@ -15,7 +15,16 @@ class Reservacion extends Model
         'empleado_id',
         'fecha',
         'hora',
+        'estatus',
     ];
+
+    /**
+     * Scope a query to only include active reservations.
+     */
+    public function scopeActivas($query)
+    {
+        return $query->where('estatus', 'activa');
+    }
 
     /**
      * Get the employee that owns the reservation.

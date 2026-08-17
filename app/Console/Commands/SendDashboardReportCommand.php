@@ -45,10 +45,22 @@ class SendDashboardReportCommand extends Command
             $todayStr = Carbon::today()->toDateString();
             $accesosHoy = RegistroComedor::where('fecha', $todayStr)->count();
 
-            $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
-            $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
-            $accesosMes = RegistroComedor::whereBetween('fecha', [$startOfMonth, $endOfMonth])->count();
-            $promedioDiario = $accesosMes > 0 ? round($accesosMes / Carbon::now()->day, 1) : 0;
+            $now = Carbon::now();
+            $startOfMonthObj = $now->copy()->startOfMonth();
+            $todayObj = $now->copy();
+
+            $diasLaborablesTranscurridos = 0;
+            for ($dateIter = $startOfMonthObj->copy(); $dateIter->lte($todayObj); $dateIter->addDay()) {
+                if ($dateIter->isWeekday()) {
+                    $diasLaborablesTranscurridos++;
+                }
+            }
+
+            $accesosMesLaborables = RegistroComedor::whereBetween('fecha', [$startOfMonthObj->toDateString(), $todayObj->toDateString()])
+                ->whereRaw('WEEKDAY(fecha) < 5')
+                ->count();
+
+            $promedioDiario = $diasLaborablesTranscurridos > 0 ? round($accesosMesLaborables / $diasLaborablesTranscurridos, 1) : 0;
 
             $rawDepts = RegistroComedor::join('empleados', 'registro_comedors.empleado_id', '=', 'empleados.id')
                 ->selectRaw('COALESCE(empleados.departamento, "Sin departamento") as dept, count(*) as count')

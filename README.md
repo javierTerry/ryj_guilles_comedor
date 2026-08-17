@@ -297,6 +297,22 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v1.8.1**:
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
+* **v2.0.0**:
+  * **Dashboard de Estadísticas (Filtros de Horario, Días Laborables y Generación PDF)**:
+    * Solucionado el desbordamiento y solapamiento horizontal entre las gráficas de la primera fila en [dashboard.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/dashboard.blade.php) aplicando `min-w-0 overflow-hidden` a las columnas de la grilla CSS (`grid-cols-2`) y `max-width: 100% !important` a los elementos `<canvas>` de Chart.js.
+    * Solucionado el solapamiento/corte de gráficas al exportar el Dashboard a PDF aplicando `page-break-inside: avoid` en los contenedores de gráficas y configurando `pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }` y `scrollY: 0` en `html2pdf.js`.
+    * Acotada la gráfica **"Distribución de Horarios"** en [DashboardController.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Http/Controllers/DashboardController.php) para mostrar exclusivamente el rango de **12:00 a 17:00 hrs** (`HOUR(fecha_hora) BETWEEN 12 AND 17`).
+    * Actualizado el gráfico **"Accesos Diarios (Últimos 15 días)"** para considerar exclusivamente los días laborables (Lunes a Viernes / `$date->isWeekday()`), excluyendo sábados y domingos de la serie temporal.
+    * Reestructurada la métrica **"Promedio Diario"** para calcular la media estimada dividiendo los consumos entre la cantidad de días laborables (Lunes a Viernes) transcurridos en el mes en curso.
+    * Sincronizado el cálculo en el comando Artisan `SendDashboardReportCommand` para envíos automáticos por correo.
+  * **Reporte de Reservaciones (Métricas de Asistencia y Estatus)**:
+    * Agregadas en la vista inicial del reporte (`/reportes/reservas`) las tarjetas KPI de resumen: **"Total Reservaciones Registradas"**, **"Acudieron al Comedor"** (con porcentaje de cumplimiento de asistencia) y **"Reservaciones Canceladas"**.
+    * Incorporadas en la tabla del reporte y en la exportación CSV (`exportReservasCsv`) las columnas **"Estatus Reserva"** (`Activa` / `Cancelada`) y **"Asistencia Al Comedor"** (`🟢 Acudió` / `🟡 Pendiente` / `⚪ Cancelada`).
+    * Agregado el filtro rápido por estatus de reservación (Todas / Activas / Canceladas).
+  * **Componente Blade Reutilizable `UserCard` (`laravel-blade-ui`)**:
+    * Diseñado en `resources/views/components/ui/user-card.blade.php` un componente Blade modular utilizando Tailwind CSS, avatar/iniciales, badge dinámico de estatus (`Activo`, `Inactivo`, `Pendiente`) y menú desplegable de acciones interactivo mediante Alpine.js.
+  * **Suite de Pruebas Automatizadas con Pest PHP (`laravel-pest-testing`)**:
+    * Generado en `tests/Feature/ReservacionTest.php` un conjunto de pruebas de integración para el endpoint `reservaciones.store` evaluando casos de éxito (happy path), validación de payloads, rechazo a colaboradores inactivos y restricción de duplicados por día.
 * **v1.9.0**:
   * **Sistema de Validación y Gestión de Roles de Usuario**:
     * Creada la tabla `roles` con 3 niveles jerárquicos: **Rol 1 (Super Admin)**, **Rol 2 (Admin)** y **Rol 3 (Usuario)**.
@@ -315,10 +331,21 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * **Trazabilidad y Canal de Log Propio (`roles`)**:
     * Configurado el canal de log dedicado `'roles'` en `config/logging.php` que almacena registros diarios en `storage/logs/roles.log`.
     * Auditoría automática de cambios en permisos de menús, reasignaciones de rol a usuarios y accesos denegados por restricciones de seguridad.
-* **v1.8.0**:
+* **v1.7.2**:
   * Creado el **Módulo de Reportes de Visitas** (`/reportes`) accesible mediante una nueva opción en el menú de navegación principal.
   * Implementada la **Exportación a CSV** por demanda (`/reportes/exportar`) integrando codificación UTF-8 BOM para compatibilidad directa con Excel. El archivo descargado incluye todos los datos del empleado (Número, Nombre, Correo, Departamento, Puesto, Estatus) acompañados del Día de la Semana, Fecha y Hora exacta de acceso.
   * Diseñado un panel de filtros avanzados para segmentar la información por **Estatus del Empleado**, **Departamento**, **Nombre/Número de Colaborador** y **Rango de Fechas (Inicio - Fin)**.
+* **v1.8.0**:
+  * Implementado en modo **POC** el flujo de **Cancelación y Modificación de Horario de Reservaciones**.
+  * Generado el submenú **"Cancelar"** en la navegación y pestañas de la interfaz para alternar fácilmente entre los submenús "Reservar" y "Cancelar".
+  * Reestructurada la vista de reservaciones duplicando la tarjeta de reservación como `#panel-cancelacion` y extrayendo el `#panel-informativo` a una vista parcial reutilizable (`resources/views/reservaciones/partials/panel-informativo.blade.php`).
+  * Aplicada la regla de negocio de **anticipación mínima de 30 minutos** antes del horario reservado previamente para permitir la cancelación o cambio.
+  * Diseñado un flujo interactivo con **SweetAlert2** para validar Número de Colaborador y Correo Electrónico y desplegar las opciones:
+    1. **Cancelar Reservación**: Cambia el estatus a `'cancelada'` y libera el cupo de forma inmediata en el sistema.
+    2. **Cambiar Horario**: Permite seleccionar un nuevo horario disponible, marca la reservación anterior como cancelada y registra la nueva reservación activa, conservando el historial.
+    3. **Cerrar sin cambios**: Permite cerrar el modal sin aplicar ninguna modificación.
+  * Creado un canal dedicado de trazabilidad en logs: `Log::channel('cancelaciones')` escribiendo en `storage/logs/cancelaciones.log`.
+  * Actualizada la migración de base de datos (`2026_08_15_000000_add_estatus_to_reservaciones_table.php`) para añadir la columna `estatus` (`'activa'`, `'cancelada'`) y eliminar la restricción de unicidad estricta para asegurar que el historial se conserve en el reporte de reservaciones.
 * **v1.7.1**:
   * Reemplazado el logotipo por defecto en el componente `<x-application-logo>` por la imagen oficial de **Comedor GILOU** en el encabezado (header) y la barra de navegación.
   * Configurado el **Favicon oficial** en la sección `<head>` de todas las plantillas (`app`, `guest`, `welcome`) utilizando la imagen del logotipo de **Comedor GILOU** para mostrar la marca en las pestañas del navegador web.

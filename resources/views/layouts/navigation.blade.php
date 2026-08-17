@@ -59,6 +59,9 @@
                         <x-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                             {{ __('Reservar') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('reservaciones.cancel_view')" :active="request()->routeIs('reservaciones.cancel_view')">
+                            {{ __('Cancelar') }}
+                        </x-nav-link>
                     @endauth
                 </div>
             </div>
@@ -157,6 +160,9 @@
             @else
                 <x-responsive-nav-link :href="route('reservaciones.create')" :active="request()->routeIs('reservaciones.create')">
                     {{ __('Reservar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('reservaciones.cancel_view')" :active="request()->routeIs('reservaciones.cancel_view')">
+                    {{ __('Cancelar') }}
                 </x-responsive-nav-link>
             @endauth
         </div>
