@@ -8,10 +8,6 @@
                 <p class="text-xs text-gray-500 mt-0.5">Métricas de consumo e indicadores en tiempo real</p>
             </div>
             <div class="flex items-center gap-3">
-                <span
-                    class="hidden md:inline-flex px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
-                    Actualizado en tiempo real
-                </span>
 
                 <!-- BOTÓN DESCARGAR PDF -->
                 <button type="button" onclick="downloadDashboardPDF()"
@@ -41,7 +37,13 @@
     <!-- Chart.js & html2pdf.js CDNs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom CSS for strict canvas overflow containment -->
+    <style>
+        #dashboard-report-content canvas {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+    </style>
 
     <div class="py-8">
         <div id="dashboard-report-content"
@@ -51,15 +53,16 @@
             <div class="hidden print:block pb-4 border-b border-gray-200 mb-6">
                 <h1 class="text-2xl font-bold text-gray-900">Reporte Estadístico de Comedor GILOU</h1>
                 <p class="text-xs text-gray-500">Fecha de emisión:
-                    {{ now()->translatedFormat('d \d\e F \d\e Y - H:i') }} hrs</p>
+                    {{ now()->translatedFormat('d \d\e F \d\e Y - H:i') }} hrs
+                </p>
             </div>
 
             <!-- KPI CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="page-break-inside: avoid; break-inside: avoid;">
 
                 <!-- CARD 1: Total Empleados -->
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Empleados</p>
@@ -81,7 +84,7 @@
 
                 <!-- CARD 2: Accesos Hoy -->
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Comidas Hoy</p>
@@ -102,7 +105,7 @@
 
                 <!-- CARD 3: Accesos Mes -->
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Comidas este Mes</p>
@@ -123,7 +126,7 @@
 
                 <!-- CARD 4: Promedio Diario (Estimado) -->
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300">
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-300" style="page-break-inside: avoid; break-inside: avoid;">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Promedio Diario</p>
@@ -147,54 +150,54 @@
             </div>
 
             <!-- CHARTS ROW 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full min-w-0" style="page-break-inside: avoid; break-inside: avoid;">
 
                 <!-- Chart 1: Daily Accesses -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span>
                         Accesos Diarios (Últimos 15 días)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="dailyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="dailyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart 2: Hourly Distribution -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-violet-500 rounded-full mr-2"></span>
-                        Distribución de Horarios (Hora Pico)
+                        Distribución de Horarios (12:00 a 17:00 hrs)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="hourlyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="hourlyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
             </div>
 
             <!-- CHARTS ROW 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full min-w-0" style="page-break-inside: avoid; break-inside: avoid;">
 
                 <!-- Chart 3: Monthly Accesses -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-emerald-500 rounded-full mr-2"></span>
                         Accesos Mensuales (Año Actual)
                     </h3>
-                    <div class="relative" style="height: 320px;">
-                        <canvas id="monthlyChart"></canvas>
+                    <div class="relative w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="monthlyChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart 4: Department Breakdown -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-w-0 overflow-hidden" style="page-break-inside: avoid; break-inside: avoid;">
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <span class="w-3 h-3 bg-amber-500 rounded-full mr-2"></span>
                         Accesos por Departamento
                     </h3>
-                    <div class="relative flex items-center justify-center" style="height: 320px;">
-                        <canvas id="deptChart"></canvas>
+                    <div class="relative flex items-center justify-center w-full max-w-full overflow-hidden" style="height: 320px;">
+                        <canvas id="deptChart" class="w-full max-w-full block" style="max-width: 100% !important;"></canvas>
                     </div>
                 </div>
 
@@ -397,8 +400,9 @@
                 margin: [8, 8, 8, 8],
                 filename: 'Reporte_Dashboard_Comedor_' + new Date().toISOString().slice(0, 10) + '.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             html2pdf().set(options).from(element).save().then(() => {

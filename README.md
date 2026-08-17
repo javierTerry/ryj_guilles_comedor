@@ -298,8 +298,11 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
 * **v2.0.0**:
-  * **Dashboard de Estadísticas (Filtro Días Laborables Lunes a Viernes)**:
-    * Actualizado el gráfico **"Accesos Diarios (Últimos 15 días)"** en [DashboardController.php](file:app/Http/Controllers/DashboardController.php) y [dashboard.blade.php](file:resources/views/dashboard.blade.php) para considerar exclusivamente los días laborables (Lunes a Viernes / `$date->isWeekday()`), excluyendo sábados y domingos de la serie temporal.
+  * **Dashboard de Estadísticas (Filtros de Horario, Días Laborables y Generación PDF)**:
+    * Solucionado el desbordamiento y solapamiento horizontal entre las gráficas de la primera fila en [dashboard.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/dashboard.blade.php) aplicando `min-w-0 overflow-hidden` a las columnas de la grilla CSS (`grid-cols-2`) y `max-width: 100% !important` a los elementos `<canvas>` de Chart.js.
+    * Solucionado el solapamiento/corte de gráficas al exportar el Dashboard a PDF aplicando `page-break-inside: avoid` en los contenedores de gráficas y configurando `pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }` y `scrollY: 0` en `html2pdf.js`.
+    * Acotada la gráfica **"Distribución de Horarios"** en [DashboardController.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Http/Controllers/DashboardController.php) para mostrar exclusivamente el rango de **12:00 a 17:00 hrs** (`HOUR(fecha_hora) BETWEEN 12 AND 17`).
+    * Actualizado el gráfico **"Accesos Diarios (Últimos 15 días)"** para considerar exclusivamente los días laborables (Lunes a Viernes / `$date->isWeekday()`), excluyendo sábados y domingos de la serie temporal.
     * Reestructurada la métrica **"Promedio Diario"** para calcular la media estimada dividiendo los consumos entre la cantidad de días laborables (Lunes a Viernes) transcurridos en el mes en curso.
     * Sincronizado el cálculo en el comando Artisan `SendDashboardReportCommand` para envíos automáticos por correo.
   * **Reporte de Reservaciones (Métricas de Asistencia y Estatus)**:

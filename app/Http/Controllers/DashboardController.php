@@ -105,15 +105,16 @@ class DashboardController extends Controller
             }
         }
 
-        // 4. Hourly Distribution Chart (Peak Hours - grouping 6:00 to 20:00)
+        // 4. Hourly Distribution Chart (Peak Hours - acotado de 12:00 a 17:00 hrs)
         $hourlyLabels = [];
         $hourlyValues = [];
-        for ($h = 6; $h <= 20; $h++) {
+        for ($h = 12; $h <= 17; $h++) {
             $hourlyLabels[$h] = sprintf('%02d:00', $h);
             $hourlyValues[$h] = 0;
         }
 
         $rawHourly = RegistroComedor::selectRaw('HOUR(fecha_hora) as hour, count(*) as count')
+            ->whereRaw('HOUR(fecha_hora) BETWEEN 12 AND 17')
             ->groupBy('hour')
             ->get();
 
