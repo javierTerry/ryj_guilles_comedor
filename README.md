@@ -297,6 +297,11 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v1.8.1**:
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
+* **v2.0.1**:
+  * **Acceso a Comedor (Filtrado Exclusivo de Reservaciones Activas)**:
+    * Corregida la consulta de verificación en [RegistroComedorController.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Http/Controllers/RegistroComedorController.php) para aplicar el scope `activas()`, asegurando que si un colaborador cancela su reservación para el día de hoy, el kiosco de comedor rechace su ingreso en horarios restringidos por no contar con una reservación activa.
+    * Mantenidas e integradas todas las reglas de negocio del kiosco: validación de ventanas de tolerancia, exenciones por número de empleado y acceso libre sin restricción entre 3:30 p.m. y 4:30 p.m.
+    * Creada la suite de pruebas de integración [RegistroComedorTest.php](file:///home/javier/workspace/JYR/GUILLES/comedor/tests/Feature/RegistroComedorTest.php) para verificar el comportamiento con reservaciones activas, canceladas y en acceso libre.
 * **v2.0.0**:
   * **Dashboard de Estadísticas (Filtros de Horario, Días Laborables y Generación PDF)**:
     * Solucionado el desbordamiento y solapamiento horizontal entre las gráficas de la primera fila en [dashboard.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/dashboard.blade.php) aplicando `min-w-0 overflow-hidden` a las columnas de la grilla CSS (`grid-cols-2`) y `max-width: 100% !important` a los elementos `<canvas>` de Chart.js.

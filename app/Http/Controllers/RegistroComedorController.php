@@ -89,22 +89,23 @@ class RegistroComedorController extends Controller
         if ($requireReservation) {
             $horaActual = Carbon::now()->format('H:i');
 
-            // 2.b. Check if the employee has a reservation for today
+            // 2.b. Check if the employee has an active reservation for today
             $reservacion = Reservacion::where('empleado_id', $empleado->id)
                 ->where('fecha', $today)
+                ->activas()
                 ->first();
 
             // Si estamos en el horario de Acceso Libre (3:30 p.m. a 4:30 p.m. -> ventana 15:30 a 16:30) se permite el ingreso
             $esAccesoLibre = ($horaActual >= '15:30' && $horaActual <= '16:30');
 
             if (!$reservacion && !$esAccesoLibre) {
-                Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación para hoy.", [
+                Log::channel('comedor')->warning("Kiosco Comedor: Acceso rechazado. Colaborador {$numeroEmpleado} ({$empleado->nombre}) no cuenta con reservación activa para hoy.", [
                     'ip' => $request->ip(),
                     'empleado_id' => $empleado->id,
                 ]);
                 return redirect()->route('comedor.index')
                     ->withInput()
-                    ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación registrada para el día de hoy.");
+                    ->with('error', "El empleado {$empleado->nombre} ({$numeroEmpleado}) no cuenta con una reservación activa registrada para el día de hoy.");
             }
 
             // 2.c. Check if the employee is within the reserved schedule window
