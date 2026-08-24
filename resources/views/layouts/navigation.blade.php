@@ -78,6 +78,8 @@
                                     <span class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">SUPER ADMIN</span>
                                 @elseif(Auth::user()->isAdmin())
                                     <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                                @elseif(Auth::user()->isUsuario1())
+                                    <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">USUARIO 1</span>
                                 @endif
                             </div>
 
@@ -175,6 +177,10 @@
                     <span>{{ Auth::user()->name }}</span>
                     @if(Auth::user()->isSuperAdmin())
                         <span class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">SUPER ADMIN</span>
+                    @elseif(Auth::user()->isAdmin())
+                        <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                    @elseif(Auth::user()->isUsuario1())
+                        <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">USUARIO 1</span>
                     @endif
                 </div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>

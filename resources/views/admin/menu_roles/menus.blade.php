@@ -77,9 +77,9 @@
                                 <tr>
                                     <th class="px-6 py-3.5">Menú / Submenú</th>
                                     <th class="px-4 py-3.5">Ruta Interna</th>
-                                    <th class="px-4 py-3.5 text-center">Super Admin (Rol 1)</th>
-                                    <th class="px-4 py-3.5 text-center">Admin (Rol 2)</th>
-                                    <th class="px-4 py-3.5 text-center">Usuario (Rol 3)</th>
+                                    @foreach ($roles as $role)
+                                        <th class="px-4 py-3.5 text-center">{{ $role->nombre }} (Rol {{ $role->id }})</th>
+                                    @endforeach
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -102,26 +102,20 @@
                                         <td class="px-4 py-3.5 text-xs text-gray-500 font-mono">
                                             {{ $menu->route_name ?? '—' }}
                                         </td>
-                                        <!-- Super Admin ALWAYS checked -->
-                                        <td class="px-4 py-3.5 text-center">
-                                            <input type="checkbox" checked disabled class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-not-allowed opacity-75">
-                                        </td>
-                                        <!-- Admin Rol 2 -->
-                                        <td class="px-4 py-3.5 text-center">
-                                            <input type="checkbox" 
-                                                   name="permissions[{{ $menu->id }}][]" 
-                                                   value="2" 
-                                                   {{ $menu->roles->contains(2) ? 'checked' : '' }} 
-                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                        </td>
-                                        <!-- Usuario Rol 3 -->
-                                        <td class="px-4 py-3.5 text-center">
-                                            <input type="checkbox" 
-                                                   name="permissions[{{ $menu->id }}][]" 
-                                                   value="3" 
-                                                   {{ $menu->roles->contains(3) ? 'checked' : '' }} 
-                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                        </td>
+                                        @foreach ($roles as $role)
+                                            <td class="px-4 py-3.5 text-center">
+                                                @if ($role->id === 1)
+                                                    <!-- Super Admin ALWAYS checked -->
+                                                    <input type="checkbox" checked disabled class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-not-allowed opacity-75">
+                                                @else
+                                                    <input type="checkbox" 
+                                                           name="permissions[{{ $menu->id }}][]" 
+                                                           value="{{ $role->id }}" 
+                                                           {{ $menu->roles->contains($role->id) ? 'checked' : '' }} 
+                                                           class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                                @endif
+                                            </td>
+                                        @endforeach
                                     </tr>
 
                                     <!-- Submenús Hijos -->
@@ -134,26 +128,20 @@
                                             <td class="px-4 py-2.5 text-xs text-gray-400 font-mono">
                                                 {{ $submenu->route_name ?? '—' }}
                                             </td>
-                                            <!-- Super Admin ALWAYS checked -->
-                                            <td class="px-4 py-2.5 text-center">
-                                                <input type="checkbox" checked disabled class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-not-allowed opacity-75">
-                                            </td>
-                                            <!-- Admin Rol 2 -->
-                                            <td class="px-4 py-2.5 text-center">
-                                                <input type="checkbox" 
-                                                       name="permissions[{{ $submenu->id }}][]" 
-                                                       value="2" 
-                                                       {{ $submenu->roles->contains(2) ? 'checked' : '' }} 
-                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                            </td>
-                                            <!-- Usuario Rol 3 -->
-                                            <td class="px-4 py-2.5 text-center">
-                                                <input type="checkbox" 
-                                                       name="permissions[{{ $submenu->id }}][]" 
-                                                       value="3" 
-                                                       {{ $submenu->roles->contains(3) ? 'checked' : '' }} 
-                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                            </td>
+                                            @foreach ($roles as $role)
+                                                <td class="px-4 py-2.5 text-center">
+                                                    @if ($role->id === 1)
+                                                        <!-- Super Admin ALWAYS checked -->
+                                                        <input type="checkbox" checked disabled class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-not-allowed opacity-75">
+                                                    @else
+                                                        <input type="checkbox" 
+                                                               name="permissions[{{ $submenu->id }}][]" 
+                                                               value="{{ $role->id }}" 
+                                                               {{ $submenu->roles->contains($role->id) ? 'checked' : '' }} 
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                                    @endif
+                                                </td>
+                                            @endforeach
                                         </tr>
                                     @endforeach
                                 @endforeach
