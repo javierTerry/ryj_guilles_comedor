@@ -60,7 +60,7 @@
                             </svg>
                             Lista de Usuarios Registrados
                         </h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Asigna el rol (1: Super Admin, 2: Admin, 3: Usuario) para controlar la visibilidad de los menús</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Asigna el rol para controlar la visibilidad de los menús y permisos de cada usuario</p>
                     </div>
 
                     <!-- Control de Registros por Página (15, 25, 50, 100) -->
@@ -101,9 +101,13 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                                                 Admin (2)
                                             </span>
+                                        @elseif($u->role_id === 4)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                usuario1 (4)
+                                            </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                                                Usuario (3)
+                                                {{ $u->role ? $u->role->nombre . ' (' . $u->role_id . ')' : 'Usuario (' . $u->role_id . ')' }}
                                             </span>
                                         @endif
                                     </td>

@@ -43,6 +43,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Verificar si el usuario es Usuario1 (Rol 4).
+     */
+    public function isUsuario1(): bool
+    {
+        return (int) $this->role_id === Role::USUARIO1;
+    }
+
+    /**
      * Verificar si el usuario posee un rol específico por ID o slug.
      */
     public function hasRole($role): bool

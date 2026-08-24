@@ -297,6 +297,16 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 * **v1.8.1**:
   * Configurado el canal de logs dedicado **`reportes`** en `config/logging.php` generando archivos de trazabilidad `storage/logs/reportes-YYYY-MM-DD.log`.
   * Integrado el registro de auditoría en `ReporteController`, `DashboardController` y el comando de consola `SendDashboardReportCommand` para auditar accesos, filtros consultados, volúmenes de exportación CSV y correos despachados.
+* **v2.1.0**:
+  * **Creación del 4to Rol de Usuario (`usuario1`)**:
+    * Creada la migración `2026_08_24_000000_add_usuario1_role.php` que registra en la tabla `roles` el rol con `id = 4`, `nombre = 'usuario1'`, `slug = 'usuario1'` y descripción de acceso inicial a encuestas.
+    * Asignada por defecto la relación en `menu_role` para habilitar la visibilidad exclusiva del módulo de **Encuesta** (Menú ID `3`, ruta `encuestas.create`) para el rol `usuario1` (ID `4`).
+    * Definida la constante `Role::USUARIO1 = 4` en [Role.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Models/Role.php) y agregado el método helper `isUsuario1(): bool` en [User.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Models/User.php).
+  * **Dinamización de la Matriz de Menús y Roles en el Panel Super Admin**:
+    * Actualizada la vista [menus.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/admin/menu_roles/menus.blade.php) para renderizar dinámicamente las columnas de cabecera y celdas de checkboxes iterando sobre la colección `$roles`, soportando de forma automática cualquier nuevo rol agregado al sistema sin necesidad de modificar plantillas.
+    * Actualizadas las vistas [users.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/admin/menu_roles/users.blade.php) y [navigation.blade.php](file:///home/javier/workspace/JYR/GUILLES/comedor/resources/views/layouts/navigation.blade.php) para desplegar los badges identificadores del rol `usuario1` y fallback dinámico.
+  * **Pruebas de Integración con Pest PHP**:
+    * Creada la suite [RoleMenuTest.php](file:///home/javier/workspace/JYR/GUILLES/comedor/tests/Feature/RoleMenuTest.php) con cobertura completa sobre la definición del rol `usuario1`, método `isUsuario1()`, visibilidad inicial restringida al menú de encuestas mediante `Menu::getForUser()`, reasignación de rol por Super Admin y restricción 403 Forbidden a rutas administrativas.
 * **v2.0.1**:
   * **Acceso a Comedor (Filtrado Exclusivo de Reservaciones Activas)**:
     * Corregida la consulta de verificación en [RegistroComedorController.php](file:///home/javier/workspace/JYR/GUILLES/comedor/app/Http/Controllers/RegistroComedorController.php) para aplicar el scope `activas()`, asegurando que si un colaborador cancela su reservación para el día de hoy, el kiosco de comedor rechace su ingreso en horarios restringidos por no contar con una reservación activa.
