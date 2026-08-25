@@ -84,8 +84,8 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
 * **URL Pública:** `/encuesta` (Accesible sin necesidad de inicio de sesión).
 * **Validación de Comensal por AJAX & SweetAlert2:**
   * Para habilitar el formulario de evaluación, el comensal ingresa su **número de empleado**.
-  * **Verificación de Ingreso al Comedor:** El sistema valida contra la base de datos que el colaborador **haya registrado su acceso al comedor en la fecha actual** (`registro_comedors`). Si no ha ingresado hoy, se muestra una alerta SweetAlert indicando: *"La encuesta es exclusivamente para usuarios que ya realizaron su ingreso al comedor el día de hoy."*
-  * **Control de Unicidad Diaria (1 Encuesta por día):** Se restringe la encuesta a una sola vez al día por comensal (`UNIQUE [empleado_id, fecha]`). Si ya la realizó, se notifica mediante SweetAlert.
+  * **Acceso General para Cualquier Empleado Activo:** Se removió la restricción que exigía haber ingresado previamente al comedor en la fecha actual (`registro_comedors`). Ahora cualquier colaborador activo en la plantilla puede validar sus datos y responder la encuesta.
+  * **Control de Unicidad Diaria (1 Encuesta por día):** Se restringe la encuesta a una sola vez al día por comensal (`UNIQUE [empleado_id, fecha]`). Si ya la realizó hoy, se notifica mediante SweetAlert.
 * **Criterios de Evaluación y Estrellas (1 a 5):**
   * **Calidad de alimentos:** Sabor, frescura y variedad *(Ponderación interna: 30%)*.
   * **Limpieza e higiene:** Instalaciones, utensilios y manipulación *(Ponderación interna: 25%)*.
@@ -191,7 +191,13 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.8.0 (Actual)**:
+* **v2.9.0 (Actual)**:
+  * **Remoción de Restricción de Ingreso a Comedor en Encuestas**:
+    * Eliminada la validación obligatoria contra `registro_comedors` en `EncuestaController.php` (`validarEmpleado` y `store`), permitiendo a cualquier empleado activo responder la encuesta de satisfacción sin requerir haber escaneado ingreso al comedor el mismo día.
+    * Actualizado el badge de la vista `resources/views/encuestas/create.blade.php` a *"Colaborador verificado"*.
+    * Mantenido el control de unicidad diaria de 1 encuesta por empleado por fecha y la trazabilidad mediante `Log::channel('encuestas')`.
+    * Creada la suite de pruebas de integración `tests/Feature/EncuestaTest.php` para validar el nuevo flujo sin restricción.
+* **v2.8.0**:
   * **Excepción de Acceso para Colaboradores**:
     * Implementación de una lista de excepciones inicial (hardcoded) para 4 números de empleado que les permite el ingreso al comedor sin necesidad de contar con reservación o sin importar el horario.
   * **Actualización de Capacidades de Horarios de Comedor**:
