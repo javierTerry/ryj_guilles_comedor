@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Empleado;
 use App\Models\Encuesta;
-use App\Models\RegistroComedor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -49,27 +48,7 @@ class EncuestaController extends Controller
             ], 404);
         }
 
-        // 2. Validar que el comensal haya realizado su ingreso al comedor EL MISMO DÍA
-        $registroIngreso = RegistroComedor::where('empleado_id', $empleado->id)
-            ->where('fecha', $today)
-            ->first();
-
-        if (!$registroIngreso) {
-            Log::channel('encuestas')->warning("Validación de encuesta denegada: Sin ingreso a comedor el día de hoy.", [
-                'numero_empleado' => $numeroEmpleado,
-                'empleado_id' => $empleado->id,
-                'nombre' => $empleado->nombre
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'type' => 'warning',
-                'title' => 'Ingreso Requerido',
-                'message' => 'La encuesta es exclusivamente para usuarios que ya realizaron su ingreso al comedor el día de hoy.'
-            ], 400);
-        }
-
-        // 3. Validar que no haya respondido la encuesta el día de hoy (1 encuesta diaria)
+        // 2. Validar que no haya respondido la encuesta el día de hoy (1 encuesta diaria)
         $encuestaExistente = Encuesta::where('empleado_id', $empleado->id)
             ->where('fecha', $today)
             ->first();
@@ -127,22 +106,6 @@ class EncuestaController extends Controller
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
         $empleado = Empleado::findOrFail($validated['empleado_id']);
-
-        // Verificación de seguridad adicional
-        $registroIngreso = RegistroComedor::where('empleado_id', $empleado->id)
-            ->where('fecha', $today)
-            ->first();
-
-        if (!$registroIngreso) {
-            Log::channel('encuestas')->warning("Intento de guardar encuesta sin ingreso al comedor hoy.", [
-                'empleado_id' => $empleado->id
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'La encuesta es exclusivamente para usuarios que ya realizaron su ingreso al comedor el día de hoy.'
-            ], 400);
-        }
 
         $encuestaExistente = Encuesta::where('empleado_id', $empleado->id)
             ->where('fecha', $today)

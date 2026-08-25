@@ -80,7 +80,7 @@
                     </div>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full w-fit">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Ingreso al comedor verificado hoy
+                        Colaborador verificado
                     </span>
                 </div>
 
