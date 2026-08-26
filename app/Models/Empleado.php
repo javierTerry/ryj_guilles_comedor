@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['numero_empleado', 'nombre', 'departamento', 'puesto', 'correo', 'activo'])]
+#[Fillable(['numero_empleado', 'nombre', 'departamento', 'puesto', 'estatus', 'correo', 'activo'])]
 class Empleado extends Model
 {
     use HasFactory;
+
+    public const ESTATUS_ACTIVO = 'activo';
+    public const ESTATUS_INACTIVO = 'inactivo';
+    public const ESTATUS_BAJA_DEFINITIVA = 'baja_definitiva';
 
     /**
      * Get the attributes that should be cast.

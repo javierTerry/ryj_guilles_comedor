@@ -99,11 +99,11 @@
 
                     <!-- PRIMERA FILA: BÚSQUEDA Y DEPARTAMENTO -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full pt-3 border-t border-gray-100">
-                        <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
+                        <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO / CORREO -->
                         <div class="w-full">
-                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
+                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre, Nº Empleado o Correo</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                placeholder="Buscar por número o nombre de colaborador..."
+                                placeholder="Buscar por número, nombre o correo de colaborador..."
                                 class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
 

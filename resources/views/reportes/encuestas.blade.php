@@ -119,9 +119,9 @@
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full pt-3 border-t border-gray-100">
                         <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
                         <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
+                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre, Nº Empleado o Correo</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                placeholder="Ej: 1024 o Juan"
+                                placeholder="Ej: 1024, Juan o correo..."
                                 class="w-full h-10 text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
 

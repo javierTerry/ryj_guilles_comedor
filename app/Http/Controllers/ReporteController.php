@@ -46,7 +46,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -125,7 +126,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -236,7 +238,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -318,7 +321,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -435,7 +439,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -523,7 +528,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -776,7 +782,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -914,7 +921,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
