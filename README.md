@@ -358,8 +358,9 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Diseñado un panel de filtros avanzados para segmentar la información por **Estatus del Empleado**, **Departamento**, **Nombre/Número de Colaborador** y **Rango de Fechas (Inicio - Fin)**.
 * **v1.9.0**:
   * Creada la migración `2026_08_25_000000_create_estatus_reservaciones_table.php` y el modelo Eloquent `EstatusReservacion` para la gestión centralizada de la tabla de catálogo `estatus_reservaciones` con los estados predefinidos: `'activa'`, `'cancelada'` y `'pendiente'`.
-  * Agregado el valor **'Pendientes'** al filtro desplegable *Estatus Reserva* en el reporte de reservaciones por día (`/reportes/reservas`).
-  * Actualizado el controlador `ReporteController` para soportar el filtrado de reservaciones en estatus pendiente, cálculo de métricas acumuladas e inclusión de `total_pendientes` en el canal de logs dedicado `Log::channel('reservas')`.
+  * Creada la migración `2026_08_25_000001_create_estatus_asistencias_table.php` y el modelo Eloquent `EstatusAsistencia` para representar el catálogo de estados de asistencia al comedor con los registros: **Acudió** (`acudio`) y **Pendiente** (`pendiente`).
+  * Reemplazado el filtro desplegable *Estatus Empleado* por **Asistencia al Comedor** (`estatus_asistencia`) en el reporte de reservaciones por día (`/reportes/reservas`).
+  * Actualizado el controlador `ReporteController` (métodos de consulta y exportación CSV) para filtrar dinámicamente según si el colaborador ya acudió o tiene pendiente su asistencia al comedor cruzando con la tabla `registro_comedors`.
   * Diseñado el badge visual visualmente diferenciado (`⏳ Pendiente`) en la tabla del reporte de reservaciones.
 * **v1.8.0**:
   * Implementado en modo **POC** el flujo de **Cancelación y Modificación de Horario de Reservaciones**.
