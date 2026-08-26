@@ -6,6 +6,7 @@ use App\Models\Empleado;
 use App\Models\EmpleadoLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class EmpleadoController extends Controller
@@ -23,12 +24,13 @@ class EmpleadoController extends Controller
             $q->whereBetween('fecha', [$startOfWeek, $endOfWeek]);
         }]);
 
-        // Filter by Search (name or employee number)
+        // Filter by Search (name, employee number or email)
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -37,13 +39,22 @@ class EmpleadoController extends Controller
             $query->where('departamento', $request->input('departamento'));
         }
 
-        // Filter by Status
+        // Filter by Status (active, inactive, baja_definitiva)
         if ($request->filled('status')) {
             $status = $request->input('status');
-            if ($status === 'active') {
-                $query->where('activo', true);
-            } elseif ($status === 'inactive') {
-                $query->where('activo', false);
+            if ($status === 'active' || $status === 'activo') {
+                $query->where('activo', true)->where(function($q) {
+                    $q->where('estatus', 'activo')->orWhereNull('estatus');
+                });
+            } elseif ($status === 'inactive' || $status === 'inactivo') {
+                $query->where(function($q) {
+                    $q->where('estatus', 'inactivo')
+                      ->orWhere(function($sub) {
+                          $sub->where('activo', false)->where('estatus', '!=', 'baja_definitiva');
+                      });
+                });
+            } elseif ($status === 'baja_definitiva') {
+                $query->where('estatus', 'baja_definitiva');
             }
         }
 
@@ -61,6 +72,14 @@ class EmpleadoController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(15)
             ->get();
+
+        Log::channel('empleados')->info('Consulta de catálogo de empleados realizada', [
+            'usuario_id' => auth()->id(),
+            'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+            'ip' => $request->ip(),
+            'filtros' => array_filter($request->only(['search', 'departamento', 'status'])),
+            'total_resultados' => $empleados->total(),
+        ]);
 
         return view('empleados.index', compact('empleados', 'departamentos', 'logs'));
     }
@@ -81,6 +100,7 @@ class EmpleadoController extends Controller
             'correo' => 'required|email|max:255|unique:empleados,correo',
             'departamento' => 'nullable|string|max:255',
             'puesto' => 'nullable|string|max:255',
+            'estatus' => 'nullable|string|in:activo,inactivo,baja_definitiva',
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
@@ -90,7 +110,12 @@ class EmpleadoController extends Controller
             'correo.required' => 'El correo electrónico es obligatorio.',
             'correo.email' => 'El correo electrónico debe ser una dirección válida.',
             'correo.unique' => 'Este correo electrónico ya está registrado.',
+            'estatus.in' => 'El estatus seleccionado no es válido.',
         ]);
+
+        $estatus = $request->input('estatus', 'activo') ?: 'activo';
+        $validated['estatus'] = $estatus;
+        $validated['activo'] = ($estatus === 'activo');
 
         $empleado = Empleado::create($validated);
 
@@ -106,10 +131,19 @@ class EmpleadoController extends Controller
                 'correo' => $empleado->correo,
                 'departamento' => $empleado->departamento,
                 'puesto' => $empleado->puesto,
+                'estatus' => $empleado->estatus,
+                'activo' => $empleado->activo ? 'Activo' : 'Inactivo',
             ], JSON_UNESCAPED_UNICODE)
         ]);
 
-        return redirect()->route('empleados.index')->with('success', 'Empleado creado exitosamente.');
+        Log::channel('empleados')->info("Empleado creado exitosamente: {$empleado->nombre} ({$empleado->numero_empleado})", [
+            'usuario_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'numero_empleado' => $empleado->numero_empleado,
+            'estatus' => $empleado->estatus,
+        ]);
+
+        return redirect()->route('empleados.index')->with('success', 'Empleado dado de alta exitosamente.');
     }
 
     /**
@@ -133,6 +167,7 @@ class EmpleadoController extends Controller
             ],
             'departamento' => 'nullable|string|max:255',
             'puesto' => 'nullable|string|max:255',
+            'estatus' => 'nullable|string|in:activo,inactivo,baja_definitiva',
         ], [
             'numero_empleado.required' => 'El número de empleado es obligatorio.',
             'numero_empleado.numeric' => 'El número de empleado debe ser puramente numérico.',
@@ -142,7 +177,14 @@ class EmpleadoController extends Controller
             'correo.required' => 'El correo electrónico es obligatorio.',
             'correo.email' => 'El correo electrónico debe ser una dirección válida.',
             'correo.unique' => 'Este correo electrónico ya está registrado.',
+            'estatus.in' => 'El estatus seleccionado no es válido.',
         ]);
+
+        if ($request->filled('estatus')) {
+            $estatus = $request->input('estatus');
+            $validated['estatus'] = $estatus;
+            $validated['activo'] = ($estatus === 'activo');
+        }
 
         $original = $empleado->getOriginal();
         $empleado->update($validated);
@@ -160,17 +202,31 @@ class EmpleadoController extends Controller
             ], JSON_UNESCAPED_UNICODE)
         ]);
 
+        Log::channel('empleados')->info("Empleado actualizado exitosamente: {$empleado->nombre} ({$empleado->numero_empleado})", [
+            'usuario_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'cambios' => $changes,
+        ]);
+
         return redirect()->route('empleados.index')->with('success', 'Empleado actualizado exitosamente.');
     }
 
     /**
-     * Toggle the active status of the employee.
+     * Toggle or change the status of the employee.
      */
-    public function toggleStatus(Empleado $empleado)
+    public function toggleStatus(Request $request, Empleado $empleado)
     {
-        $oldStatus = $empleado->activo;
+        $oldStatus = $empleado->estatus ?? ($empleado->activo ? 'activo' : 'inactivo');
+        
+        if ($request->filled('estatus') && in_array($request->input('estatus'), ['activo', 'inactivo', 'baja_definitiva'])) {
+            $newStatus = $request->input('estatus');
+        } else {
+            $newStatus = ($empleado->activo || $oldStatus === 'activo') ? 'inactivo' : 'activo';
+        }
+
         $empleado->update([
-            'activo' => !$empleado->activo,
+            'estatus' => $newStatus,
+            'activo' => ($newStatus === 'activo'),
         ]);
 
         EmpleadoLog::create([
@@ -180,12 +236,26 @@ class EmpleadoController extends Controller
             'empleado_nombre' => $empleado->nombre,
             'action' => 'cambiar_estado',
             'details' => json_encode([
+                'estatus' => $newStatus,
+                'anterior' => $oldStatus,
                 'activo' => $empleado->activo ? 'Activo' : 'Inactivo',
-                'anterior' => $oldStatus ? 'Activo' : 'Inactivo'
             ], JSON_UNESCAPED_UNICODE)
         ]);
 
-        $statusMessage = $empleado->activo ? 'activado' : 'desactivado';
+        Log::channel('empleados')->info("Estatus de empleado modificado: {$empleado->numero_empleado} de '{$oldStatus}' a '{$newStatus}'", [
+            'usuario_id' => auth()->id(),
+            'empleado_id' => $empleado->id,
+            'anterior' => $oldStatus,
+            'nuevo' => $newStatus,
+        ]);
+
+        $statusLabels = [
+            'activo' => 'activado',
+            'inactivo' => 'desactivado',
+            'baja_definitiva' => 'marcado como baja definitiva',
+        ];
+
+        $statusMessage = $statusLabels[$newStatus] ?? 'actualizado';
         return redirect()->route('empleados.index')->with('success', "Empleado {$statusMessage} exitosamente.");
     }
 
@@ -202,13 +272,15 @@ class EmpleadoController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['numero_empleado', 'nombre', 'correo', 'departamento', 'puesto'];
+        $columns = ['numero_empleado', 'nombre', 'correo', 'departamento', 'puesto', 'estatus'];
 
         $callback = function() use ($columns) {
             $file = fopen('php://output', 'w');
             fputs($file, "\xEF\xBB\xBF"); // BOM for Excel UTF-8
             fputcsv($file, $columns);
-            fputcsv($file, ['1234567890', 'Juan Perez Lopez', 'juan.perez@empresa.com', 'Produccion', 'Operador A']);
+            fputcsv($file, ['1234567890', 'Juan Perez Lopez', 'juan.perez@empresa.com', 'Produccion', 'Operador A', 'activo']);
+            fputcsv($file, ['0987654321', 'Maria Garcia Ruiz', 'maria.garcia@empresa.com', 'Logistica', 'Supervisora', 'inactivo']);
+            fputcsv($file, ['1122334455', 'Carlos Sanchez Cruz', 'carlos.sanchez@empresa.com', 'Calidad', 'Inspector', 'baja_definitiva']);
             fclose($file);
         };
 
@@ -216,7 +288,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Import employees from CSV.
+     * Import employees from CSV (Creates new or updates existing status/data).
      */
     public function import(Request $request)
     {
@@ -231,7 +303,8 @@ class EmpleadoController extends Controller
         $file = $request->file('csv_file');
         $path = $file->getRealPath();
 
-        $successCount = 0;
+        $createdCount = 0;
+        $updatedCount = 0;
         $errors = [];
         
         if (($handle = fopen($path, 'r')) !== false) {
@@ -248,7 +321,7 @@ class EmpleadoController extends Controller
             }
 
             $header = array_map(function($h) {
-                return trim(str_replace(['"', "'"], '', $h));
+                return strtolower(trim(str_replace(['"', "'"], '', $h)));
             }, $header);
 
             $rowNumber = 1;
@@ -267,6 +340,7 @@ class EmpleadoController extends Controller
                 $correo = trim($row['correo'] ?? '');
                 $departamento = trim($row['departamento'] ?? '');
                 $puesto = trim($row['puesto'] ?? '');
+                $rawStatus = strtolower(trim($row['estatus'] ?? ''));
 
                 if (empty($numeroEmpleado) || empty($nombre) || empty($correo)) {
                     $errors[] = "Fila {$rowNumber}: El número de empleado, el nombre y el correo son obligatorios.";
@@ -283,48 +357,111 @@ class EmpleadoController extends Controller
                     continue;
                 }
 
-                $exists = Empleado::where('numero_empleado', $numeroEmpleado)->exists();
-                if ($exists) {
-                    $errors[] = "Fila {$rowNumber}: El número de empleado '{$numeroEmpleado}' ya está registrado.";
-                    continue;
+                // Normalización de estatus (Por defecto: 'activo')
+                if (in_array($rawStatus, ['', 'activo', 'activa', '1', 'active'])) {
+                    $estatus = 'activo';
+                } elseif (in_array($rawStatus, ['inactivo', 'inactiva', '0', 'inactive', 'desactivado', 'desactivada'])) {
+                    $estatus = 'inactivo';
+                } elseif (in_array($rawStatus, ['baja', 'baja_definitiva', 'baja definitiva', 'eliminado', 'eliminada'])) {
+                    $estatus = 'baja_definitiva';
+                } else {
+                    $estatus = 'activo';
                 }
 
-                $emailExists = Empleado::where('correo', $correo)->exists();
-                if ($emailExists) {
-                    $errors[] = "Fila {$rowNumber}: El correo '{$correo}' ya está registrado.";
-                    continue;
+                $esActivo = ($estatus === 'activo');
+
+                $existing = Empleado::where('numero_empleado', $numeroEmpleado)->first();
+
+                if ($existing) {
+                    // Verificar si el correo está ocupado por otro empleado diferente
+                    $emailConflict = Empleado::where('correo', $correo)
+                        ->where('id', '!=', $existing->id)
+                        ->exists();
+
+                    if ($emailConflict) {
+                        $errors[] = "Fila {$rowNumber}: El correo '{$correo}' ya está registrado con otro número de empleado.";
+                        continue;
+                    }
+
+                    $original = $existing->getOriginal();
+                    $existing->update([
+                        'nombre' => $nombre,
+                        'correo' => $correo,
+                        'departamento' => $departamento ?: null,
+                        'puesto' => $puesto ?: null,
+                        'estatus' => $estatus,
+                        'activo' => $esActivo,
+                    ]);
+
+                    $changes = $existing->getChanges();
+
+                    EmpleadoLog::create([
+                        'user_id' => auth()->id(),
+                        'empleado_id' => $existing->id,
+                        'empleado_numero' => $existing->numero_empleado,
+                        'empleado_nombre' => $existing->nombre,
+                        'action' => 'importar_actualizar',
+                        'details' => json_encode([
+                            'changes' => $changes,
+                            'original' => array_intersect_key($original, $changes)
+                        ], JSON_UNESCAPED_UNICODE)
+                    ]);
+
+                    $updatedCount++;
+                } else {
+                    // Verificar si el correo ya existe
+                    $emailExists = Empleado::where('correo', $correo)->exists();
+                    if ($emailExists) {
+                        $errors[] = "Fila {$rowNumber}: El correo '{$correo}' ya está registrado con otro colaborador.";
+                        continue;
+                    }
+
+                    $empleado = Empleado::create([
+                        'numero_empleado' => $numeroEmpleado,
+                        'nombre' => $nombre,
+                        'correo' => $correo,
+                        'departamento' => $departamento ?: null,
+                        'puesto' => $puesto ?: null,
+                        'estatus' => $estatus,
+                        'activo' => $esActivo,
+                    ]);
+
+                    EmpleadoLog::create([
+                        'user_id' => auth()->id(),
+                        'empleado_id' => $empleado->id,
+                        'empleado_numero' => $empleado->numero_empleado,
+                        'empleado_nombre' => $empleado->nombre,
+                        'action' => 'importar',
+                        'details' => json_encode([
+                            'nombre' => $empleado->nombre,
+                            'numero_empleado' => $empleado->numero_empleado,
+                            'correo' => $empleado->correo,
+                            'departamento' => $empleado->departamento,
+                            'puesto' => $empleado->puesto,
+                            'estatus' => $empleado->estatus,
+                            'activo' => $empleado->activo ? 'Activo' : 'Inactivo',
+                        ], JSON_UNESCAPED_UNICODE)
+                    ]);
+
+                    $createdCount++;
                 }
-
-                $empleado = Empleado::create([
-                    'numero_empleado' => $numeroEmpleado,
-                    'nombre' => $nombre,
-                    'correo' => $correo,
-                    'departamento' => $departamento ?: null,
-                    'puesto' => $puesto ?: null,
-                    'activo' => true,
-                ]);
-
-                EmpleadoLog::create([
-                    'user_id' => auth()->id(),
-                    'empleado_id' => $empleado->id,
-                    'empleado_numero' => $empleado->numero_empleado,
-                    'empleado_nombre' => $empleado->nombre,
-                    'action' => 'importar',
-                    'details' => json_encode([
-                        'nombre' => $empleado->nombre,
-                        'numero_empleado' => $empleado->numero_empleado,
-                        'correo' => $empleado->correo,
-                        'departamento' => $empleado->departamento,
-                        'puesto' => $empleado->puesto,
-                    ], JSON_UNESCAPED_UNICODE)
-                ]);
-
-                $successCount++;
             }
             fclose($handle);
         }
 
-        $message = "Se importaron {$successCount} empleados con éxito.";
+        $totalProcesados = $createdCount + $updatedCount;
+        $message = "Se procesaron {$totalProcesados} empleados con éxito ({$createdCount} nuevos registrados, {$updatedCount} actualizados/cambio de estatus).";
+
+        Log::channel('empleados')->info('Carga masiva de empleados ejecutada', [
+            'usuario_id' => auth()->id(),
+            'usuario_nombre' => auth()->user()->name ?? 'Desconocido',
+            'ip' => $request->ip(),
+            'nuevos_creados' => $createdCount,
+            'actualizados' => $updatedCount,
+            'total_procesados' => $totalProcesados,
+            'errores_conteo' => count($errors),
+        ]);
+
         if (count($errors) > 0) {
             return redirect()->route('empleados.index')
                 ->with('success', $message)
@@ -334,3 +471,4 @@ class EmpleadoController extends Controller
         return redirect()->route('empleados.index')->with('success', $message);
     }
 }
+

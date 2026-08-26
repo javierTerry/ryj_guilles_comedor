@@ -48,7 +48,8 @@
             nombre: '',
             correo: '',
             departamento: '',
-            puesto: ''
+            puesto: '',
+            estatus: 'activo'
         },
         openEdit(emp) {
             this.activeEmpleado = {
@@ -57,7 +58,8 @@
                 nombre: emp.nombre,
                 correo: emp.correo || '',
                 departamento: emp.departamento || '',
-                puesto: emp.puesto || ''
+                puesto: emp.puesto || '',
+                estatus: emp.estatus || (emp.activo ? 'activo' : 'inactivo')
             };
             this.$dispatch('open-modal', 'editar-empleado');
         }
@@ -83,7 +85,7 @@
                                 name="search"
                                 id="search"
                                 value="{{ request('search') }}"
-                                placeholder="Nombre o número de empleado..."
+                                placeholder="Nombre, número de empleado o correo..."
                                 class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm placeholder-gray-400 transition"
                             />
                         </div>
@@ -115,8 +117,9 @@
                             class="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition"
                         >
                             <option value="">Todos los Estados</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Activos</option>
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactivos</option>
+                            <option value="active" {{ in_array(request('status'), ['active', 'activo']) ? 'selected' : '' }}>Activos</option>
+                            <option value="inactive" {{ in_array(request('status'), ['inactive', 'inactivo']) ? 'selected' : '' }}>Inactivos</option>
+                            <option value="baja_definitiva" {{ request('status') == 'baja_definitiva' ? 'selected' : '' }}>Baja Definitiva</option>
                         </select>
                     </div>
 
@@ -196,14 +199,22 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                        @if ($empleado->activo)
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                        @php
+                                            $estatusActual = $empleado->estatus ?? ($empleado->activo ? 'activo' : 'inactivo');
+                                        @endphp
+                                        @if ($estatusActual === 'activo')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                                 <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full"></span>
                                                 Activo
                                             </span>
+                                        @elseif ($estatusActual === 'baja_definitiva')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                <span class="w-1.5 h-1.5 mr-1.5 bg-rose-600 rounded-full"></span>
+                                                Baja Definitiva
+                                            </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
-                                                <span class="w-1.5 h-1.5 mr-1.5 bg-rose-500 rounded-full"></span>
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                <span class="w-1.5 h-1.5 mr-1.5 bg-amber-500 rounded-full"></span>
                                                 Inactivo
                                             </span>
                                         @endif
@@ -286,7 +297,7 @@
                                     <!-- Action Badge -->
                                     @if ($log->action === 'crear')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                            Creación
+                                            Alta
                                         </span>
                                     @elseif ($log->action === 'actualizar')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-100">
@@ -296,9 +307,13 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
                                             Estado
                                         </span>
+                                    @elseif ($log->action === 'importar_actualizar')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                            Carga Masiva (Actualización)
+                                        </span>
                                     @elseif ($log->action === 'importar')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
-                                            Importación
+                                            Carga Masiva (Alta)
                                         </span>
                                     @endif
 
@@ -309,7 +324,7 @@
                                 </div>
 
                                 <!-- Change Details -->
-                                @if($log->action === 'actualizar')
+                                @if($log->action === 'actualizar' || $log->action === 'importar_actualizar')
                                     @if(isset($detailsData['changes']) && count($detailsData['changes']) > 0)
                                         <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-2">
                                             @foreach($detailsData['changes'] as $key => $val)
@@ -325,13 +340,13 @@
                                         </div>
                                     @endif
                                 @elseif($log->action === 'cambiar_estado')
-                                    @if(isset($detailsData['activo']))
+                                    @if(isset($detailsData['estatus']) || isset($detailsData['activo']))
                                         <div class="text-xs text-gray-500 mt-1">
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-50 text-slate-700 border border-slate-100 font-mono">
                                                 Estado: 
-                                                <span class="text-rose-600 line-through mx-1">{{ $detailsData['anterior'] ?? 'N/A' }}</span>
+                                                <span class="text-rose-600 line-through mx-1">{{ ucfirst($detailsData['anterior'] ?? 'N/A') }}</span>
                                                 <svg class="w-3 h-3 text-gray-400 mx-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                                <span class="text-emerald-600 font-semibold">{{ $detailsData['activo'] }}</span>
+                                                <span class="text-emerald-600 font-semibold">{{ ucfirst($detailsData['estatus'] ?? $detailsData['activo']) }}</span>
                                             </span>
                                         </div>
                                     @endif
@@ -449,6 +464,20 @@
                         placeholder="Ej. Operador A, Supervisor, etc."
                     />
                 </div>
+
+                <div>
+                    <x-input-label for="new_estatus" :value="__('Estatus Inicial')" />
+                    <select
+                        id="new_estatus"
+                        name="estatus"
+                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                    >
+                        <option value="activo" selected>Activo (Por defecto)</option>
+                        <option value="inactivo">Inactivo / Desactivado</option>
+                        <option value="baja_definitiva">Baja Definitiva / Eliminada</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Define el estado inicial del colaborador al ser dado de alta.</p>
+                </div>
             </div>
 
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
@@ -534,6 +563,20 @@
                         x-model="activeEmpleado.puesto"
                     />
                 </div>
+
+                <div>
+                    <x-input-label for="edit_estatus" :value="__('Estatus del Empleado')" />
+                    <select
+                        id="edit_estatus"
+                        name="estatus"
+                        x-model="activeEmpleado.estatus"
+                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                    >
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo / Desactivado</option>
+                        <option value="baja_definitiva">Baja Definitiva / Eliminada</option>
+                    </select>
+                </div>
             </div>
 
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
@@ -562,9 +605,11 @@
                     <p class="font-bold uppercase tracking-wider">Instrucciones de Importación:</p>
                     <ol class="list-decimal list-inside space-y-1">
                         <li>Descarga la plantilla CSV con las columnas correspondientes.</li>
-                        <li>Completa los datos en las columnas: <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">nombre</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">departamento</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">puesto</code>.</li>
-                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code> debe ser numérico con un máximo de 10 dígitos y ser único.</li>
-                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code> debe tener formato válido y ser único.</li>
+                        <li>Completa los datos en las columnas: <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">nombre</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">departamento</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">puesto</code>, <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">estatus</code>.</li>
+                        <li>La columna <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">estatus</code> admite: <span class="font-semibold text-emerald-700">activo</span> (por defecto), <span class="font-semibold text-amber-700">inactivo</span> o <span class="font-semibold text-rose-700">baja_definitiva</span>.</li>
+                        <li><strong>Actualización masiva:</strong> Si el número de empleado ya existe, la carga actualizará automáticamente sus datos y cambiará su estatus.</li>
+                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">numero_empleado</code> debe ser numérico con un máximo de 10 dígitos.</li>
+                        <li>El <code class="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">correo</code> debe tener formato válido.</li>
                         <li>Sube tu archivo y presiona importar. Se reportarán las filas exitosas y los errores si ocurren.</li>
                     </ol>
                 </div>

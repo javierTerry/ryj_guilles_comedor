@@ -356,10 +356,18 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Creado el **Módulo de Reportes de Visitas** (`/reportes`) accesible mediante una nueva opción en el menú de navegación principal.
   * Implementada la **Exportación a CSV** por demanda (`/reportes/exportar`) integrando codificación UTF-8 BOM para compatibilidad directa con Excel. El archivo descargado incluye todos los datos del empleado (Número, Nombre, Correo, Departamento, Puesto, Estatus) acompañados del Día de la Semana, Fecha y Hora exacta de acceso.
   * Diseñado un panel de filtros avanzados para segmentar la información por **Estatus del Empleado**, **Departamento**, **Nombre/Número de Colaborador** y **Rango de Fechas (Inicio - Fin)**.
+* **v1.10.0**:
+  * Creada la migración `2026_08_25_000002_add_estatus_to_empleados_table.php` para incorporar la columna `estatus` (`'activo'`, `'inactivo'`, `'baja_definitiva'`) a la tabla `empleados`.
+  * Incorporado soporte de estatus explícito en altas manuales y edición web de colaboradores con valor predeterminado `'activo'`.
+  * Diseñado el sistema de **Carga Masiva / Importación CSV con Upsert y Cambio de Estatus**: la importación ahora incluye la columna `estatus` y permite registrar colaboradores nuevos o actualizar masivamente la información y el estado de colaboradores existentes.
+  * Añadidos badges visuales en la tabla de empleados para **Activo** (verde), **Inactivo** (amarillo) y **Baja Definitiva** (rojo), junto con el filtrado avanzado por cada estado.
+  * Configurado el canal dedicado de logs `Log::channel('empleados')` en `config/logging.php` (`storage/logs/empleados.log`) para trazabilidad de altas, ediciones, cambios de estado e importaciones masivas.
+  * **Ampliación del Filtro de Búsqueda Global**: Actualizada la condición de búsqueda en el módulo de Empleados y en todos los Reportes (General, Visitas, Encuestas y Reservaciones) para permitir búsquedas por coincidencia en **Número de Empleado**, **Nombre** o **Correo Electrónico**.
 * **v1.9.0**:
   * Creada la migración `2026_08_25_000000_create_estatus_reservaciones_table.php` y el modelo Eloquent `EstatusReservacion` para la gestión centralizada de la tabla de catálogo `estatus_reservaciones` con los estados predefinidos: `'activa'`, `'cancelada'` y `'pendiente'`.
-  * Agregado el valor **'Pendientes'** al filtro desplegable *Estatus Reserva* en el reporte de reservaciones por día (`/reportes/reservas`).
-  * Actualizado el controlador `ReporteController` para soportar el filtrado de reservaciones en estatus pendiente, cálculo de métricas acumuladas e inclusión de `total_pendientes` en el canal de logs dedicado `Log::channel('reservas')`.
+  * Creada la migración `2026_08_25_000001_create_estatus_asistencias_table.php` y el modelo Eloquent `EstatusAsistencia` para representar el catálogo de estados de asistencia al comedor con los registros: **Acudió** (`acudio`) y **Pendiente** (`pendiente`).
+  * Reemplazado el filtro desplegable *Estatus Empleado* por **Asistencia al Comedor** (`estatus_asistencia`) en el reporte de reservaciones por día (`/reportes/reservas`).
+  * Actualizado el controlador `ReporteController` (métodos de consulta y exportación CSV) para filtrar dinámicamente según si el colaborador ya acudió o tiene pendiente su asistencia al comedor cruzando con la tabla `registro_comedors`.
   * Diseñado el badge visual visualmente diferenciado (`⏳ Pendiente`) en la tabla del reporte de reservaciones.
 * **v1.8.0**:
   * Implementado en modo **POC** el flujo de **Cancelación y Modificación de Horario de Reservaciones**.

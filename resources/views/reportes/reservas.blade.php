@@ -99,11 +99,11 @@
 
                     <!-- PRIMERA FILA: BÚSQUEDA Y DEPARTAMENTO -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full pt-3 border-t border-gray-100">
-                        <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO -->
+                        <!-- 1. BÚSQUEDA POR NOMBRE / NÚMERO / CORREO -->
                         <div class="w-full">
-                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre o Nº Empleado</label>
+                            <label for="search" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre, Nº Empleado o Correo</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                placeholder="Buscar por número o nombre de colaborador..."
+                                placeholder="Buscar por número, nombre o correo de colaborador..."
                                 class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
 
@@ -124,14 +124,14 @@
 
                     <!-- SEGUNDA FILA: ESTATUS EMPLEADO, HORARIO RESERVADO Y ESTATUS RESERVA (DISTRIBUIDOS UNIFORMEMENTE AL MISMO NIVEL) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full pt-3 border-t border-gray-100">
-                        <!-- 3. ESTATUS EMPLEADO -->
+                        <!-- 3. ASISTENCIA AL COMEDOR -->
                         <div class="w-full">
-                            <label for="estatus" class="block text-xs font-semibold text-gray-600 mb-1.5">Estatus Empleado</label>
-                            <select name="estatus" id="estatus"
+                            <label for="estatus_asistencia" class="block text-xs font-semibold text-gray-600 mb-1.5">Asistencia al Comedor</label>
+                            <select name="estatus_asistencia" id="estatus_asistencia"
                                 class="w-full h-10 text-sm rounded-xl border-gray-300 shadow-2xs focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">Todos los estatus</option>
-                                <option value="1" {{ request('estatus') === '1' ? 'selected' : '' }}>Activo</option>
-                                <option value="0" {{ request('estatus') === '0' ? 'selected' : '' }}>Inactivo</option>
+                                <option value="">Todas las asistencias</option>
+                                <option value="acudio" {{ request('estatus_asistencia') === 'acudio' ? 'selected' : '' }}>Acudió</option>
+                                <option value="pendiente" {{ request('estatus_asistencia') === 'pendiente' ? 'selected' : '' }}>Pendiente / Sin registro</option>
                             </select>
                         </div>
 
@@ -261,9 +261,6 @@
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Correo Electrónico
                                 </th>
-                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Departamento / Puesto
-                                </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Horario Reservado
                                 </th>
@@ -275,6 +272,9 @@
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Asistencia Al Comedor
+                                </th>
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Departamento / Puesto
                                 </th>
                             </tr>
                         </thead>
@@ -301,12 +301,6 @@
                                     <!-- CORREO -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         {{ $emp->correo ?? '-' }}
-                                    </td>
-
-                                    <!-- DEPARTAMENTO Y PUESTO -->
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        <div class="font-medium text-gray-900">{{ $emp->departamento ?? 'Sin departamento' }}</div>
-                                        <div class="text-xs text-gray-400">{{ $emp->puesto ?? 'Sin puesto' }}</div>
                                     </td>
 
                                     <!-- HORARIO RESERVADO -->
@@ -353,6 +347,12 @@
                                                 🟡 Pendiente / Sin registro
                                             </span>
                                         @endif
+                                    </td>
+
+                                    <!-- DEPARTAMENTO Y PUESTO -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <div class="font-medium text-gray-900">{{ $emp->departamento ?? 'Sin departamento' }}</div>
+                                        <div class="text-xs text-gray-400">{{ $emp->puesto ?? 'Sin puesto' }}</div>
                                     </td>
                                 </tr>
                             @empty

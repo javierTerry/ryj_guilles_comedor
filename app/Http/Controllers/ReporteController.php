@@ -46,7 +46,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -125,7 +126,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -236,7 +238,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -318,7 +321,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -435,7 +439,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -523,7 +528,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -776,7 +782,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -788,12 +795,26 @@ class ReporteController extends Controller
             });
         }
 
-        // Filtro por Estatus (Activo / Inactivo)
+        // Filtro por Estatus de Empleado (Activo / Inactivo)
         if ($request->filled('estatus')) {
             $estatus = $request->input('estatus') === '1';
             $query->whereHas('empleado', function ($q) use ($estatus) {
                 $q->where('activo', $estatus);
             });
+        }
+
+        // Filtro por Asistencia al Comedor (acudio / pendiente)
+        if ($request->filled('estatus_asistencia')) {
+            $estAsistencia = $request->input('estatus_asistencia');
+            if ($estAsistencia === 'acudio') {
+                $query->whereHas('empleado.registrosComedor', function ($q) {
+                    $q->whereColumn('registro_comedors.fecha', 'reservaciones.fecha');
+                });
+            } elseif ($estAsistencia === 'pendiente') {
+                $query->whereDoesntHave('empleado.registrosComedor', function ($q) {
+                    $q->whereColumn('registro_comedors.fecha', 'reservaciones.fecha');
+                });
+            }
         }
 
         // Filtro por Horario Reservado
@@ -845,7 +866,7 @@ class ReporteController extends Controller
             })
             ->toArray();
 
-        $hasFilters = $request->anyFilled(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva']) || $request->filled('per_page');
+        $hasFilters = $request->anyFilled(['search', 'departamento', 'estatus', 'estatus_asistencia', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva']) || $request->filled('per_page');
 
         // Trazabilidad en canal dedicado 'reservas'
         Log::channel('reservas')->info('Consulta de reporte de reservaciones por día realizada', [
@@ -856,7 +877,7 @@ class ReporteController extends Controller
             'fecha_inicio_usada' => $fechaInicio,
             'fecha_fin_usada' => $fechaFin,
             'es_dia_actual_default' => !$hasCustomDateFilter,
-            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva', 'per_page'])),
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'estatus_asistencia', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva', 'per_page'])),
             'total_reservas' => $totalReservas,
             'total_acudieron' => $totalAcudieron,
             'total_canceladas' => $totalCanceladas,
@@ -900,7 +921,8 @@ class ReporteController extends Controller
             $search = $request->input('search');
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('numero_empleado', 'like', "%{$search}%");
+                  ->orWhere('numero_empleado', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
             });
         }
 
@@ -916,6 +938,19 @@ class ReporteController extends Controller
             $query->whereHas('empleado', function ($q) use ($estatus) {
                 $q->where('activo', $estatus);
             });
+        }
+
+        if ($request->filled('estatus_asistencia')) {
+            $estAsistencia = $request->input('estatus_asistencia');
+            if ($estAsistencia === 'acudio') {
+                $query->whereHas('empleado.registrosComedor', function ($q) {
+                    $q->whereColumn('registro_comedors.fecha', 'reservaciones.fecha');
+                });
+            } elseif ($estAsistencia === 'pendiente') {
+                $query->whereDoesntHave('empleado.registrosComedor', function ($q) {
+                    $q->whereColumn('registro_comedors.fecha', 'reservaciones.fecha');
+                });
+            }
         }
 
         if ($request->filled('hora')) {
@@ -935,7 +970,7 @@ class ReporteController extends Controller
             'ip' => $request->ip(),
             'fecha_inicio' => $fechaInicio,
             'fecha_fin' => $fechaFin,
-            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva'])),
+            'filtros' => array_filter($request->only(['search', 'departamento', 'estatus', 'estatus_asistencia', 'fecha_inicio', 'fecha_fin', 'hora', 'estatus_reserva'])),
             'total_registros_exportados' => $totalExportar,
         ]);
 
