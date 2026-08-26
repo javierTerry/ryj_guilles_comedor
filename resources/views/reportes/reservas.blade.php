@@ -157,6 +157,7 @@
                                 <option value="">Todos los estados</option>
                                 <option value="activa" {{ request('estatus_reserva') === 'activa' ? 'selected' : '' }}>Activas</option>
                                 <option value="cancelada" {{ request('estatus_reserva') === 'cancelada' ? 'selected' : '' }}>Canceladas</option>
+                                <option value="pendiente" {{ request('estatus_reserva') === 'pendiente' ? 'selected' : '' }}>Pendientes</option>
                             </select>
                         </div>
                     </div>
@@ -325,6 +326,10 @@
                                         @if (($reserva->estatus ?? 'activa') === 'cancelada')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
                                                 🚫 Cancelada
+                                            </span>
+                                        @elseif (($reserva->estatus ?? 'activa') === 'pendiente')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                ⏳ Pendiente
                                             </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">

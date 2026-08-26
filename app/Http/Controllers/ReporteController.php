@@ -801,7 +801,7 @@ class ReporteController extends Controller
             $query->where('hora', $request->input('hora'));
         }
 
-        // Filtro por Estatus de Reservación (activa / cancelada)
+        // Filtro por Estatus de Reservación (activa / cancelada / pendiente)
         if ($request->filled('estatus_reserva')) {
             $query->where('estatus', $request->input('estatus_reserva'));
         }
@@ -824,6 +824,7 @@ class ReporteController extends Controller
             ->count();
 
         $totalCanceladas = (clone $query)->where('estatus', 'cancelada')->count();
+        $totalPendientes = (clone $query)->where('estatus', 'pendiente')->count();
 
         // Paginación dinámica ordenada por fecha y hora ascendente
         $reservas = $query->orderBy('fecha', 'desc')
@@ -859,6 +860,7 @@ class ReporteController extends Controller
             'total_reservas' => $totalReservas,
             'total_acudieron' => $totalAcudieron,
             'total_canceladas' => $totalCanceladas,
+            'total_pendientes' => $totalPendientes,
         ]);
 
         return view('reportes.reservas', compact(
@@ -867,6 +869,7 @@ class ReporteController extends Controller
             'totalReservas',
             'totalAcudieron',
             'totalCanceladas',
+            'totalPendientes',
             'asistenciasMap',
             'hasFilters',
             'hasCustomDateFilter',

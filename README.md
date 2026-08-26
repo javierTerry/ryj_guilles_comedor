@@ -356,6 +356,11 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Creado el **Módulo de Reportes de Visitas** (`/reportes`) accesible mediante una nueva opción en el menú de navegación principal.
   * Implementada la **Exportación a CSV** por demanda (`/reportes/exportar`) integrando codificación UTF-8 BOM para compatibilidad directa con Excel. El archivo descargado incluye todos los datos del empleado (Número, Nombre, Correo, Departamento, Puesto, Estatus) acompañados del Día de la Semana, Fecha y Hora exacta de acceso.
   * Diseñado un panel de filtros avanzados para segmentar la información por **Estatus del Empleado**, **Departamento**, **Nombre/Número de Colaborador** y **Rango de Fechas (Inicio - Fin)**.
+* **v1.9.0**:
+  * Creada la migración `2026_08_25_000000_create_estatus_reservaciones_table.php` y el modelo Eloquent `EstatusReservacion` para la gestión centralizada de la tabla de catálogo `estatus_reservaciones` con los estados predefinidos: `'activa'`, `'cancelada'` y `'pendiente'`.
+  * Agregado el valor **'Pendientes'** al filtro desplegable *Estatus Reserva* en el reporte de reservaciones por día (`/reportes/reservas`).
+  * Actualizado el controlador `ReporteController` para soportar el filtrado de reservaciones en estatus pendiente, cálculo de métricas acumuladas e inclusión de `total_pendientes` en el canal de logs dedicado `Log::channel('reservas')`.
+  * Diseñado el badge visual visualmente diferenciado (`⏳ Pendiente`) en la tabla del reporte de reservaciones.
 * **v1.8.0**:
   * Implementado en modo **POC** el flujo de **Cancelación y Modificación de Horario de Reservaciones**.
   * Generado el submenú **"Cancelar"** en la navegación y pestañas de la interfaz para alternar fácilmente entre los submenús "Reservar" y "Cancelar".
