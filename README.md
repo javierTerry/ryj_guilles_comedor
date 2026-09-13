@@ -109,11 +109,11 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **Semana Actual:** Filtra automáticamente de Lunes a Domingo de la semana en curso (calculado dinámicamente sin importar qué día de la semana se pida).
   * **Quincena:** Filtra el período del 1 al 15 del mes actual.
   * **Mensual:** Filtra desde el 1er día hasta el último día del mes actual.
-* **4 Secciones Principales (Diseño Réplica Oficial):**
-  * **Sección 1: Resumen Ejecutivo ISU:** Indicador visual tipo medidor/arco de cumplimiento mínimo contractual e índice global.
+* **4 Secciones Principales (Diseño Ejecutivo):**
+  * **Sección 1: Resumen Ejecutivo ISU:** Gauge Chart vectorial en SVG nativo (< 80% Rojo / Crítico, 80% - 85% Amarillo / Mínimo, > 85% - 100% Gradiente Verde tenue a fuerte / Óptimo) con aguja tacométrica, badge de estado contractual y tipografía optimizada para web y exportación PDF A4.
   * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación.
-  * **Sección 3: Hallazgos Críticos & Plan de Acción:** Tabla estructurada de notas al pie con hallazgos y acciones acordadas.
-  * **Sección 4: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
+  * **Sección 3: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
+  * **Sección 4: Retroalimentación de Usuarios:** Card de opiniones con 5 comentarios aleatorios de comensales (> 10 caracteres) renovados dinámicamente en cada carga de página.
 * **Botón de Imprimir / Descargar PDF:** Optimizado con reglas CSS `@media print` para renderizado perfecto en A4.
 * **Canal Dedicado de Logs (`isu_report`):** Almacena la trazabilidad de consultas del informe ISU en `storage/logs/isu_report.log`.
 
@@ -218,9 +218,18 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Función de descarga directa en formato CSV UTF-8 con BOM para Excel (`/reportes/reservas/exportar`).
   * Canal de logs dedicado **`reservas`** configurado en `config/logging.php` con registro de auditoría en `storage/logs/reservas.log`.
   * Pestaña de navegación integrada en la barra superior de todos los módulos de reportes y en el desplegable principal `navigation.blade.php`.
+* **v2.6.1**:
+  * **Optimización de Sección 1 en Informe ISU (PDF/Web):**
+    * Sustituido el indicador provisional por un **Gauge Chart vectorial nativo en SVG**, garantizando máxima resolución y compatibilidad con exportación PDF A4 (`window.print()`).
+    * Implementación del **Gauge Chart con sectores visibles divididos y aguja tacométrica**:
+      * **Sector 1 (0% a < 80%):** Rojo visible (`#ef4444`, Incumplimiento Crítico).
+      * **Sector 2 (80% a 85%):** Amarillo visible (`#f59e0b`, Cumplimiento Mínimo Contractual).
+      * **Sector 3 (> 85% a 100%):** Verde visible con gradiente (`#86efac` tenue a `#14532d` verde fuerte, Cumplimiento Óptimo).
+      * **Aguja velocímetro y cursor dinámico:** Apuntan con precisión matemática al valor exacto del porcentaje obtenido sobre el sector correspondiente.
+    * Corrección tipográfica y diseño minimalista: eliminación de textos solapados/duplicados y presentación limpia del estado contractual actual en un badge responsivo y libre de saturación visual.
+    * **Card de Retroalimentación de Usuarios (Comentarios Aleatorios):** Se reemplazó la tabla de plan de acción por una tarjeta elegante que presenta 5 comentarios de comensales seleccionados aleatoriamente (`inRandomOrder()`), con filtro de longitud superior a 10 caracteres (`CHAR_LENGTH > 10`), refrescándose con una nueva muestra aleatoria en cada recarga de página.
 * **v2.6.0**:
   * Creado el **Informe de Satisfacción del Usuario (ISU)** en formato PDF (`/reportes/isu`).
-
   * Réplica del diseño de referencia con 4 secciones principales: Resumen Ejecutivo ISU, Detalle por Criterios, Hallazgos Críticos & Plan de Acción, y Análisis de Tendencia Trimestral.
   * Filtros de período dinámicos: **Semana Actual** (Lunes a Domingo calculado automáticamente), **Quincena** (1 al 15 del mes actual) y **Mensual** (1er al último día del mes).
   * Promedios por criterios calculados a partir de las evaluaciones registradas (`calidad`, `limpieza`, `temperatura`, `atencion`, `presentacion`).
