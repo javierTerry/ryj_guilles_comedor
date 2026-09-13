@@ -78,6 +78,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general.
   * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para el reporte de visitas.
   * Canal **`reservas`**: Trazabilidad en `storage/logs/reservas.log` para el reporte de reservaciones por día.
+  * Canal **`reservas_libres`**: Trazabilidad en `storage/logs/reservas_libres.log` para auditoría y ciclo de vida de fechas en Reserva Libre.
 
 
 ### 5. Encuesta de Satisfacción del Comedor (Acceso Público)
@@ -372,6 +373,20 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Añadidos badges visuales en la tabla de empleados para **Activo** (verde), **Inactivo** (amarillo) y **Baja Definitiva** (rojo), junto con el filtrado avanzado por cada estado.
   * Configurado el canal dedicado de logs `Log::channel('empleados')` en `config/logging.php` (`storage/logs/empleados.log`) para trazabilidad de altas, ediciones, cambios de estado e importaciones masivas.
   * **Ampliación del Filtro de Búsqueda Global**: Actualizada la condición de búsqueda en el módulo de Empleados y en todos los Reportes (General, Visitas, Encuestas y Reservaciones) para permitir búsquedas por coincidencia en **Número de Empleado**, **Nombre** o **Correo Electrónico**.
+* **v1.10.0**:
+  * Implementada la funcionalidad integral **"Reserva Libre"** en el módulo de reservaciones del comedor para usuarios con roles `admin` y `super_admin`.
+  * Creada la migración `2026_09_13_000001_create_free_bookings_table.php` para la tabla `free_bookings` con campos `id`, `booking_date` (índice), `created_by` (foreignId referenciando a `users`), `status` (enum: `'activo'`, `'aplicado'`, `'cancelado'`) y timestamps.
+  * Creado el modelo Eloquent `FreeBooking` con constantes de estado, casts de fecha, scopes (`scopeActivo`, `scopeAplicado`, `scopeCancelado`), métodos de verificación y relación `createdBy`.
+  * Diseñado el Gate `'manage-free-bookings'` en `AppServiceProvider` y protegido el grupo de rutas en `routes/web.php` con middleware `['auth', 'role:admin,super-admin']`.
+  * Desarrollado `FreeBookingController` con métodos `index`, `store` y `updateStatus`, aplicando reglas de negocio estrictas: validación de fecha no pasada (`after_or_equal:today`), rechazo de duplicados activos para la misma fecha, asignación automática de `created_by = auth()->id()`, bloqueo de cambios si el estado es `aplicado` y protección de reactivación.
+  * Configurado el canal de log dedicado **`reservas_libres`** en `config/logging.php` con rotación diaria y registro de eventos de auditoría en `storage/logs/reservas_libres.log`.
+  * Diseñada la interfaz de usuario en Blade (`resources/views/reservas/libres.blade.php`) y su alias (`resources/views/reservaciones/libres.blade.php`) integrando submenú de 3 pestañas ("Reservar", "Cancelar", "Reserva Libre" condicionado por `@can('manage-free-bookings')`).
+  * Implementada tabla de seguimiento con fecha formateada (`d/m/Y`), creador, badges visuales por estatus (Verde para Activo, Azul para Aplicado, Rojo para Cancelado) y botones dinámicos de acción ("Cancelar" y "Reactivar").
+  * Integrada interactividad con **SweetAlert2** (`input: 'date'`) para la selección de fecha con validación asíncrona, modales de confirmación con estados de carga y manejo de respuestas HTTP 200, 422 y 500 con protección CSRF.
+  * Resuelto problema de direccionamiento en peticiones PATCH (`cambiarEstatus`) mediante el helper `route('reservas.libres.update_status', ...)` para garantizar compatibilidad total con servidores bajo subdirectorios (ej. `/comedor/public/`), además de blindar el procesamiento de respuestas asegurando la validación del encabezado `Content-Type: application/json` antes de deserializar.
+  * Añadidos identificadores y atributos desacoplados `data-testid` (`tab-reservar`, `tab-cancelar`, `tab-reserva-libre`, `btn-agregar-reserva-libre`, `tabla-reservas-libres`, `btn-cancelar-*`, `btn-reactivar-*`) en todas las vistas del submódulo para robustecer las pruebas automatizadas.
+  * Diseñada la infraestructura de pruebas End-to-End (E2E) con **Playwright**: archivo `playwright.config.js`, helper de autenticación `tests/e2e/helpers/auth.js`, scripts `test:e2e` y `test:e2e:ui` en `package.json`, y suite completa `tests/e2e/free-booking.spec.js` validando flujos de navegación, validaciones de modal SweetAlert2, creación, cancelación y reactivación de reservas libres.
+  * Creada suite exhaustiva de pruebas funcionales en `tests/Feature/FreeBookingTest.php` cubriendo autenticación, verificación de roles, validaciones de fecha, duplicados, visibilidad de pestañas y ciclo de vida de estados.
 * **v1.9.0**:
   * Creada la migración `2026_08_25_000000_create_estatus_reservaciones_table.php` y el modelo Eloquent `EstatusReservacion` para la gestión centralizada de la tabla de catálogo `estatus_reservaciones` con los estados predefinidos: `'activa'`, `'cancelada'` y `'pendiente'`.
   * Creada la migración `2026_08_25_000001_create_estatus_asistencias_table.php` y el modelo Eloquent `EstatusAsistencia` para representar el catálogo de estados de asistencia al comedor con los registros: **Acudió** (`acudio`) y **Pendiente** (`pendiente`).

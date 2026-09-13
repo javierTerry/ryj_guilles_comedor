@@ -8,6 +8,7 @@ use App\Http\Controllers\ReservacionController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\Admin\MenuRoleController;
+use App\Http\Controllers\FreeBookingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -60,6 +61,13 @@ Route::get('reservar/empleado/{numero_empleado}', [ReservacionController::class,
 Route::get('reservar/cancelar', [ReservacionController::class, 'cancelView'])->name('reservaciones.cancel_view');
 Route::post('reservar/buscar-reservacion', [ReservacionController::class, 'buscarReservacion'])->name('reservaciones.buscar_reservacion');
 Route::post('reservar/cancelar', [ReservacionController::class, 'cancelStore'])->name('reservaciones.cancel_store');
+
+// Rutas para Gestión de Reservas Libres (Admin y Super-Admin)
+Route::middleware(['auth', 'role:admin,super-admin'])->prefix('reservas/libres')->name('reservas.libres.')->group(function () {
+    Route::get('/', [FreeBookingController::class, 'index'])->name('index');
+    Route::post('/', [FreeBookingController::class, 'store'])->name('store');
+    Route::patch('/{freeBooking}/status', [FreeBookingController::class, 'updateStatus'])->name('update_status');
+});
 
 // Rutas Públicas para Encuesta de Satisfacción del Comedor
 Route::get('encuesta', [EncuestaController::class, 'create'])->name('encuestas.create');
