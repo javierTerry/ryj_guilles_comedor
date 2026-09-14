@@ -27,3 +27,4 @@ Thumbs.db
 
 playwright.config.js
 tests/e2e/helpers/auth.js
+ playwright-report/
