@@ -102,37 +102,165 @@
                 <!-- SECCIÓN 1 Y SECCIÓN 2 GRID -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-stretch">
                     
-                    <!-- SECCIÓN 1: RESUMEN EJECUTIVO (ISU) -->
+                    <!-- SECCIÓN 1: RESUMEN EJECUTIVO (ISU) - GAUGE CHART DIVIDIDO POR ESTADO CONTRACTUAL -->
+                    @php
+                        $val = max(0, min(100, (float)($indiceGlobal ?? 0)));
+                        
+                        // Rotación de la aguja velocímetro:
+                        // 0% => -90° (horizontal izquierda)
+                        // 50% => 0° (vertical hacia arriba)
+                        // 100% => +90° (horizontal derecha)
+                        $rotDeg = round(-90 + ($val / 100 * 180), 2);
+                        
+                        // Posición del cursor en el arco (radio r = 86, centro = 160, 130)
+                        $knobAngleDeg = 180 - ($val / 100 * 180);
+                        $knobAngleRad = deg2rad($knobAngleDeg);
+                        $knobX = round(160 + 86 * cos($knobAngleRad), 2);
+                        $knobY = round(130 - 86 * sin($knobAngleRad), 2);
+
+                        // Reglas de estado contractual dinámico solicitadas:
+                        // 1. Menor a 80%: Rojo (Incumplimiento Crítico)
+                        // 2. Entre 80% y 85%: Amarillo (Cumplimiento Mínimo)
+                        // 3. Encima de 85% hasta 100%: Verde (Cumplimiento Óptimo, degradado de tenue a fuerte)
+                        if ($val < 80) {
+                            $gaugeSolidColor = '#ef4444';
+                            $estadoNombre = 'Incumplimiento Crítico';
+                            $estadoDesc = 'Por debajo del umbral contractual (< 80%)';
+                            $badgeBg = 'bg-rose-50';
+                            $badgeText = 'text-rose-700';
+                            $badgeBorder = 'border-rose-200';
+                            $badgeIcon = '🔴';
+                        } elseif ($val <= 85) {
+                            $gaugeSolidColor = '#f59e0b';
+                            $estadoNombre = 'Cumplimiento Mínimo';
+                            $estadoDesc = 'Rango contractual aceptable (80% - 85%)';
+                            $badgeBg = 'bg-amber-50';
+                            $badgeText = 'text-amber-800';
+                            $badgeBorder = 'border-amber-200';
+                            $badgeIcon = '🟡';
+                        } else {
+                            // De verde tenue rgb(167, 243, 208) a verde fuerte rgb(21, 128, 61)
+                            $factor = ($val - 85) / 15; // 0.0 en 85%, 1.0 en 100%
+                            $rDyn = round(167 - ($factor * (167 - 21)));
+                            $gDyn = round(243 - ($factor * (243 - 128)));
+                            $bDyn = round(208 - ($factor * (208 - 61)));
+                            $gaugeSolidColor = "rgb({$rDyn}, {$gDyn}, {$bDyn})";
+                            
+                            $estadoNombre = $val >= 95 ? 'Cumplimiento Sobresaliente' : 'Cumplimiento Óptimo';
+                            $estadoDesc = 'Supera el umbral contractual (> 85%)';
+                            $badgeBg = 'bg-emerald-50';
+                            $badgeText = 'text-emerald-800';
+                            $badgeBorder = 'border-emerald-200';
+                            $badgeIcon = '🟢';
+                        }
+                    @endphp
+
                     <div class="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between bg-slate-50/50">
                         <div>
-                            <!-- Header de Sección -->
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">1</span>
-                                <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
-                                    RESUMEN EJECUTIVO (ISU)
-                                </h2>
+                            <!-- Header de Sección con Leyenda Visual de los 3 Colores -->
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">1</span>
+                                    <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
+                                        RESUMEN EJECUTIVO (ISU)
+                                    </h2>
+                                </div>
+                                <!-- Micro-Leyenda de división de colores -->
+                                <div class="flex items-center gap-1 text-[9.5px] font-bold">
+                                    <span class="px-1.5 py-0.5 rounded bg-red-100 text-red-700">🔴 &lt;80%</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">🟡 80-85%</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">🟢 &gt;85%</span>
+                                </div>
                             </div>
 
-                            <!-- Arch/Gauge Widget Visual -->
-                            <div class="relative flex flex-col items-center justify-center my-4 py-2">
-                                <div class="w-48 h-24 overflow-hidden relative">
-                                    <!-- Semi-circle Track -->
-                                    <div class="w-48 h-48 rounded-full border-[18px] border-slate-200 border-t-emerald-500 border-r-emerald-500 border-b-transparent border-l-cyan-500 absolute top-0 left-0 transform rotate-[-45deg]"></div>
-                                    <!-- Gauge Value text -->
-                                    <div class="absolute bottom-0 inset-x-0 text-center">
-                                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">CUMPLIMIENTO MÍNIMO CONTRACTUAL</div>
-                                        <div class="text-3xl font-black text-slate-900 mt-1">{{ number_format($indiceGlobal, 1) }}%</div>
-                                    </div>
-                                </div>
-                                <div class="text-[10px] text-slate-400 font-semibold uppercase mt-3">CUMPLIMIENTO MÍNIMO CONTRACTUAL</div>
+                            <!-- GAUGE CHART CON DIVISIONES DE COLOR VISIBLES (PDF Y PANTALLA) -->
+                            <div class="relative flex flex-col items-center justify-center pt-2 pb-1">
+                                <svg viewBox="0 0 320 160" class="w-full max-w-[295px] h-auto overflow-visible select-none">
+                                    <defs>
+                                        <!-- Gradiente para el Sector 3 (> 85% a 100%): Verde tenue a Verde fuerte -->
+                                        <linearGradient id="gaugeSectorGreenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#86efac" />  <!-- Verde tenue en 85% -->
+                                            <stop offset="50%" stop-color="#22c55e" /> <!-- Verde medio -->
+                                            <stop offset="100%" stop-color="#14532d" /><!-- Verde fuerte en 100% -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- 1. SECTORES VISIBLEMENTE DIVIDIDOS (ROJO, AMARILLO Y VERDE) -->
+                                    <!-- SECTOR 1: 🔴 ROJO (< 80%, Incumplimiento Crítico) -->
+                                    <path d="M 74 130 A 86 86 0 0 1 228.23 77.65" 
+                                          fill="none" 
+                                          stroke="#ef4444" 
+                                          stroke-width="17" 
+                                          stroke-linecap="round" />
+                                    
+                                    <!-- SECTOR 2: 🟡 AMARILLO (80% - 85%, Cumplimiento Mínimo) -->
+                                    <path d="M 230.87 81.29 A 86 86 0 0 1 235.58 88.96" 
+                                          fill="none" 
+                                          stroke="#f59e0b" 
+                                          stroke-width="17" 
+                                          stroke-linecap="butt" />
+                                    
+                                    <!-- SECTOR 3: 🟢 VERDE (> 85% - 100%, Cumplimiento Óptimo: tenue a fuerte) -->
+                                    <path d="M 237.62 92.98 A 86 86 0 0 1 246 130" 
+                                          fill="none" 
+                                          stroke="url(#gaugeSectorGreenGradient)" 
+                                          stroke-width="17" 
+                                          stroke-linecap="round" />
+
+                                    <!-- 2. MARCADORES DE UMBRAL Y ETIQUETAS DE ESCALA -->
+                                    <!-- Tick 80% (Límite Rojo / Amarillo) -->
+                                    <line x1="228.23" y1="77.65" x2="237.5" y2="71.8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+                                    <text x="245" y="68" font-size="9" font-weight="900" fill="#d97706" text-anchor="start" font-family="sans-serif">80%</text>
+
+                                    <!-- Tick 85% (Límite Amarillo / Verde) -->
+                                    <line x1="237.62" y1="92.98" x2="247.3" y2="88.0" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
+                                    <text x="254" y="87" font-size="9" font-weight="900" fill="#059669" text-anchor="start" font-family="sans-serif">85%</text>
+
+                                    <!-- Etiquetas de Base 0% y 100% -->
+                                    <text x="54" y="146" font-size="10" font-weight="700" fill="#94a3b8" text-anchor="middle" font-family="sans-serif">0%</text>
+                                    <text x="266" y="146" font-size="10" font-weight="700" fill="#94a3b8" text-anchor="middle" font-family="sans-serif">100%</text>
+
+                                    <!-- 3. AGUJA DE PRECISIÓN DEL TACÓMETRO (APUNTA AL VALOR ACTUAL) -->
+                                    <g transform="rotate({{ $rotDeg }}, 160, 130)">
+                                        <polygon points="157.5,130 162.5,130 160.8,58 159.2,58" fill="#1e293b" opacity="0.95" />
+                                        <circle cx="160" cy="130" r="7.5" fill="#0f172a" />
+                                        <circle cx="160" cy="130" r="3" fill="#ffffff" />
+                                    </g>
+
+                                    <!-- 4. CURSOR / PUNTERO INDICADOR EN EL ARCO -->
+                                    <circle cx="{{ $knobX }}" cy="{{ $knobY }}" r="8" fill="#ffffff" stroke="#0f172a" stroke-width="3" />
+                                    <circle cx="{{ $knobX }}" cy="{{ $knobY }}" r="3.5" fill="{{ $gaugeSolidColor }}" />
+
+                                    <!-- 5. VALOR NUMÉRICO CENTRAL Y ETIQUETA -->
+                                    <text x="160" y="98" text-anchor="middle" font-size="32" font-weight="900" fill="#0f172a" font-family="sans-serif">
+                                        {{ number_format($val, 1) }}%
+                                    </text>
+                                    <text x="160" y="115" text-anchor="middle" font-size="9" font-weight="800" fill="#64748b" letter-spacing="1.2" font-family="sans-serif">
+                                        ÍNDICE ISU OBTENIDO
+                                    </text>
+                                </svg>
                             </div>
                         </div>
 
-                        <!-- Footer Pill de la Sección 1 -->
-                        <div class="mt-4 bg-slate-100 border border-slate-200 rounded-xl p-3 text-center">
-                            <span class="text-xs font-bold text-slate-700">
-                                Índice Global: <span class="text-slate-900 font-black">{{ number_format($indiceGlobal, 1) }}%</span> - Estado: <span class="{{ $indiceGlobal >= 80 ? 'text-emerald-700' : 'text-amber-700' }} font-bold">{{ $indiceGlobal >= 80 ? 'Aprobado' : 'En Proceso' }}</span>
-                            </span>
+                        <!-- ESTADO CONTRACTUAL DINÁMICO -->
+                        <div class="mt-4">
+                            <!-- Badge de Estado Actual Dinámico -->
+                            <div class="flex items-center justify-between px-4 py-2.5 rounded-xl {{ $badgeBg }} border {{ $badgeBorder }} shadow-2xs">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-base leading-none">{{ $badgeIcon }}</span>
+                                    <div>
+                                        <div class="text-xs font-black {{ $badgeText }} uppercase tracking-tight leading-tight">
+                                            {{ $estadoNombre }}
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 font-medium leading-tight">
+                                            {{ $estadoDesc }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-black {{ $badgeText }}">
+                                    {{ number_format($val, 1) }}%
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -201,11 +329,11 @@
 
                 </div>
 
-                <!-- SECCIÓN 4: ANÁLISIS DE TENDENCIA TRIMESTRAL (GRÁFICA DE ÁREA) -->
+                <!-- SECCIÓN 3: ANÁLISIS DE TENDENCIA TRIMESTRAL (GRÁFICA DE ÁREA) -->
                 <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">4</span>
+                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">3</span>
                             <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
                                 ANÁLISIS DE TENDENCIA TRIMESTRAL
                             </h2>
@@ -274,50 +402,51 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 3: HALLAZGOS CRÍTICOS & PLAN DE ACCIÓN (UBICADO AL FINAL DEL DOCUMENTO COMO NOTAS) -->
+                <!-- SECCIÓN 4: RETROALIMENTACIÓN DE USUARIOS (5 COMENTARIOS ALEATORIOS) -->
                 <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">3</span>
-                            <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
-                                HALLAZGOS CRÍTICOS & PLAN DE ACCIÓN
-                            </h2>
+                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-black text-sm shadow-sm">4</span>
+                            <div>
+                                <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
+                                    RETROALIMENTACIÓN DE USUARIOS
+                                </h2>
+                                <p class="text-[11px] text-slate-500 font-medium">Muestra aleatoria de opiniones de comensales (> 10 caracteres)</p>
+                            </div>
                         </div>
-                        <span class="text-slate-600">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 shadow-2xs flex items-center gap-1.5">
+                            <span>💬</span> 5 Comentarios Aleatorios
                         </span>
                     </div>
 
-                    <!-- Tabla de Hallazgos y Plan de Acción -->
-                    <div class="overflow-hidden border border-slate-200 rounded-xl bg-white">
-                        <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
-                            <thead class="bg-slate-800 text-white uppercase font-black tracking-wider">
-                                <tr>
-                                    <th scope="col" class="py-3 px-4 w-1/2 text-center">HALLAZGOS</th>
-                                    <th scope="col" class="py-3 px-4 w-1/2 text-center">PLAN DE ACCIÓN</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 font-medium text-slate-700">
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3 px-4 align-top">
-                                        1. Temperatura inconsistente en platillos principales (horas pico de servicio).
-                                    </td>
-                                    <td class="py-3 px-4 align-top">
-                                        1. Ajuste y calibración de equipos de calentamiento continuo. (Responsable: Proveedor, Fecha: 15 Nov)
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3 px-4 align-top">
-                                        2. Solicitud de mayor variedad en barras de ensaladas y guisados.
-                                    </td>
-                                    <td class="py-3 px-4 align-top">
-                                        2. Introducción de nuevo menú con opciones rotativas semanales. (Responsable: Proveedor, Fecha: 01 Dic)
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Listado de Comentarios -->
+                    <div class="space-y-2.5">
+                        @forelse($comentariosAleatorios as $idx => $coment)
+                            <div class="bg-white border border-slate-200/90 rounded-xl p-3.5 shadow-2xs flex items-start gap-3">
+                                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-700 font-black text-xs flex items-center justify-center shrink-0 mt-0.5 border border-indigo-100">
+                                    {{ $idx + 1 }}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-semibold text-slate-700 leading-relaxed italic">
+                                        "{{ $coment->comentarios }}"
+                                    </p>
+                                    @if(!empty($coment->fecha))
+                                        <div class="flex items-center gap-3 mt-1.5 text-[10.5px] text-slate-400 font-medium">
+                                            <span>📅 {{ \Carbon\Carbon::parse($coment->fecha)->format('d/m/Y') }}</span>
+                                            @if(!empty($coment->calificacion))
+                                                <span class="text-amber-500 font-bold">
+                                                    {{ str_repeat('★', (int)$coment->calificacion) }} ({{ $coment->calificacion }}/5)
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="bg-white border border-dashed border-slate-300 rounded-xl p-6 text-center text-xs text-slate-400">
+                                No se encontraron comentarios registrados con más de 10 caracteres.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 

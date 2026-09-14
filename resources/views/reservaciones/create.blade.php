@@ -24,6 +24,7 @@
             <!-- SUBMENÚ DE NAVEGACIÓN DE RESERVACIONES -->
             <div class="flex items-center space-x-2 border-b border-gray-200 mb-6 pb-2">
                 <a href="{{ route('reservaciones.create') }}"
+                    data-testid="tab-reservar"
                     class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.create') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                     <span class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,6 +35,7 @@
                     </span>
                 </a>
                 <a href="{{ route('reservaciones.cancel_view') }}"
+                    data-testid="tab-cancelar"
                     class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.cancel_view') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                     <span class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,6 +45,19 @@
                         Cancelar
                     </span>
                 </a>
+                @can('manage-free-bookings')
+                <a href="{{ route('reservas.libres.index') }}"
+                    data-testid="tab-reserva-libre"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservas.libres.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Reserva Libre
+                    </span>
+                </a>
+                @endcan
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-stretch">
@@ -119,22 +134,101 @@
                             </div>
                         </div>
 
-                        <!-- FECHA -->
-                        <div class="space-y-2">
-                            <span class="block text-sm font-semibold text-gray-700">
-                                Fecha de reservación
-                            </span>
-                            <div
-                                class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-indigo-100 bg-indigo-50/30 text-indigo-900 font-semibold transition duration-200">
-                                <span class="text-indigo-500">
-                                    <!-- Calendar Icon -->
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </span>
-                                <span>Hoy: {{ \Carbon\Carbon::today()->translatedFormat('j \d\e F \d\e Y') }}</span>
+                        <!-- FECHA DE RESERVACIÓN -->
+                        <div class="space-y-2" id="reservation-date-picker-container"
+                            data-has-free-booking="{{ !empty($activeFreeBooking) ? 'true' : 'false' }}"
+                            data-allowed-dates='@json($allowedDates ?? [$today])'
+                            data-today="{{ $today }}">
+                            <div class="flex items-center justify-between">
+                                <label for="fecha_reservacion" class="block text-sm font-semibold text-gray-700">
+                                    Fecha de reservación
+                                </label>
+                                @if (!empty($activeFreeBooking))
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Reserva Libre Activa
+                                    </span>
+                                @endif
                             </div>
+
+                            <input type="hidden" name="fecha" id="fecha_reservacion" value="{{ $fecha }}" />
+
+                            @if (!empty($activeFreeBooking))
+                                <!-- Opciones condicionales cuando existe Reserva Libre activa -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- Opción: Hoy -->
+                                    <button type="button" data-date-target="{{ $today }}"
+                                        class="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition duration-200 {{ $fecha === $today ? 'border-indigo-600 bg-indigo-50/60 text-indigo-950 shadow-sm ring-1 ring-indigo-500' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700' }}">
+                                        <div class="w-9 h-9 rounded-lg {{ $fecha === $today ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500' }} flex items-center justify-center shrink-0">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <span class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Día Actual</span>
+                                            <span class="block text-sm font-bold truncate">
+                                                Hoy: {{ \Carbon\Carbon::parse($today)->translatedFormat('j \d\e F') }}
+                                            </span>
+                                        </div>
+                                        @if($fecha === $today)
+                                            <span class="text-indigo-600">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        @endif
+                                    </button>
+
+                                    <!-- Opciones de Fechas en Reserva Libre Activa -->
+                                    @foreach ($reservasLibresActivas as $reservaLibre)
+                                        @php
+                                            $freeDateStr = $reservaLibre->booking_date->format('Y-m-d');
+                                        @endphp
+                                        <button type="button" data-date-target="{{ $freeDateStr }}"
+                                            class="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition duration-200 {{ $fecha === $freeDateStr ? 'border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-sm ring-1 ring-emerald-500' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700' }}">
+                                            <div class="w-9 h-9 rounded-lg {{ $fecha === $freeDateStr ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700' }} flex items-center justify-center shrink-0">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <span class="block text-[11px] font-semibold text-emerald-700 uppercase tracking-wider">Reserva Libre</span>
+                                                <span class="block text-sm font-bold truncate">
+                                                    {{ $reservaLibre->booking_date->translatedFormat('j \d\e F') }}
+                                                </span>
+                                            </div>
+                                            @if($fecha === $freeDateStr)
+                                                <span class="text-emerald-600">
+                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <span class="font-semibold text-emerald-700">Reserva libre activa:</span> El selector limita las opciones al día de hoy y a la fecha configurada. Otras fechas no están disponibles.
+                                </p>
+                            @else
+                                <!-- Flujo Estándar cuando NO existe Reserva Libre activa -->
+                                <div
+                                    class="flex items-center gap-3 p-3.5 rounded-xl border-2 border-indigo-100 bg-indigo-50/30 text-indigo-900 font-semibold transition duration-200">
+                                    <span class="text-indigo-500">
+                                        <!-- Calendar Icon -->
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </span>
+                                    <span>Hoy: {{ \Carbon\Carbon::parse($today)->translatedFormat('j \d\e F \d\e Y') }}</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    Flujo normal del sistema: reservaciones para el día en curso.
+                                </p>
+                            @endif
                         </div>
 
                         <!-- Campo oculto para enviar la hora seleccionada -->
@@ -273,20 +367,22 @@
             const hora = form.querySelector('input[name="hora"]').value;
             const numEmp = document.getElementById('numero_empleado').value.trim();
             const correo = document.getElementById('correo').value.trim();
+            const fechaVal = form.querySelector('input[name="fecha"]')?.value || '{{ $today }}';
+            const isToday = (fechaVal === '{{ $today }}');
 
             const requireReservation = @json(config('app.require_reservation', false));
 
-            // Validación de horario de apertura (8:00 a.m.) en modo normal (require_reservation = true)
+            // Validación de horario de apertura (8:00 a.m.) en modo normal sólo si es hoy
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             const currentTimeMinutes = currentHour * 60 + currentMinute;
 
-            if (requireReservation && currentTimeMinutes < 480) {
+            if (isToday && requireReservation && currentTimeMinutes < 480) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Reservaciones no iniciadas',
-                    text: 'El horario para empezar la reserva solo puede ser después de las 8:00 a.m.',
+                    text: 'El horario para empezar la reserva del día de hoy solo puede ser después de las 8:00 a.m.',
                     confirmButtonColor: '#4f46e5'
                 });
                 return;
@@ -302,7 +398,7 @@
                 return;
             }
 
-            // Validación de límites de 15 minutos de anticipación en modo normal (require_reservation = true)
+            // Validación de límites de 15 minutos de anticipación sólo si es hoy
             const limits = {
                 '12:30': 12 * 60 + 15,
                 '13:15': 13 * 60 + 0,
@@ -311,11 +407,11 @@
                 '15:30': 15 * 60 + 15
             };
 
-            if (requireReservation && limits[hora] && currentTimeMinutes >= limits[hora]) {
+            if (isToday && requireReservation && limits[hora] && currentTimeMinutes >= limits[hora]) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Horario expirado',
-                    text: 'El tiempo límite para reservar el horario de las ' + hora + ' p.m. ha expirado.',
+                    text: 'El tiempo límite para reservar el horario de las ' + hora + ' p.m. para hoy ha expirado.',
                     confirmButtonColor: '#4f46e5'
                 });
                 return;
@@ -350,7 +446,10 @@
                 }
             });
 
-            const url = "{{ route('reservaciones.empleado_info', ['numero_empleado' => ':num']) }}".replace(':num', numEmp) + '?correo=' + encodeURIComponent(correo);
+            const url = "{{ route('reservaciones.empleado_info', ['numero_empleado' => ':num']) }}".replace(':num', numEmp) 
+                + '?correo=' + encodeURIComponent(correo)
+                + '&fecha=' + encodeURIComponent(fechaVal);
+
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -363,7 +462,7 @@
                         if (data.already_reserved) {
                             Swal.fire({
                                 icon: 'warning',
-                                title: 'Ya tienes una reservación hoy',
+                                title: 'Reservación ya registrada',
                                 text: data.message,
                                 confirmButtonColor: '#4f46e5',
                                 customClass: {
@@ -386,12 +485,18 @@
                         return;
                     }
                     Swal.close();
+
+                    const fechaPartes = fechaVal.split('-');
+                    const fechaDisplay = fechaPartes.length === 3 
+                        ? `${fechaPartes[2]}/${fechaPartes[1]}/${fechaPartes[0]}` 
+                        : fechaVal;
+
                     Swal.fire({
                         title: '¿Confirmar Reservación?',
                         html: `
                             <div class="text-left mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm space-y-2">
                                 <div><span class="font-bold text-gray-500">Colaborador:</span> <span class="text-gray-900 font-semibold">${data.nombre}</span></div>
-                                <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-gray-900 font-semibold">${new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span></div>
+                                <div><span class="font-bold text-gray-500">Fecha:</span> <span class="text-indigo-900 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">${fechaDisplay}</span></div>
                                 <div><span class="font-bold text-gray-500">Horario:</span> <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded text-xs">${hora} p.m.</span></div>
                             </div>
                         `,
