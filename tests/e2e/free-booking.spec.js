@@ -63,9 +63,10 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     await login(page);
     await page.goto('reservas/libres');
 
-    // Generar una fecha futura única para la prueba (ej. 45 días a futuro)
+    // Generar una fecha futura única para la prueba con offset aleatorio para evitar colisiones
+    const randomDays = 50 + Math.floor(Math.random() * 150);
     const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 45);
+    futureDate.setDate(futureDate.getDate() + randomDays);
     const dateStr = futureDate.toISOString().split('T')[0]; // YYYY-MM-DD
     const [year, month, day] = dateStr.split('-');
     const formattedDate = `${day}/${month}/${year}`;
@@ -84,6 +85,8 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     ]);
 
     expect(response.status()).toBe(201);
+    const resJson = await response.json();
+    const bookingId = resJson?.data?.id;
 
     // Esperar mensaje de éxito en SweetAlert2 y recarga automática
     await expect(page.locator('.swal2-icon-success')).toBeVisible({ timeout: 5000 });
@@ -92,7 +95,9 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     // B. VERIFICAR QUE APAREZCA EN LA TABLA
     const tabla = page.locator('[data-testid="tabla-reservas-libres"]');
     await expect(tabla).toBeVisible();
-    const fila = tabla.locator(`tr:has-text("${formattedDate}")`);
+    const fila = bookingId 
+      ? tabla.locator(`[data-testid="fila-reserva-${bookingId}"]`)
+      : tabla.locator(`tr:has-text("${formattedDate}")`).first();
     await expect(fila).toBeVisible();
 
     // Verificar que su estatus inicial sea Activo
@@ -119,7 +124,9 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     await page.waitForLoadState('networkidle');
 
     // Verificar que el badge ahora sea Cancelado y aparezca botón Reactivar
-    const filaActualizada = tabla.locator(`tr:has-text("${formattedDate}")`);
+    const filaActualizada = bookingId
+      ? tabla.locator(`[data-testid="fila-reserva-${bookingId}"]`)
+      : tabla.locator(`tr:has-text("${formattedDate}")`).first();
     await expect(filaActualizada.locator('[data-testid^="badge-status-"]')).toContainText('Cancelado');
     const btnReactivar = filaActualizada.locator('[data-testid^="btn-reactivar-"]');
     await expect(btnReactivar).toBeVisible();
@@ -141,7 +148,9 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     await page.waitForLoadState('networkidle');
 
     // Verificar que vuelva a estar Activo
-    const filaReactivada = tabla.locator(`tr:has-text("${formattedDate}")`);
+    const filaReactivada = bookingId
+      ? tabla.locator(`[data-testid="fila-reserva-${bookingId}"]`)
+      : tabla.locator(`tr:has-text("${formattedDate}")`).first();
     await expect(filaReactivada.locator('[data-testid^="badge-status-"]')).toContainText('Activo');
   });
 
@@ -149,9 +158,10 @@ test.describe('Módulo de Reserva Libre - Pruebas E2E con Playwright', () => {
     await login(page);
     await page.goto('reservas/libres');
 
-    // Generar fecha futura para prueba de duplicado (ej. 60 días a futuro)
+    // Generar fecha futura para prueba de duplicado con offset aleatorio
+    const randomDaysDup = 210 + Math.floor(Math.random() * 100);
     const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 60);
+    futureDate.setDate(futureDate.getDate() + randomDaysDup);
     const dateStr = futureDate.toISOString().split('T')[0];
 
     // 1. Crear la primera reserva activa

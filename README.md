@@ -192,7 +192,20 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.9.0 (Actual)**:
+* **v2.10.0 (Actual)**:
+  * **Integración de Fechas de Reserva Libre Activa en el Flujo Público de Reservaciones (`/reservar`)**:
+    * Consulta condicional en `ReservacionController@create` para verificar si existen registros de `FreeBooking` con estatus `'activo'` (`booking_date >= today`).
+    * **Comportamiento Frontend Condicional**:
+      * Si existe Reserva Libre activa: el selector de fecha limita las opciones exclusivamente al día actual (`today`) y a la(s) fecha(s) autorizada(s) en la reserva libre activa, bloqueando cualquier otra fecha en el selector y calendario interactivo.
+      * Si no existe Reserva Libre activa: preserva el flujo normal del sistema habilitado para el día en curso con sus reglas estándar.
+      * Creado el módulo `resources/js/reservation-date-picker.js` (e integrado en `resources/js/app.js`) para controlar la selección, validar límites de fecha en el cliente y sincronizar las consultas de cupo por día.
+    * **Validación en Backend**:
+      * Validador en `ReservacionController@store` y Form Request `StoreReservationRequest` para asegurar que fechas futuras solo sean aceptadas si corresponden a una Reserva Libre activa en la base de datos, rechazando fechas no autorizadas, canceladas, aplicadas o pasadas con mensajes de error descriptivos.
+      * Soporte dinámico para la consulta preventiva por AJAX (`getEmpleadoInfo`) validando que el colaborador no cuente con duplicados activos para la fecha específica seleccionada.
+      * Trazabilidad completa mediante el canal estructurado `Log::channel('reservas_horarios')`.
+    * Creadas pruebas funcionales y de integración en `tests/Feature/ReservacionTest.php` para validar la consulta condicional en la vista, aceptación de fechas autorizadas por Reserva Libre y rechazo de fechas no autorizadas.
+    * Desarrollada la suite completa de pruebas End-to-End (E2E) en Playwright (`tests/e2e/reservacion-comedor.spec.js`) cubriendo acceso público, validaciones cliente SweetAlert2, selección reactiva de horarios, verificación AJAX de colaborador, prevención de duplicados, modal de confirmación y selector interactivo de fechas, configurando la ejecución con 5 workers concurrentes en `playwright.config.js`.
+* **v2.9.0**:
   * **Remoción de Restricción de Ingreso a Comedor en Encuestas**:
     * Eliminada la validación obligatoria contra `registro_comedors` en `EncuestaController.php` (`validarEmpleado` y `store`), permitiendo a cualquier empleado activo responder la encuesta de satisfacción sin requerir haber escaneado ingreso al comedor el mismo día.
     * Actualizado el badge de la vista `resources/views/encuestas/create.blade.php` a *"Colaborador verificado"*.
