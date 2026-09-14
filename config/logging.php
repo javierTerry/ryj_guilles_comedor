@@ -161,6 +161,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'reservas_libres' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/reservas_libres.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'empleados' => [
             'driver' => 'daily',
             'path' => storage_path('logs/empleados.log'),

@@ -24,6 +24,7 @@
             <!-- SUBMENÚ DE NAVEGACIÓN DE RESERVACIONES -->
             <div class="flex items-center space-x-2 border-b border-gray-200 mb-6 pb-2">
                 <a href="{{ route('reservaciones.create') }}"
+                    data-testid="tab-reservar"
                     class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.create') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                     <span class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,6 +34,7 @@
                     </span>
                 </a>
                 <a href="{{ route('reservaciones.cancel_view') }}"
+                    data-testid="tab-cancelar"
                     class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservaciones.cancel_view') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                     <span class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,6 +43,19 @@
                         Cancelar
                     </span>
                 </a>
+                @can('manage-free-bookings')
+                <a href="{{ route('reservas.libres.index') }}"
+                    data-testid="tab-reserva-libre"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 {{ request()->routeIs('reservas.libres.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Reserva Libre
+                    </span>
+                </a>
+                @endcan
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-stretch">

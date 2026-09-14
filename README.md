@@ -78,6 +78,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * Canal **`reportes`**: Trazabilidad en `storage/logs/reportes.log` para el reporte general.
   * Canal **`visitas`**: Trazabilidad en `storage/logs/visitas.log` para el reporte de visitas.
   * Canal **`reservas`**: Trazabilidad en `storage/logs/reservas.log` para el reporte de reservaciones por día.
+  * Canal **`reservas_libres`**: Trazabilidad en `storage/logs/reservas_libres.log` para auditoría y ciclo de vida de fechas en Reserva Libre.
 
 
 ### 5. Encuesta de Satisfacción del Comedor (Acceso Público)
@@ -109,11 +110,11 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **Semana Actual:** Filtra automáticamente de Lunes a Domingo de la semana en curso (calculado dinámicamente sin importar qué día de la semana se pida).
   * **Quincena:** Filtra el período del 1 al 15 del mes actual.
   * **Mensual:** Filtra desde el 1er día hasta el último día del mes actual.
-* **4 Secciones Principales (Diseño Réplica Oficial):**
-  * **Sección 1: Resumen Ejecutivo ISU:** Indicador visual tipo medidor/arco de cumplimiento mínimo contractual e índice global.
+* **4 Secciones Principales (Diseño Ejecutivo):**
+  * **Sección 1: Resumen Ejecutivo ISU:** Gauge Chart vectorial en SVG nativo (< 80% Rojo / Crítico, 80% - 85% Amarillo / Mínimo, > 85% - 100% Gradiente Verde tenue a fuerte / Óptimo) con aguja tacométrica, badge de estado contractual y tipografía optimizada para web y exportación PDF A4.
   * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación.
-  * **Sección 3: Hallazgos Críticos & Plan de Acción:** Tabla estructurada de notas al pie con hallazgos y acciones acordadas.
-  * **Sección 4: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
+  * **Sección 3: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
+  * **Sección 4: Retroalimentación de Usuarios:** Card de opiniones con 5 comentarios aleatorios de comensales (> 10 caracteres) renovados dinámicamente en cada carga de página.
 * **Botón de Imprimir / Descargar PDF:** Optimizado con reglas CSS `@media print` para renderizado perfecto en A4.
 * **Canal Dedicado de Logs (`isu_report`):** Almacena la trazabilidad de consultas del informe ISU en `storage/logs/isu_report.log`.
 
@@ -191,7 +192,20 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
-* **v2.9.0 (Actual)**:
+* **v2.10.0 (Actual)**:
+  * **Integración de Fechas de Reserva Libre Activa en el Flujo Público de Reservaciones (`/reservar`)**:
+    * Consulta condicional en `ReservacionController@create` para verificar si existen registros de `FreeBooking` con estatus `'activo'` (`booking_date >= today`).
+    * **Comportamiento Frontend Condicional**:
+      * Si existe Reserva Libre activa: el selector de fecha limita las opciones exclusivamente al día actual (`today`) y a la(s) fecha(s) autorizada(s) en la reserva libre activa, bloqueando cualquier otra fecha en el selector y calendario interactivo.
+      * Si no existe Reserva Libre activa: preserva el flujo normal del sistema habilitado para el día en curso con sus reglas estándar.
+      * Creado el módulo `resources/js/reservation-date-picker.js` (e integrado en `resources/js/app.js`) para controlar la selección, validar límites de fecha en el cliente y sincronizar las consultas de cupo por día.
+    * **Validación en Backend**:
+      * Validador en `ReservacionController@store` y Form Request `StoreReservationRequest` para asegurar que fechas futuras solo sean aceptadas si corresponden a una Reserva Libre activa en la base de datos, rechazando fechas no autorizadas, canceladas, aplicadas o pasadas con mensajes de error descriptivos.
+      * Soporte dinámico para la consulta preventiva por AJAX (`getEmpleadoInfo`) validando que el colaborador no cuente con duplicados activos para la fecha específica seleccionada.
+      * Trazabilidad completa mediante el canal estructurado `Log::channel('reservas_horarios')`.
+    * Creadas pruebas funcionales y de integración en `tests/Feature/ReservacionTest.php` para validar la consulta condicional en la vista, aceptación de fechas autorizadas por Reserva Libre y rechazo de fechas no autorizadas.
+    * Desarrollada la suite completa de pruebas End-to-End (E2E) en Playwright (`tests/e2e/reservacion-comedor.spec.js`) cubriendo acceso público, validaciones cliente SweetAlert2, selección reactiva de horarios, verificación AJAX de colaborador, prevención de duplicados, modal de confirmación y selector interactivo de fechas, configurando la ejecución con 5 workers concurrentes en `playwright.config.js`.
+* **v2.9.0**:
   * **Remoción de Restricción de Ingreso a Comedor en Encuestas**:
     * Eliminada la validación obligatoria contra `registro_comedors` en `EncuestaController.php` (`validarEmpleado` y `store`), permitiendo a cualquier empleado activo responder la encuesta de satisfacción sin requerir haber escaneado ingreso al comedor el mismo día.
     * Actualizado el badge de la vista `resources/views/encuestas/create.blade.php` a *"Colaborador verificado"*.
@@ -218,9 +232,18 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Función de descarga directa en formato CSV UTF-8 con BOM para Excel (`/reportes/reservas/exportar`).
   * Canal de logs dedicado **`reservas`** configurado en `config/logging.php` con registro de auditoría en `storage/logs/reservas.log`.
   * Pestaña de navegación integrada en la barra superior de todos los módulos de reportes y en el desplegable principal `navigation.blade.php`.
+* **v2.6.1**:
+  * **Optimización de Sección 1 en Informe ISU (PDF/Web):**
+    * Sustituido el indicador provisional por un **Gauge Chart vectorial nativo en SVG**, garantizando máxima resolución y compatibilidad con exportación PDF A4 (`window.print()`).
+    * Implementación del **Gauge Chart con sectores visibles divididos y aguja tacométrica**:
+      * **Sector 1 (0% a < 80%):** Rojo visible (`#ef4444`, Incumplimiento Crítico).
+      * **Sector 2 (80% a 85%):** Amarillo visible (`#f59e0b`, Cumplimiento Mínimo Contractual).
+      * **Sector 3 (> 85% a 100%):** Verde visible con gradiente (`#86efac` tenue a `#14532d` verde fuerte, Cumplimiento Óptimo).
+      * **Aguja velocímetro y cursor dinámico:** Apuntan con precisión matemática al valor exacto del porcentaje obtenido sobre el sector correspondiente.
+    * Corrección tipográfica y diseño minimalista: eliminación de textos solapados/duplicados y presentación limpia del estado contractual actual en un badge responsivo y libre de saturación visual.
+    * **Card de Retroalimentación de Usuarios (Comentarios Aleatorios):** Se reemplazó la tabla de plan de acción por una tarjeta elegante que presenta 5 comentarios de comensales seleccionados aleatoriamente (`inRandomOrder()`), con filtro de longitud superior a 10 caracteres (`CHAR_LENGTH > 10`), refrescándose con una nueva muestra aleatoria en cada recarga de página.
 * **v2.6.0**:
   * Creado el **Informe de Satisfacción del Usuario (ISU)** en formato PDF (`/reportes/isu`).
-
   * Réplica del diseño de referencia con 4 secciones principales: Resumen Ejecutivo ISU, Detalle por Criterios, Hallazgos Críticos & Plan de Acción, y Análisis de Tendencia Trimestral.
   * Filtros de período dinámicos: **Semana Actual** (Lunes a Domingo calculado automáticamente), **Quincena** (1 al 15 del mes actual) y **Mensual** (1er al último día del mes).
   * Promedios por criterios calculados a partir de las evaluaciones registradas (`calidad`, `limpieza`, `temperatura`, `atencion`, `presentacion`).
@@ -363,6 +386,20 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
   * Añadidos badges visuales en la tabla de empleados para **Activo** (verde), **Inactivo** (amarillo) y **Baja Definitiva** (rojo), junto con el filtrado avanzado por cada estado.
   * Configurado el canal dedicado de logs `Log::channel('empleados')` en `config/logging.php` (`storage/logs/empleados.log`) para trazabilidad de altas, ediciones, cambios de estado e importaciones masivas.
   * **Ampliación del Filtro de Búsqueda Global**: Actualizada la condición de búsqueda en el módulo de Empleados y en todos los Reportes (General, Visitas, Encuestas y Reservaciones) para permitir búsquedas por coincidencia en **Número de Empleado**, **Nombre** o **Correo Electrónico**.
+* **v1.10.0**:
+  * Implementada la funcionalidad integral **"Reserva Libre"** en el módulo de reservaciones del comedor para usuarios con roles `admin` y `super_admin`.
+  * Creada la migración `2026_09_13_000001_create_free_bookings_table.php` para la tabla `free_bookings` con campos `id`, `booking_date` (índice), `created_by` (foreignId referenciando a `users`), `status` (enum: `'activo'`, `'aplicado'`, `'cancelado'`) y timestamps.
+  * Creado el modelo Eloquent `FreeBooking` con constantes de estado, casts de fecha, scopes (`scopeActivo`, `scopeAplicado`, `scopeCancelado`), métodos de verificación y relación `createdBy`.
+  * Diseñado el Gate `'manage-free-bookings'` en `AppServiceProvider` y protegido el grupo de rutas en `routes/web.php` con middleware `['auth', 'role:admin,super-admin']`.
+  * Desarrollado `FreeBookingController` con métodos `index`, `store` y `updateStatus`, aplicando reglas de negocio estrictas: validación de fecha no pasada (`after_or_equal:today`), rechazo de duplicados activos para la misma fecha, asignación automática de `created_by = auth()->id()`, bloqueo de cambios si el estado es `aplicado` y protección de reactivación.
+  * Configurado el canal de log dedicado **`reservas_libres`** en `config/logging.php` con rotación diaria y registro de eventos de auditoría en `storage/logs/reservas_libres.log`.
+  * Diseñada la interfaz de usuario en Blade (`resources/views/reservas/libres.blade.php`) y su alias (`resources/views/reservaciones/libres.blade.php`) integrando submenú de 3 pestañas ("Reservar", "Cancelar", "Reserva Libre" condicionado por `@can('manage-free-bookings')`).
+  * Implementada tabla de seguimiento con fecha formateada (`d/m/Y`), creador, badges visuales por estatus (Verde para Activo, Azul para Aplicado, Rojo para Cancelado) y botones dinámicos de acción ("Cancelar" y "Reactivar").
+  * Integrada interactividad con **SweetAlert2** (`input: 'date'`) para la selección de fecha con validación asíncrona, modales de confirmación con estados de carga y manejo de respuestas HTTP 200, 422 y 500 con protección CSRF.
+  * Resuelto problema de direccionamiento en peticiones PATCH (`cambiarEstatus`) mediante el helper `route('reservas.libres.update_status', ...)` para garantizar compatibilidad total con servidores bajo subdirectorios (ej. `/comedor/public/`), además de blindar el procesamiento de respuestas asegurando la validación del encabezado `Content-Type: application/json` antes de deserializar.
+  * Añadidos identificadores y atributos desacoplados `data-testid` (`tab-reservar`, `tab-cancelar`, `tab-reserva-libre`, `btn-agregar-reserva-libre`, `tabla-reservas-libres`, `btn-cancelar-*`, `btn-reactivar-*`) en todas las vistas del submódulo para robustecer las pruebas automatizadas.
+  * Diseñada la infraestructura de pruebas End-to-End (E2E) con **Playwright**: archivo `playwright.config.js`, helper de autenticación `tests/e2e/helpers/auth.js`, scripts `test:e2e` y `test:e2e:ui` en `package.json`, y suite completa `tests/e2e/free-booking.spec.js` validando flujos de navegación, validaciones de modal SweetAlert2, creación, cancelación y reactivación de reservas libres.
+  * Creada suite exhaustiva de pruebas funcionales en `tests/Feature/FreeBookingTest.php` cubriendo autenticación, verificación de roles, validaciones de fecha, duplicados, visibilidad de pestañas y ciclo de vida de estados.
 * **v1.9.0**:
   * Creada la migración `2026_08_25_000000_create_estatus_reservaciones_table.php` y el modelo Eloquent `EstatusReservacion` para la gestión centralizada de la tabla de catálogo `estatus_reservaciones` con los estados predefinidos: `'activa'`, `'cancelada'` y `'pendiente'`.
   * Creada la migración `2026_08_25_000001_create_estatus_asistencias_table.php` y el modelo Eloquent `EstatusAsistencia` para representar el catálogo de estados de asistencia al comedor con los registros: **Acudió** (`acudio`) y **Pendiente** (`pendiente`).
