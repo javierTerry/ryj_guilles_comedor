@@ -111,8 +111,8 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **Quincena:** Filtra el período del 1 al 15 del mes actual.
   * **Mensual:** Filtra desde el 1er día hasta el último día del mes actual.
 * **4 Secciones Principales (Diseño Ejecutivo):**
-  * **Sección 1: Resumen Ejecutivo ISU:** Gauge Chart vectorial en SVG nativo (< 80% Rojo / Crítico, 80% - 85% Amarillo / Mínimo, > 85% - 100% Gradiente Verde tenue a fuerte / Óptimo) con aguja tacométrica, badge de estado contractual y tipografía optimizada para web y exportación PDF A4.
-  * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación.
+  * **Sección 1: Resumen Ejecutivo ISU:** Gauge Chart vectorial en SVG nativo con degradado continuo proporcional en 3 tercios (Rojo < 80% / Crítico, Amarillo 80% - 85% / Mínimo, Verde > 85% - 100% / Óptimo en verde vibrante), aguja tacométrica mapeada por sector, indicador de variación en puntos porcentuales (`▲` / `▼` `pp`) respecto al mes anterior, badge de estado contractual y tipografía optimizada para web y exportación PDF A4.
+  * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación, acompañada al pie por el total de encuestas y el período analizado.
   * **Sección 3: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
   * **Sección 4: Retroalimentación de Usuarios:** Card de opiniones con 5 comentarios aleatorios de comensales (> 10 caracteres) renovados dinámicamente en cada carga de página.
 * **Botón de Imprimir / Descargar PDF:** Optimizado con reglas CSS `@media print` para renderizado perfecto en A4.
