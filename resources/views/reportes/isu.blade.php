@@ -102,18 +102,32 @@
                 <!-- SECCIÓN 1 Y SECCIÓN 2 GRID -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-stretch">
                     
-                    <!-- SECCIÓN 1: RESUMEN EJECUTIVO (ISU) - GAUGE CHART DIVIDIDO POR ESTADO CONTRACTUAL -->
+                    <!-- SECCIÓN 1: RESUMEN EJECUTIVO (ISU) - GAUGE CHART DIVIDIDO EN 3 SECTORES PROPORCIONALES -->
                     @php
                         $val = max(0, min(100, (float)($indiceGlobal ?? 0)));
-                        
-                        // Rotación de la aguja velocímetro:
-                        // 0% => -90° (horizontal izquierda)
-                        // 50% => 0° (vertical hacia arriba)
-                        // 100% => +90° (horizontal derecha)
-                        $rotDeg = round(-90 + ($val / 100 * 180), 2);
-                        
+
+                        // Escala proporcional en 3 tercios iguales (60° cada sector en el semicírculo de 180°):
+                        // - Sector Rojo (< 80%):       180° -> 120° (rotación aguja: -90° -> -30°)
+                        // - Sector Amarillo (80% - 85%): 120° -> 60° (rotación aguja: -30° -> +30°)
+                        // - Sector Verde (> 85% - 100%): 60° -> 0°   (rotación aguja: +30° -> +90°)
+                        if ($val < 80) {
+                            $sectorProgress = $val / 80;
+                            $knobAngleDeg = 180 - ($sectorProgress * 60);
+                            $rotDeg = -90 + ($sectorProgress * 60);
+                        } elseif ($val <= 85) {
+                            $sectorProgress = ($val - 80) / 5;
+                            $knobAngleDeg = 120 - ($sectorProgress * 60);
+                            $rotDeg = -30 + ($sectorProgress * 60);
+                        } else {
+                            $sectorProgress = ($val - 85) / 15;
+                            $knobAngleDeg = 60 - ($sectorProgress * 60);
+                            $rotDeg = 30 + ($sectorProgress * 60);
+                        }
+
+                        $rotDeg = round($rotDeg, 2);
+                        $knobAngleDeg = round($knobAngleDeg, 2);
+
                         // Posición del cursor en el arco (radio r = 86, centro = 160, 130)
-                        $knobAngleDeg = 180 - ($val / 100 * 180);
                         $knobAngleRad = deg2rad($knobAngleDeg);
                         $knobX = round(160 + 86 * cos($knobAngleRad), 2);
                         $knobY = round(130 - 86 * sin($knobAngleRad), 2);
@@ -139,11 +153,11 @@
                             $badgeBorder = 'border-amber-200';
                             $badgeIcon = '🟡';
                         } else {
-                            // De verde tenue rgb(167, 243, 208) a verde fuerte rgb(21, 128, 61)
+                            // De verde claro rgb(74, 222, 128) a verde vibrante rgb(22, 163, 74)
                             $factor = ($val - 85) / 15; // 0.0 en 85%, 1.0 en 100%
-                            $rDyn = round(167 - ($factor * (167 - 21)));
-                            $gDyn = round(243 - ($factor * (243 - 128)));
-                            $bDyn = round(208 - ($factor * (208 - 61)));
+                            $rDyn = round(74 - ($factor * (74 - 22)));
+                            $gDyn = round(222 - ($factor * (222 - 163)));
+                            $bDyn = round(128 - ($factor * (128 - 74)));
                             $gaugeSolidColor = "rgb({$rDyn}, {$gDyn}, {$bDyn})";
                             
                             $estadoNombre = $val >= 95 ? 'Cumplimiento Sobresaliente' : 'Cumplimiento Óptimo';
@@ -177,44 +191,36 @@
                             <div class="relative flex flex-col items-center justify-center pt-2 pb-1">
                                 <svg viewBox="0 0 320 160" class="w-full max-w-[295px] h-auto overflow-visible select-none">
                                     <defs>
-                                        <!-- Gradiente para el Sector 3 (> 85% a 100%): Verde tenue a Verde fuerte -->
-                                        <linearGradient id="gaugeSectorGreenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stop-color="#86efac" />  <!-- Verde tenue en 85% -->
-                                            <stop offset="50%" stop-color="#22c55e" /> <!-- Verde medio -->
-                                            <stop offset="100%" stop-color="#14532d" /><!-- Verde fuerte en 100% -->
+                                        <!-- Gradiente continuo proporcional en 3 tercios: Rojo -> Amarillo -> Verde vibrante -->
+                                        <!-- Proyección horizontal: 0% (x=74) | 25% (x=117, 120° / 80%) | 75% (x=203, 60° / 85%) | 100% (x=246) -->
+                                        <linearGradient id="gaugeProportionalGradient" gradientUnits="userSpaceOnUse" x1="74" y1="130" x2="246" y2="130">
+                                            <stop offset="0%" stop-color="#ef4444" />   <!-- Rojo en 0% -->
+                                            <stop offset="16%" stop-color="#ef4444" />  <!-- Rojo -->
+                                            <stop offset="25%" stop-color="#f97316" />  <!-- Transición Rojo -> Amarillo (80%) -->
+                                            <stop offset="36%" stop-color="#f59e0b" />  <!-- Ámbar / Amarillo -->
+                                            <stop offset="50%" stop-color="#facc15" />  <!-- Amarillo centro -->
+                                            <stop offset="64%" stop-color="#eab308" />  <!-- Amarillo -->
+                                            <stop offset="75%" stop-color="#84cc16" />  <!-- Transición Amarillo -> Verde (85%) -->
+                                            <stop offset="86%" stop-color="#22c55e" />  <!-- Verde vibrante -->
+                                            <stop offset="100%" stop-color="#16a34a" /> <!-- Verde intenso limpio en 100% -->
                                         </linearGradient>
                                     </defs>
 
-                                    <!-- 1. SECTORES VISIBLEMENTE DIVIDIDOS (ROJO, AMARILLO Y VERDE) -->
-                                    <!-- SECTOR 1: 🔴 ROJO (< 80%, Incumplimiento Crítico) -->
-                                    <path d="M 74 130 A 86 86 0 0 1 228.23 77.65" 
+                                    <!-- 1. ARCO CONTINUO CON DEGRADADO PROPORCIONAL (ROJO -> AMARILLO -> VERDE) -->
+                                    <path d="M 74 130 A 86 86 0 0 1 246 130" 
                                           fill="none" 
-                                          stroke="#ef4444" 
-                                          stroke-width="17" 
-                                          stroke-linecap="round" />
-                                    
-                                    <!-- SECTOR 2: 🟡 AMARILLO (80% - 85%, Cumplimiento Mínimo) -->
-                                    <path d="M 230.87 81.29 A 86 86 0 0 1 235.58 88.96" 
-                                          fill="none" 
-                                          stroke="#f59e0b" 
-                                          stroke-width="17" 
-                                          stroke-linecap="butt" />
-                                    
-                                    <!-- SECTOR 3: 🟢 VERDE (> 85% - 100%, Cumplimiento Óptimo: tenue a fuerte) -->
-                                    <path d="M 237.62 92.98 A 86 86 0 0 1 246 130" 
-                                          fill="none" 
-                                          stroke="url(#gaugeSectorGreenGradient)" 
+                                          stroke="url(#gaugeProportionalGradient)" 
                                           stroke-width="17" 
                                           stroke-linecap="round" />
 
                                     <!-- 2. MARCADORES DE UMBRAL Y ETIQUETAS DE ESCALA -->
-                                    <!-- Tick 80% (Límite Rojo / Amarillo) -->
-                                    <line x1="228.23" y1="77.65" x2="237.5" y2="71.8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
-                                    <text x="245" y="68" font-size="9" font-weight="900" fill="#d97706" text-anchor="start" font-family="sans-serif">80%</text>
+                                    <!-- Tick 80% (Límite Rojo / Amarillo en 120°) -->
+                                    <line x1="117" y1="55.52" x2="111" y2="45.13" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+                                    <text x="106" y="42" font-size="9" font-weight="900" fill="#d97706" text-anchor="end" font-family="sans-serif">80%</text>
 
-                                    <!-- Tick 85% (Límite Amarillo / Verde) -->
-                                    <line x1="237.62" y1="92.98" x2="247.3" y2="88.0" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
-                                    <text x="254" y="87" font-size="9" font-weight="900" fill="#059669" text-anchor="start" font-family="sans-serif">85%</text>
+                                    <!-- Tick 85% (Límite Amarillo / Verde en 60°) -->
+                                    <line x1="203" y1="55.52" x2="209" y2="45.13" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
+                                    <text x="214" y="42" font-size="9" font-weight="900" fill="#059669" text-anchor="start" font-family="sans-serif">85%</text>
 
                                     <!-- Etiquetas de Base 0% y 100% -->
                                     <text x="54" y="146" font-size="10" font-weight="700" fill="#94a3b8" text-anchor="middle" font-family="sans-serif">0%</text>
@@ -239,6 +245,48 @@
                                         ÍNDICE ISU OBTENIDO
                                     </text>
                                 </svg>
+
+                                <!-- VARIACIÓN EN PUNTOS PORCENTUALES (pp) VS MES ANTERIOR -->
+                                @php
+                                    $hasPrevMonth = isset($variacionPP, $indiceMesAnterior) && $variacionPP !== null && $indiceMesAnterior !== null;
+                                    if ($hasPrevMonth) {
+                                        if ($variacionPP > 0) {
+                                            $varBg = 'bg-emerald-50 border-emerald-300 text-emerald-900';
+                                            $varIconColor = 'text-emerald-600';
+                                            $varArrow = '▲';
+                                            $varFormatted = '+' . number_format($variacionPP, 1) . ' pp';
+                                        } elseif ($variacionPP < 0) {
+                                            $varBg = 'bg-rose-50 border-rose-300 text-rose-900';
+                                            $varIconColor = 'text-rose-600';
+                                            $varArrow = '▼';
+                                            $varFormatted = number_format($variacionPP, 1) . ' pp';
+                                        } else {
+                                            $varBg = 'bg-slate-100 border-slate-300 text-slate-700';
+                                            $varIconColor = 'text-slate-500';
+                                            $varArrow = '●';
+                                            $varFormatted = '0.0 pp';
+                                        }
+                                    }
+                                @endphp
+                                <div class="flex flex-col items-center mt-1">
+                                    @if($hasPrevMonth)
+                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border {{ $varBg }} text-xs font-extrabold shadow-2xs">
+                                            <span class="{{ $varIconColor }} text-[11px] leading-none">{{ $varArrow }}</span>
+                                            <span>{{ $varFormatted }}</span>
+                                        </div>
+                                        <span class="text-[11px] font-medium text-slate-600 mt-1">
+                                            vs. mes anterior ({{ number_format($indiceMesAnterior, 1) }}%)
+                                        </span>
+                                    @else
+                                        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border bg-slate-100 border-slate-200 text-slate-500 text-xs font-bold">
+                                            <span class="text-[11px] leading-none">—</span>
+                                            <span>Sin variación</span>
+                                        </div>
+                                        <span class="text-[11px] font-medium text-slate-400 mt-1">
+                                            vs. mes anterior (sin registros)
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -323,6 +371,20 @@
                                         </g>
                                     @endforeach
                                 </svg>
+                            </div>
+                        </div>
+
+                        <!-- RESUMEN DE ENCUESTAS Y PERÍODO ANALIZADO -->
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Total de encuestas:</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-800 text-white text-xs font-black">
+                                    {{ number_format($totalEncuestas) }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                                <span class="text-slate-400">Período:</span>
+                                <span class="font-bold text-slate-800">{{ $periodoTitulo }}</span>
                             </div>
                         </div>
                     </div>
