@@ -674,24 +674,16 @@ class ReporteController extends Controller
 
         // Sección 2: Detalle por Criterios (Promedios de conversión en porcentaje)
         if ($totalEncuestas > 0) {
-            $promediosCriterios = [
-                'calidad' => round((clone $query)->avg('calidad_alimentos_conversion') ?? 85, 1),
-                'limpieza' => round((clone $query)->avg('limpieza_higiene_conversion') ?? 90, 1),
-                'temperatura' => round((clone $query)->avg('temperatura_adecuada_conversion') ?? 70, 1),
-                'atencion' => round((clone $query)->avg('atencion_eficiencia_conversion') ?? 88, 1),
-                'presentacion' => round((clone $query)->avg('presentacion_conversion') ?? 80, 1),
-            ];
+            $resultadoActual = $this->calcularPromediosIsu($query);
+            $promediosCriterios = $resultadoActual['criterios'];
+            $indiceGlobal = $resultadoActual['indice'];
         } else {
             // Si no hay encuestas en el rango filtrado, obtener promedio histórico o valores base de referencia para renderizado
             $historicoCount = Encuesta::count();
             if ($historicoCount > 0) {
-                $promediosCriterios = [
-                    'calidad' => round(Encuesta::avg('calidad_alimentos_conversion') ?? 85, 1),
-                    'limpieza' => round(Encuesta::avg('limpieza_higiene_conversion') ?? 90, 1),
-                    'temperatura' => round(Encuesta::avg('temperatura_adecuada_conversion') ?? 70, 1),
-                    'atencion' => round(Encuesta::avg('atencion_eficiencia_conversion') ?? 88, 1),
-                    'presentacion' => round(Encuesta::avg('presentacion_conversion') ?? 80, 1),
-                ];
+                $resultadoHistorico = $this->calcularPromediosIsu(Encuesta::query());
+                $promediosCriterios = $resultadoHistorico['criterios'];
+                $indiceGlobal = $resultadoHistorico['indice'];
             } else {
                 $promediosCriterios = [
                     'calidad' => 85.0,
@@ -700,10 +692,23 @@ class ReporteController extends Controller
                     'atencion' => 88.0,
                     'presentacion' => 80.0,
                 ];
+                $indiceGlobal = round(array_sum($promediosCriterios) / count($promediosCriterios), 1);
             }
         }
 
-        $indiceGlobal = round(array_sum($promediosCriterios) / count($promediosCriterios), 1);
+        // Comparativa en puntos porcentuales (pp) respecto al mes anterior completo
+        $mesAnteriorInicio = $now->copy()->subMonthNoOverflow()->startOfMonth()->format('Y-m-d');
+        $mesAnteriorFin = $now->copy()->subMonthNoOverflow()->endOfMonth()->format('Y-m-d');
+        $queryMesAnterior = Encuesta::whereBetween('fecha', [$mesAnteriorInicio, $mesAnteriorFin]);
+        $totalMesAnterior = (clone $queryMesAnterior)->count();
+
+        $indiceMesAnterior = null;
+        $variacionPP = null;
+        if ($totalMesAnterior > 0) {
+            $resultadoMesAnterior = $this->calcularPromediosIsu($queryMesAnterior);
+            $indiceMesAnterior = $resultadoMesAnterior['indice'];
+            $variacionPP = round($indiceGlobal - $indiceMesAnterior, 1);
+        }
 
         // Sección 4: Análisis de Tendencia Trimestral (Últimos 4 meses utilizando Promedio Conversión)
         $tendenciaTrimestral = [];
@@ -772,8 +777,11 @@ class ReporteController extends Controller
             'fecha_fin' => $fechaFin->format('Y-m-d'),
             'total_encuestas' => $totalEncuestas,
             'indice_global' => $indiceGlobal,
+            'indice_mes_anterior' => $indiceMesAnterior,
+            'variacion_pp' => $variacionPP,
             'promedios_criterios' => $promediosCriterios,
             'comentarios_aleatorios_count' => $comentariosAleatorios->count(),
+            'medidor_distribucion' => 'proporcional_3_sectores',
         ]);
 
         return view('reportes.isu', compact(
@@ -784,9 +792,30 @@ class ReporteController extends Controller
             'totalEncuestas',
             'promediosCriterios',
             'indiceGlobal',
+            'indiceMesAnterior',
+            'variacionPP',
             'tendenciaTrimestral',
             'comentariosAleatorios'
         ));
+    }
+
+    /**
+     * Calcula los promedios por criterio y el índice global ISU para una consulta de encuestas.
+     */
+    private function calcularPromediosIsu($query): array
+    {
+        $criterios = [
+            'calidad' => round((clone $query)->avg('calidad_alimentos_conversion') ?? 85, 1),
+            'limpieza' => round((clone $query)->avg('limpieza_higiene_conversion') ?? 90, 1),
+            'temperatura' => round((clone $query)->avg('temperatura_adecuada_conversion') ?? 70, 1),
+            'atencion' => round((clone $query)->avg('atencion_eficiencia_conversion') ?? 88, 1),
+            'presentacion' => round((clone $query)->avg('presentacion_conversion') ?? 80, 1),
+        ];
+
+        return [
+            'criterios' => $criterios,
+            'indice' => round(array_sum($criterios) / count($criterios), 1),
+        ];
     }
 
     /**
