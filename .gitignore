@@ -30,3 +30,6 @@ tests/e2e/helpers/auth.js
 playwright-report/
 
 qr/*
+.agents/*
+tests/
+test-results/
