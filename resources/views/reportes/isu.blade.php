@@ -464,7 +464,7 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 4: RETROALIMENTACIÓN DE USUARIOS (5 COMENTARIOS ALEATORIOS) -->
+                <!-- SECCIÓN 4: RETROALIMENTACIÓN DE USUARIOS (HASTA 10 COMENTARIOS DEL PERÍODO) -->
                 <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
@@ -473,11 +473,11 @@
                                 <h2 class="font-extrabold text-slate-800 text-base uppercase tracking-tight">
                                     RETROALIMENTACIÓN DE USUARIOS
                                 </h2>
-                                <p class="text-[11px] text-slate-500 font-medium">Muestra aleatoria de opiniones de comensales (> 10 caracteres)</p>
+                                <p class="text-[11px] text-slate-500 font-medium">Muestra aleatoria del período seleccionado (comentarios no vacíos)</p>
                             </div>
                         </div>
                         <span class="text-xs font-bold px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 shadow-2xs flex items-center gap-1.5">
-                            <span>💬</span> 5 Comentarios Aleatorios
+                            <span>💬</span> {{ $comentariosAleatorios->count() }} de 10 Comentarios
                         </span>
                     </div>
 
@@ -506,7 +506,7 @@
                             </div>
                         @empty
                             <div class="bg-white border border-dashed border-slate-300 rounded-xl p-6 text-center text-xs text-slate-400">
-                                No se encontraron comentarios registrados con más de 10 caracteres.
+                                No se encontraron comentarios registrados en el período seleccionado.
                             </div>
                         @endforelse
                     </div>

@@ -727,45 +727,14 @@ class ReporteController extends Controller
             ];
         }
 
-        // Obtención de 5 comentarios aleatorios con más de 10 caracteres (aleatorizados en cada carga)
-        $comentariosAleatorios = Encuesta::whereNotNull('comentarios')
-            ->whereRaw('CHAR_LENGTH(TRIM(comentarios)) > 10')
+        // Obtención de hasta 10 comentarios aleatorios no vacíos estrictamente dentro del rango del período seleccionado
+        $comentariosAleatorios = Encuesta::whereBetween('fecha', [$fechaInicio->format('Y-m-d'), $fechaFin->format('Y-m-d')])
+            ->whereNotNull('comentarios')
+            ->where('comentarios', '!=', '')
+            ->whereRaw("TRIM(REPLACE(REPLACE(REPLACE(comentarios, '\r', ''), '\n', ''), '\t', '')) != ''")
             ->inRandomOrder()
-            ->limit(5)
+            ->limit(10)
             ->get(['id', 'comentarios', 'fecha', 'calificacion']);
-
-        // Respaldo de muestras si la BD cuenta con menos de 5 comentarios registrados con > 10 caracteres
-        if ($comentariosAleatorios->count() < 5) {
-            $poolEjemplos = [
-                'Excelente sazón en la comida del día de hoy y muy buena temperatura en las sopas.',
-                'La atención del personal en la barra de servicio fue rápida, amable y eficiente.',
-                'Sería genial contar con mayor variedad en los aderezos y complementos de las ensaladas.',
-                'Los platillos principales estaban bien calientes y con una presentación muy higiénica.',
-                'Muy buen servicio en general, el comedor se mantiene limpio y ordenado en hora pico.',
-                'El menú estuvo muy balanceado y con porciones adecuadas, muchas gracias al equipo.',
-                'El servicio ha mejorado notablemente en los tiempos de espera y entrega de alimentos.',
-            ];
-            shuffle($poolEjemplos);
-
-            $existentes = $comentariosAleatorios->pluck('comentarios')->toArray();
-            $faltantes = 5 - $comentariosAleatorios->count();
-            $agregados = 0;
-
-            foreach ($poolEjemplos as $ejemplo) {
-                if ($agregados >= $faltantes) {
-                    break;
-                }
-                if (!in_array($ejemplo, $existentes)) {
-                    $comentariosAleatorios->push((object)[
-                        'id' => null,
-                        'comentarios' => $ejemplo,
-                        'fecha' => $now->format('Y-m-d'),
-                        'calificacion' => 5,
-                    ]);
-                    $agregados++;
-                }
-            }
-        }
 
         // Trazabilidad en canal dedicado 'isu_report'
         Log::channel('isu_report')->info('Generación de Informe ISU consultada', [

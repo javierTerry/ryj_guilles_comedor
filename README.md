@@ -114,7 +114,7 @@ Este es un sistema basado en Laravel diseñado para gestionar el registro diario
   * **Sección 1: Resumen Ejecutivo ISU:** Gauge Chart vectorial en SVG nativo con degradado continuo proporcional en 3 tercios (Rojo < 80% / Crítico, Amarillo 80% - 85% / Mínimo, Verde > 85% - 100% / Óptimo en verde vibrante), aguja tacométrica mapeada por sector, indicador de variación en puntos porcentuales (`▲` / `▼` `pp`) respecto al mes anterior, badge de estado contractual y tipografía optimizada para web y exportación PDF A4.
   * **Sección 2: Detalle por Criterios:** Gráfica de Barras con la evaluación promedio (%) de Calidad de Alimentos, Limpieza e Higiene, Temperatura Adecuada, Atención y Eficiencia, y Presentación, acompañada al pie por el total de encuestas y el período analizado.
   * **Sección 3: Análisis de Tendencia Trimestral:** Gráfica de Área vectorial SVG con tendencia comparativa de los últimos 4 meses evaluando el Promedio de Conversión.
-  * **Sección 4: Retroalimentación de Usuarios:** Card de opiniones con 5 comentarios aleatorios de comensales (> 10 caracteres) renovados dinámicamente en cada carga de página.
+  * **Sección 4: Retroalimentación de Usuarios:** Card de opiniones con hasta 10 comentarios aleatorios no vacíos de comensales filtrados estrictamente por el rango de fechas del período seleccionado, renovados dinámicamente en cada carga de página.
 * **Botón de Imprimir / Descargar PDF:** Optimizado con reglas CSS `@media print` para renderizado perfecto en A4.
 * **Canal Dedicado de Logs (`isu_report`):** Almacena la trazabilidad de consultas del informe ISU en `storage/logs/isu_report.log`.
 
@@ -192,6 +192,11 @@ Para garantizar que los registros y las estadísticas de consumo diario coincida
 
 ## 📌 Historial de Versiones
 
+  * **Suite de Pruebas E2E para Reporte ISU (`tests/e2e/reporte-isu.spec.js`)**:
+    * Prueba automatizada con Playwright que valida acceso autenticado, cambio entre períodos (`mensual`, `semana`, `quincena`), medidor proporcional y variación `pp`, límite de hasta 10 comentarios no vacíos del período y flujo de impresión/exportación a PDF A4.
+    * Configurado `slowMo` automático (`600ms`, configurable vía `SLOW_MO`) y ejecución secuencial (`workers: 1`) en `playwright.config.js` al ejecutar con `--headed`.
+  * **Suite de Pruebas E2E para CRUD de Clientes (`tests/e2e/clientes-crud.spec.js`)**:
+    * Prueba automatizada con Playwright que cubre el ciclo completo Crear, Consultar, Editar, Eliminar y el intento de re-registro del mismo cliente tras su eliminación para reproducir y validar conflictos de unicidad/soft-delete.
 * **v2.10.0 (Actual)**:
   * **Integración de Fechas de Reserva Libre Activa en el Flujo Público de Reservaciones (`/reservar`)**:
     * Consulta condicional en `ReservacionController@create` para verificar si existen registros de `FreeBooking` con estatus `'activo'` (`booking_date >= today`).
